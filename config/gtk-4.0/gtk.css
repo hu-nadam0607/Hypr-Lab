@@ -1,0 +1,731 @@
+/*
+
+* ============================================================
+* HYPR-LAB — GTK 4 BASE THEME
+* ============================================================
+*
+* Based on the final Hypr-Lab Thunar GTK3 appearance.
+*
+* Background : rgba(10, 10, 14, 0.85)
+* Foreground : #e0e0e0
+* Bright     : #ffffff
+* Hover      : rgba(255, 255, 255, 0.06)
+* Selection  : rgba(60, 100, 180, 0.80)
+* Selected+  : rgba(60, 100, 180, 0.90)
+* Border     : rgba(255, 255, 255, 0.10)
+  */
+
+/* ============================================================
+
+* 1. HYPR-LAB COLORS
+* ============================================================ */
+
+@define-color hl_bg rgba(10, 10, 14, 0.85);
+@define-color hl_bg_dark rgba(10, 10, 14, 0.96);
+
+@define-color hl_fg #e0e0e0;
+@define-color hl_fg_bright #ffffff;
+@define-color hl_fg_disabled rgba(224, 224, 224, 0.45);
+
+@define-color hl_hover rgba(255, 255, 255, 0.06);
+
+@define-color hl_selection rgba(60, 100, 180, 0.80);
+@define-color hl_selection_hover rgba(60, 100, 180, 0.90);
+
+@define-color hl_border rgba(255, 255, 255, 0.10);
+@define-color hl_border_hover rgba(255, 255, 255, 0.16);
+
+@define-color hl_separator rgba(255, 255, 255, 0.06);
+
+/* ============================================================
+
+* 2. GLOBAL BACKGROUND
+* ============================================================ */
+
+.background {
+background-color: @hl_bg;
+color: @hl_fg;
+}
+
+viewport {
+background-color: @hl_bg;
+color: @hl_fg;
+}
+
+scrolledwindow {
+background-color: @hl_bg;
+color: @hl_fg;
+}
+
+/* ============================================================
+
+* 3. GLOBAL TEXT
+* ============================================================ */
+
+label {
+color: @hl_fg;
+}
+
+label:disabled {
+color: @hl_fg_disabled;
+}
+
+/* ============================================================
+
+* 4. BUTTONS
+* ============================================================ */
+
+button {
+background-color: transparent;
+color: @hl_fg;
+
+
+border-width: 0;
+border-color: transparent;
+
+box-shadow: none;
+
+
+}
+
+button:hover {
+background-color: @hl_hover;
+color: @hl_fg_bright;
+}
+
+button:active,
+button:checked {
+background-color: @hl_selection;
+color: @hl_fg_bright;
+}
+
+button:disabled {
+color: @hl_fg_disabled;
+}
+
+/* ============================================================
+
+* 5. ENTRIES
+* ============================================================ */
+
+entry {
+background-color: @hl_bg;
+color: @hl_fg;
+
+
+border-width: 1px;
+border-style: solid;
+border-color: @hl_border;
+border-radius: 6px;
+
+box-shadow: none;
+
+
+}
+
+entry:hover {
+border-color: @hl_border_hover;
+}
+
+entry:focus,
+entry:focus-within {
+border-color: @hl_selection;
+}
+
+/* ============================================================
+
+* 6. LISTS
+* ============================================================ */
+
+list {
+background-color: @hl_bg;
+color: @hl_fg;
+}
+
+listview {
+background-color: @hl_bg;
+color: @hl_fg;
+}
+
+row {
+background-color: transparent;
+color: @hl_fg;
+}
+
+row:hover {
+background-color: @hl_hover;
+color: @hl_fg_bright;
+}
+
+row:selected {
+background-color: @hl_selection;
+color: @hl_fg_bright;
+}
+
+row:selected:hover {
+background-color: @hl_selection_hover;
+color: @hl_fg_bright;
+}
+
+/* ============================================================
+
+* 7. SIDEBAR
+* ============================================================ */
+
+.sidebar {
+background-color: @hl_bg;
+color: @hl_fg;
+}
+
+.sidebar row {
+background-color: transparent;
+color: @hl_fg;
+}
+
+.sidebar row:hover {
+background-color: @hl_hover;
+color: @hl_fg_bright;
+}
+
+.sidebar row:selected {
+background-color: @hl_selection;
+color: @hl_fg_bright;
+}
+
+.sidebar row:selected:hover {
+background-color: @hl_selection_hover;
+color: @hl_fg_bright;
+}
+
+/* ============================================================
+
+* 8. POPOVER
+* ============================================================ */
+
+popover {
+background-color: @hl_bg_dark;
+color: @hl_fg;
+
+
+border-width: 1px;
+border-style: solid;
+border-color: @hl_border;
+border-radius: 8px;
+
+box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35);
+
+
+}
+
+popover contents {
+background-color: transparent;
+color: @hl_fg;
+}
+
+/* ============================================================
+
+* 9. POPOVER LISTS
+* ============================================================ */
+
+popover list {
+background-color: transparent;
+color: @hl_fg;
+}
+
+popover row {
+background-color: transparent;
+color: @hl_fg;
+}
+
+popover row:hover {
+background-color: @hl_hover;
+color: @hl_fg_bright;
+}
+
+popover row:selected {
+background-color: @hl_selection;
+color: @hl_fg_bright;
+}
+
+popover row:selected:hover {
+background-color: @hl_selection_hover;
+color: @hl_fg_bright;
+}
+
+/* ============================================================
+
+* 10. MODEL BUTTONS
+* ============================================================ */
+
+modelbutton {
+background-color: transparent;
+color: @hl_fg;
+}
+
+modelbutton:hover {
+background-color: @hl_hover;
+color: @hl_fg_bright;
+}
+
+modelbutton:active,
+modelbutton:checked {
+background-color: @hl_selection;
+color: @hl_fg_bright;
+}
+
+/* ============================================================
+
+* 11. DROPDOWN
+* ============================================================ */
+
+dropdown {
+color: @hl_fg;
+}
+
+dropdown button {
+background-color: @hl_bg;
+color: @hl_fg;
+
+
+border-width: 1px;
+border-style: solid;
+border-color: @hl_border;
+border-radius: 6px;
+
+
+}
+
+dropdown button:hover {
+background-color: @hl_hover;
+color: @hl_fg_bright;
+
+
+border-color: @hl_border_hover;
+
+
+}
+
+dropdown button:active {
+background-color: @hl_selection;
+color: @hl_fg_bright;
+
+
+border-color: @hl_selection;
+
+
+}
+
+/* ============================================================
+
+* 12. HEADERBAR
+* ============================================================ */
+
+headerbar {
+background-color: @hl_bg;
+color: @hl_fg;
+
+
+border-color: @hl_border;
+
+
+}
+
+headerbar button {
+background-color: transparent;
+color: @hl_fg;
+
+
+border-width: 0;
+
+
+}
+
+headerbar button:hover {
+background-color: @hl_hover;
+color: @hl_fg_bright;
+}
+
+headerbar button:active,
+headerbar button:checked {
+background-color: @hl_selection;
+color: @hl_fg_bright;
+}
+
+/* ============================================================
+
+* 13. CHECKBUTTON / RADIOBUTTON
+* ============================================================ */
+
+checkbutton,
+radiobutton {
+color: @hl_fg;
+}
+
+checkbutton:hover,
+radiobutton:hover {
+color: @hl_fg_bright;
+}
+
+/* ============================================================
+
+* 14. CHECK / RADIO
+* ============================================================ */
+
+check,
+radio {
+background-color: @hl_bg;
+
+
+border-width: 1px;
+border-style: solid;
+border-color: @hl_border;
+
+
+}
+
+check:hover,
+radio:hover {
+border-color: @hl_border_hover;
+}
+
+check:checked,
+radio:checked {
+background-color: @hl_selection;
+border-color: @hl_selection;
+}
+
+/* ============================================================
+
+* 15. SWITCH
+* ============================================================ */
+
+switch {
+background-color: rgba(255, 255, 255, 0.10);
+
+
+border-width: 1px;
+border-style: solid;
+border-color: @hl_border;
+
+
+}
+
+switch:hover {
+background-color: rgba(255, 255, 255, 0.14);
+}
+
+switch:checked {
+background-color: @hl_selection;
+border-color: @hl_selection;
+}
+
+switch slider {
+background-color: @hl_fg;
+}
+
+/* ============================================================
+
+* 16. SCALE
+* ============================================================ */
+
+scale {
+color: @hl_fg;
+}
+
+scale trough {
+background-color: rgba(255, 255, 255, 0.10);
+}
+
+scale highlight {
+background-color: @hl_selection;
+}
+
+scale fill {
+background-color: @hl_selection;
+}
+
+scale slider {
+background-color: @hl_fg;
+
+
+border-width: 1px;
+border-style: solid;
+border-color: @hl_border;
+
+
+}
+
+scale slider:hover {
+background-color: @hl_fg_bright;
+}
+
+/* ============================================================
+
+* 17. PROGRESS BAR
+* ============================================================ */
+
+progressbar trough {
+background-color: rgba(255, 255, 255, 0.08);
+}
+
+progressbar progress {
+background-color: @hl_selection;
+}
+
+/* ============================================================
+
+* 18. SEPARATORS
+* ============================================================ */
+
+separator {
+background-color: @hl_separator;
+}
+
+/* ============================================================
+
+* 19. SCROLLBARS
+* ============================================================ */
+
+scrollbar {
+background-color: transparent;
+}
+
+scrollbar trough {
+background-color: transparent;
+}
+
+scrollbar slider {
+background-color: rgba(224, 224, 224, 0.20);
+border-radius: 999px;
+}
+
+scrollbar slider:hover {
+background-color: rgba(224, 224, 224, 0.35);
+}
+
+scrollbar slider:active {
+background-color: @hl_selection;
+}
+
+/* ============================================================
+
+* 20. TOOLTIP
+* ============================================================ */
+
+tooltip {
+background-color: @hl_bg_dark;
+color: @hl_fg;
+
+
+border-width: 1px;
+border-style: solid;
+border-color: @hl_border;
+border-radius: 6px;
+
+
+}
+
+tooltip label {
+color: @hl_fg;
+}
+
+/* ============================================================
+
+* 21. FOCUS
+* ============================================================ */
+
+*:focus {
+outline-width: 1px;
+outline-style: solid;
+outline-color: @hl_selection;
+}
+
+/* ============================================================
+
+* 22. DISABLED
+* ============================================================ */
+
+*:disabled {
+color: @hl_fg_disabled;
+}
+
+/* ============================================================
+ * HYPR-LAB — GTK4 LISTVIEW FIX
+ * Transmission and GtkListView based applications
+ * ============================================================ */
+
+listview.view {
+    background-color: @hl_bg;
+    color: @hl_fg;
+}
+
+listview.view > row {
+    background-color: transparent;
+    color: @hl_fg;
+}
+
+listview.view > row:hover {
+    background-color: @hl_hover;
+    color: @hl_fg_bright;
+}
+
+listview.view > row:selected {
+    background-color: @hl_selection;
+    color: @hl_fg_bright;
+}
+
+listview.view > row:selected:hover {
+    background-color: @hl_selection_hover;
+    color: @hl_fg_bright;
+}
+
+/* ============================================================
+ * HYPR-LAB — GTK4 VERIFIED APPLICATION FIXES
+ * ============================================================
+ *
+ * Verified with GTK Inspector:
+ *
+ * Transmission:
+ *   - torrent list
+ *   - top toolbar
+ *   - filter combo boxes
+ *
+ * Pavucontrol:
+ *   - device / port combo boxes
+ * ============================================================ */
+
+
+/* ------------------------------------------------------------
+ * GtkListView
+ * Transmission torrent list
+ * ------------------------------------------------------------ */
+
+listview.view {
+    background-color: @hl_bg;
+    color: @hl_fg;
+}
+
+listview.view > row {
+    background-color: transparent;
+    color: @hl_fg;
+}
+
+listview.view > row:hover {
+    background-color: @hl_hover;
+    color: @hl_fg_bright;
+}
+
+listview.view > row:selected {
+    background-color: @hl_selection;
+    color: @hl_fg_bright;
+}
+
+listview.view > row:selected:hover {
+    background-color: @hl_selection_hover;
+    color: @hl_fg_bright;
+}
+
+
+/* ------------------------------------------------------------
+ * GtkBox.toolbar
+ * Transmission top toolbar
+ * ------------------------------------------------------------ */
+
+box.toolbar {
+    background-color: @hl_bg;
+    color: @hl_fg;
+}
+
+
+/* ------------------------------------------------------------
+ * Legacy GtkToggleButton combo widgets
+ *
+ * Transmission:
+ *   "Megjelenítés / Összes" selectors
+ *
+ * Pavucontrol:
+ *   Port / device selectors
+ * ------------------------------------------------------------ */
+
+.combo {
+    background-image: none;
+    background-color: @hl_bg;
+    color: @hl_fg;
+    box-shadow: none;
+}
+
+
+/* Combo inner GtkCellView */
+
+.combo cellview {
+    background-color: transparent;
+    color: @hl_fg;
+}
+
+
+/* Combo hover */
+
+.combo:hover {
+    background-image: none;
+    background-color: @hl_hover;
+    color: @hl_fg_bright;
+}
+
+
+/* Combo active / opened */
+
+.combo:active,
+.combo:checked {
+    background-image: none;
+    background-color: @hl_selection;
+    color: @hl_fg_bright;
+}
+
+/* ============================================================
+ * HYPR-LAB — PAVUCONTROL
+ * ============================================================ */
+
+/* Pavucontrol felső tabsáv */
+tabs {
+    background-color: rgba(10, 10, 14, 0.85);
+    color: #e0e0e0;
+}
+
+/* Hangerőcsúszka fogantyú */
+scale slider {
+    background-image: none;
+    background-color: rgba(60, 100, 180, 0.80);
+
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.10);
+
+    border-radius: 999px;
+    box-shadow: none;
+
+    min-width: 12px;
+    min-height: 12px;
+}
+
+scale slider:hover {
+    background-color: rgba(60, 100, 180, 0.90);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Alsó "Megjelenítés" sáv */
+notebook stack > box.vertical > box.horizontal {
+    background-color: rgba(10, 10, 14, 0.85);
+    color: #e0e0e0;
+}
+
+/* Alsó sáv elválasztója */
+notebook stack > box.vertical > separator {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Pavucontrol notebook tartalmának háttérkonténere */
+notebook stack > box.vertical {
+    background-color: rgba(10, 10, 14, 0.85);
+    color: #e0e0e0;
+}

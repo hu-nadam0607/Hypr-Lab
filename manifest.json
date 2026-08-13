@@ -1,0 +1,13 @@
+{
+  "name": "Hypr-Lab",
+  "version": "1.0.0-rc2",
+  "platform": "Arch Linux / Hyprland Lua / Wayland",
+  "license": "GPL-3.0",
+  "login_manager": "greetd + tuigreet + start-hyprland",
+  "cursor_theme": "Bibata-Modern-Hypr-Lab",
+  "cursor_size": 24,
+  "icon_theme": "Fluent-teal-dark",
+  "ghostty_config_included": false,
+  "fastfetch_config_included": false,
+  "monitor_state": "fresh []"
+}

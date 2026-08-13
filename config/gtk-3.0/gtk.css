@@ -1,0 +1,323 @@
+/*
+
+* ─────────────────────────────────────────────────────────────
+* Thunar GTK3 — unified dark theme
+* ─────────────────────────────────────────────────────────────
+*
+* Base:
+* Background : rgba(10, 10, 14, 0.85)
+* Foreground : #e0e0e0
+* Selection  : rgba(60, 100, 180, 0.80)
+*
+* Thunar-specific GTK3 selectors are used intentionally.
+  */
+
+/* =============================================================
+
+* 1. THUNAR WINDOW / GLOBAL BASE
+* ============================================================= */
+
+window.thunar {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+}
+
+/* Make the major Thunar containers use the same surface. */
+
+window.thunar paned,
+window.thunar scrolledwindow,
+window.thunar viewport {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+}
+
+/* =============================================================
+
+* 2. MAIN FILE VIEW
+* ============================================================= */
+
+window.thunar .standard-view {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+}
+
+window.thunar .standard-view .view,
+window.thunar .standard-view treeview.view,
+window.thunar .standard-view widget.view {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+}
+
+/* File / folder hover */
+
+window.thunar .standard-view .view:hover,
+window.thunar .standard-view treeview.view:hover,
+window.thunar .standard-view widget.view:hover {
+background-color: rgba(255, 255, 255, 0.06);
+color: #ffffff;
+}
+
+/* Selected files / folders */
+
+window.thunar .standard-view .view:selected,
+window.thunar .standard-view treeview.view:selected,
+window.thunar .standard-view widget.view:selected {
+background-color: rgba(60, 100, 180, 0.80);
+color: #ffffff;
+}
+
+/* Selected + hover */
+
+window.thunar .standard-view .view:selected:hover,
+window.thunar .standard-view treeview.view:selected:hover,
+window.thunar .standard-view widget.view:selected:hover {
+background-color: rgba(60, 100, 180, 0.90);
+color: #ffffff;
+}
+
+/* =============================================================
+
+* 3. SIDEBAR
+* ============================================================= */
+
+window.thunar .sidebar,
+window.thunar scrolledwindow.sidebar {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+border-color: rgba(10, 10, 14, 0.85);
+}
+
+window.thunar .sidebar .view,
+window.thunar .sidebar treeview.view {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+}
+
+/* Sidebar hover */
+
+window.thunar .sidebar .view:hover,
+window.thunar .sidebar treeview.view:hover {
+background-color: rgba(255, 255, 255, 0.06);
+color: #ffffff;
+}
+
+/* Sidebar selection */
+
+window.thunar .sidebar .view:selected,
+window.thunar .sidebar treeview.view:selected {
+background-color: rgba(60, 100, 180, 0.80);
+color: #ffffff;
+}
+
+/* Sidebar selected + hover */
+
+window.thunar .sidebar .view:selected:hover,
+window.thunar .sidebar treeview.view:selected:hover {
+background-color: rgba(60, 100, 180, 0.90);
+color: #ffffff;
+}
+
+/* =============================================================
+
+* 4. MENUBAR
+* ============================================================= */
+
+window.thunar menubar {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+}
+
+window.thunar menubar menuitem {
+background-color: transparent;
+color: #e0e0e0;
+}
+
+window.thunar menubar menuitem:hover,
+window.thunar menubar menuitem:active {
+background-color: rgba(255, 255, 255, 0.06);
+color: #ffffff;
+}
+
+/* Menus opened from the menubar */
+
+window.thunar menu {
+background-color: rgba(10, 10, 14, 0.96);
+color: #e0e0e0;
+}
+
+window.thunar menu menuitem {
+background-color: transparent;
+color: #e0e0e0;
+}
+
+window.thunar menu menuitem:hover,
+window.thunar menu menuitem:active {
+background-color: rgba(60, 100, 180, 0.80);
+color: #ffffff;
+}
+
+/* =============================================================
+
+* 5. TOOLBAR
+* ============================================================= */
+
+window.thunar toolbar {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+border-color: rgba(10, 10, 14, 0.85);
+}
+
+/* Toolbar buttons */
+
+window.thunar toolbar button {
+background-color: transparent;
+color: #e0e0e0;
+border-color: transparent;
+box-shadow: none;
+}
+
+window.thunar toolbar button:hover {
+background-color: rgba(255, 255, 255, 0.06);
+color: #ffffff;
+}
+
+window.thunar toolbar button:active,
+window.thunar toolbar button:checked {
+background-color: rgba(60, 100, 180, 0.80);
+color: #ffffff;
+}
+
+/* =============================================================
+
+* 6. PATH BAR / LOCATION BAR
+* ============================================================= */
+
+window.thunar .path-bar,
+window.thunar widget.path-bar {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+}
+
+/* Path buttons */
+
+window.thunar .path-bar button,
+window.thunar button.path-bar-button {
+background-color: transparent;
+color: #e0e0e0;
+border-color: transparent;
+box-shadow: none;
+}
+
+window.thunar .path-bar button:hover,
+window.thunar button.path-bar-button:hover {
+background-color: rgba(255, 255, 255, 0.06);
+color: #ffffff;
+}
+
+window.thunar .path-bar button:checked,
+window.thunar button.path-bar-button:checked {
+background-color: rgba(60, 100, 180, 0.80);
+color: #ffffff;
+}
+
+/* =============================================================
+
+* 7. SEARCH BAR / SEARCH ENTRY
+* ============================================================= */
+
+window.thunar searchbar {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+}
+
+window.thunar searchbar entry,
+window.thunar entry {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+border-color: rgba(255, 255, 255, 0.10);
+box-shadow: none;
+}
+
+window.thunar searchbar entry:focus,
+window.thunar entry:focus {
+border-color: rgba(60, 100, 180, 0.80);
+color: #ffffff;
+}
+
+/* =============================================================
+
+* 8. STATUSBAR
+* ============================================================= */
+
+window.thunar statusbar {
+background-color: rgba(10, 10, 14, 0.85);
+color: #e0e0e0;
+border-color: rgba(10, 10, 14, 0.85);
+}
+
+window.thunar statusbar label {
+color: #e0e0e0;
+}
+
+/* =============================================================
+
+* 9. BUTTONS INSIDE THUNAR
+* ============================================================= */
+
+window.thunar button {
+color: #e0e0e0;
+}
+
+window.thunar button:hover {
+color: #ffffff;
+}
+
+window.thunar button:active,
+window.thunar button:checked {
+color: #ffffff;
+}
+
+/* =============================================================
+
+* 10. TOOLTIPS
+* ============================================================= */
+
+window.thunar tooltip {
+background-color: rgba(10, 10, 14, 0.96);
+color: #e0e0e0;
+border-color: rgba(255, 255, 255, 0.10);
+}
+
+/* =============================================================
+
+* 11. SEPARATORS
+* ============================================================= */
+
+window.thunar separator {
+background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* =============================================================
+
+* 12. REMOVE UNWANTED LIGHT SURFACES
+* ============================================================= */
+
+window.thunar .frame,
+window.thunar .view,
+window.thunar treeview,
+window.thunar iconview {
+color: #e0e0e0;
+}
+
+/* =============================================================
+
+* 13. TEXT / LABELS
+* ============================================================= */
+
+window.thunar label {
+color: #e0e0e0;
+}
+
+window.thunar label:disabled {
+color: rgba(224, 224, 224, 0.45);
+}
