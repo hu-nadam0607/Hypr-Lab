@@ -22,9 +22,10 @@ check_absent() {
 }
 
 bash -n "$ROOT/install.sh"
+bash -n "$ROOT/uninstall.sh"
 find "$ROOT/config/hypr" -type f -name '*.sh' -print0 | xargs -0 -r -n1 bash -n
 
-echo "OK:   shell syntax"
+echo "OK:   installer/uninstaller shell syntax"
 check_absent '/home/[A-Za-z0-9_-]+' 'no hardcoded /home/<user> paths'
 check_absent 'volume-notify|toggle-border-anim' 'no obsolete helper references'
 if grep -Rni 'XRAY' "$ROOT/config/quickshell" "$ROOT/config/hypr/hyprlab-scripts" >/tmp/hyprlab-verify.$$ 2>/dev/null; then
@@ -54,6 +55,27 @@ if [[ "$(cat "$ROOT/config/hypr/hyprlab-settings/monitors.json")" == '[]' ]]; th
     echo "OK:   monitor state is clean"
 else
     echo "FAIL: monitor state is not []"
+    fail=1
+fi
+
+if grep -q 'hl.exec_cmd("quickshell")' "$ROOT/config/hypr/hyprland.lua"; then
+    echo "OK:   Quickshell autostart present"
+else
+    echo "FAIL: Quickshell autostart missing"
+    fail=1
+fi
+
+if grep -q 'VERSION="1.0.0-rc3"' "$ROOT/install.sh" && grep -q 'VERSION="1.0.0-rc3"' "$ROOT/uninstall.sh"; then
+    echo "OK:   RC3 script versions"
+else
+    echo "FAIL: RC3 script version mismatch"
+    fail=1
+fi
+
+if grep -q 'record_managed_packages' "$ROOT/install.sh" && grep -q 'installed-packages.txt' "$ROOT/uninstall.sh"; then
+    echo "OK:   tracked dependency uninstall path"
+else
+    echo "FAIL: tracked dependency uninstall path incomplete"
     fail=1
 fi
 

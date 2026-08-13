@@ -1,4 +1,4 @@
-# Hypr-Lab v1.0 RC2
+# Hypr-Lab v1.0 RC3
 
 Hypr-Lab is a Quickshell-based desktop environment-style shell for Arch Linux
 and modern Hyprland Lua configurations.
@@ -15,16 +15,16 @@ Screen, Welcome Screen, media controls and Hypr-Lab Settings / Monitor tools.
 - PipeWire + WirePlumber
 - Quickshell
 
-## What RC2 changes
+## What RC3 changes
 
-RC2 is the clean-install / release-safety pass discovered during testing on a
-minimal Arch Linux VM.
+RC3 continues the clean-install / release-safety pass discovered during testing on a
+minimal Arch Linux VM and adds a reversible uninstall path.
 
 - adds `pipewire-jack` explicitly so pacman does not ask which JACK provider to use;
 - adds `greetd` + `tuigreet` and launches Hyprland with `start-hyprland` on a
   clean installation;
-- starts Quickshell only after Hypr-Lab has exported the graphical-session
-  environment and initialized XDG portals;
+- restores the missing Quickshell autostart in the Hyprland Lua payload;
+- starts Quickshell from the Hyprland start callback after Hypr-Lab session initialization;
 - removes the release-machine `.welcome-disabled` state so Welcome appears on
   first graphical login;
 - resets monitor state to a clean `[]` during installation;
@@ -33,7 +33,8 @@ minimal Arch Linux VM.
 - installs the custom `Bibata-Modern-Hypr-Lab` cursor by default;
 - installs `Fluent-teal-dark` icons by default;
 - applies cursor/icon settings for GTK and the user session;
-- keeps Ghostty configuration and Fastfetch configuration user-owned.
+- keeps Ghostty configuration and Fastfetch configuration user-owned;
+- records packages installed by Hypr-Lab so `uninstall.sh` can safely offer dependency removal.
 
 ## Install
 
@@ -48,7 +49,7 @@ Do **not** run the installer as root. It requests `sudo` only where system
 changes are needed.
 
 On a clean Arch installation, reboot after the installer completes. The
-default RC2 path is:
+default RC3 path is:
 
 ```text
 greetd -> tuigreet -> start-hyprland -> Hypr-Lab
@@ -70,6 +71,50 @@ start-hyprland
 --no-themes          Do not install Bibata Hypr-Lab cursor / Fluent icons
 --no-login-manager   Do not configure greetd/tuigreet
 -h, --help           Show help
+```
+
+
+## Uninstall
+
+RC3 includes a tracked uninstaller:
+
+```bash
+./uninstall.sh
+```
+
+The default path removes/restores Hypr-Lab configuration, owned themes and login
+integration, while keeping Arch packages unless you explicitly approve their removal.
+
+For a full uninstall using the package list recorded by the RC3 installer:
+
+```bash
+./uninstall.sh --purge
+```
+
+For a non-interactive full purge:
+
+```bash
+./uninstall.sh --purge --yes
+```
+
+The uninstaller **never guesses a dependency list**. It only offers to remove packages
+that the RC3 installer recorded as missing and installed itself. Packages that existed
+before Hypr-Lab are not recorded and are therefore not removed. `pacman -Rns` still
+performs its normal dependency checks.
+
+If a pre-Hypr-Lab configuration backup is available, the uninstaller restores it by
+default. The source Git clone/release directory is deliberately left untouched.
+
+### Uninstaller options
+
+```text
+-y, --yes       Accept safe default prompts automatically
+--purge         Remove tracked packages and Hypr-Lab state/backups too
+--purge-deps    Remove packages recorded as installed by Hypr-Lab
+--purge-state   Remove ~/.local/state/hypr-lab after uninstall
+--no-restore    Do not restore the pre-Hypr-Lab config backup
+--keep-login    Leave greetd/display-manager integration untouched
+-h, --help      Show help
 ```
 
 ## Default visual themes
@@ -163,6 +208,7 @@ Hypr-Lab/
 ├── system/                 system-level templates installed with sudo
 │   └── greetd/config.toml
 ├── install.sh
+├── uninstall.sh
 ├── manifest.json
 ├── README.md
 ├── RELEASE_NOTES.md

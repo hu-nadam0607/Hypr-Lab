@@ -1,29 +1,34 @@
-# Hypr-Lab v1.0 RC2 release notes
+# Hypr-Lab v1.0 RC3 release notes
 
-RC2 is the first release candidate prepared specifically from results of a
-minimal-Arch virtual-machine installation test.
+RC3 is the next release-safety candidate after the minimal-Arch VM installer test.
 
-## Clean-install fixes
+## Fixes
 
-- Added a real clean-system login path using greetd + tuigreet +
-  `start-hyprland`.
-- Added `pipewire-jack` explicitly to remove the interactive JACK-provider
-  question during pacman installation.
-- Quickshell is now started after the Hypr-Lab XDG/session initialization
-  script instead of racing that initialization.
-- The first-login Welcome state is release-clean.
-- The monitor-state database is reset for every new user install.
-- The file-manager fallback is runtime-safe when no file manager is installed.
+- **RC2 BUG #1 fixed:** `hl.exec_cmd("quickshell")` is restored in the release
+  payload `hyprland.lua` autostart callback.
+- Keeps the generic `__HYPRLAB_KB_LAYOUT__` payload placeholder; the installer
+  replaces it with the selected layout in the installed user config.
+- Retains the RC2 clean-system path: greetd + tuigreet + `start-hyprland`.
+- Retains `pipewire-jack`, Bibata-Modern-Hypr-Lab and Fluent-teal-dark defaults.
 
-## Default Hypr-Lab desktop identity
+## New: uninstall.sh
 
-- Custom `Bibata-Modern-Hypr-Lab` cursor, 24 px, black with cyan outline.
-- `Fluent-teal-dark` icon theme.
-- Theme attribution and GPL notices are documented in
-  `THIRD_PARTY_NOTICES.md`.
+RC3 adds a reversible uninstall workflow.
 
-## Intentionally not managed
+- Records only packages that were missing and installed by Hypr-Lab.
+- Can remove those packages with `pacman -Rns` via `./uninstall.sh --purge`.
+- Does not remove packages that were already installed before Hypr-Lab.
+- Removes Hypr-Lab-owned Bibata/Fluent theme installs when they were installed
+  by Hypr-Lab.
+- Restores recorded GTK/cursor settings and pre-Hypr-Lab config backups when
+  available.
+- Disables Hypr-Lab-managed greetd and re-enables a display manager that the
+  installer previously disabled for Hypr-Lab.
+- Can retain backups/state for recovery, or remove them with `--purge`.
 
-- Hypr-Lab does not overwrite a user's Ghostty configuration.
-- Hypr-Lab does not install or overwrite a Fastfetch configuration.
-- Browser choice remains the XDG default.
+## VM test note
+
+VirtualBox proved useful for installer, package, greetd, Hyprland Lua and boot-path
+testing, but its graphics stack is not treated as authoritative for the complete
+Quickshell/Qt Wayland rendering path. Full visual validation remains a real-hardware
+test.

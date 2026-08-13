@@ -1,6 +1,6 @@
 {
   "name": "Hypr-Lab",
-  "version": "1.0.0-rc2",
+  "version": "1.0.0-rc3",
   "platform": "Arch Linux / Hyprland Lua / Wayland",
   "license": "GPL-3.0",
   "login_manager": "greetd + tuigreet + start-hyprland",
@@ -9,5 +9,6 @@
   "icon_theme": "Fluent-teal-dark",
   "ghostty_config_included": false,
   "fastfetch_config_included": false,
-  "monitor_state": "fresh []"
+  "monitor_state": "fresh []",
+  "uninstaller": "uninstall.sh with tracked-package purge"
 }

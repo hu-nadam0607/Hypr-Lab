@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.0.0-rc2"
+VERSION="1.0.0-rc3"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PAYLOAD="${SCRIPT_DIR}/config"
 SYSTEM_PAYLOAD="${SCRIPT_DIR}/system"
+STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+STATE_DIR="${STATE_HOME}/hypr-lab"
 
 ASSUME_YES=0
 SKIP_DEPS=0
@@ -108,9 +110,21 @@ if ! confirm "Continue with Hypr-Lab installation?" y; then
     exit 0
 fi
 
+mkdir -p "$STATE_DIR"
+
 # ------------------------------------------------------------
 # 1. Dependencies
 # ------------------------------------------------------------
+
+MANAGED_PACKAGES_FILE="${STATE_DIR}/installed-packages.txt"
+touch "$MANAGED_PACKAGES_FILE"
+
+record_managed_packages() {
+    local pkg
+    for pkg in "$@"; do
+        grep -qxF "$pkg" "$MANAGED_PACKAGES_FILE" 2>/dev/null || printf '%s\n' "$pkg" >> "$MANAGED_PACKAGES_FILE"
+    done
+}
 
 REQUIRED_PACKAGES=(
     hyprland
@@ -178,6 +192,7 @@ if (( ! SKIP_DEPS )); then
 
         if confirm "Install missing packages with pacman?" y; then
             sudo pacman -S --needed "${missing[@]}"
+            record_managed_packages "${missing[@]}"
         else
             echo "Cannot guarantee a working Hypr-Lab installation without them."
             exit 1
@@ -238,7 +253,6 @@ echo
 echo "[2/11] Creating backup..."
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
-STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 BACKUP_ROOT="${STATE_HOME}/hypr-lab/backups/${STAMP}"
 mkdir -p "$BACKUP_ROOT"
 
@@ -258,8 +272,16 @@ backup_path "${HOME}/.config/gtk-4.0/gtk.css" "gtk4.css"
 backup_path "${HOME}/.config/gtk-3.0/settings.ini" "gtk3-settings.ini"
 backup_path "${HOME}/.config/gtk-4.0/settings.ini" "gtk4-settings.ini"
 backup_path "${HOME}/.config/environment.d/hyprlab-cursor.conf" "hyprlab-cursor.conf"
+if sudo test -f /etc/greetd/config.toml; then
+    sudo cp -a /etc/greetd/config.toml "${BACKUP_ROOT}/greetd-config.toml"
+    sudo chown "${USER}:$(id -gn)" "${BACKUP_ROOT}/greetd-config.toml" 2>/dev/null || true
+fi
 
-printf '%s\n' "$BACKUP_ROOT" > "${STATE_HOME}/hypr-lab/last-backup"
+printf '%s\n' "$BACKUP_ROOT" > "${STATE_DIR}/last-backup"
+if [[ ! -f "${STATE_DIR}/original-backup" ]]; then
+    oldest_backup="$(find "${STATE_DIR}/backups" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort | head -n1 || true)"
+    [[ -n "$oldest_backup" ]] && printf '%s\n' "$oldest_backup" > "${STATE_DIR}/original-backup"
+fi
 echo "  Backup: $BACKUP_ROOT"
 
 # ------------------------------------------------------------
@@ -396,6 +418,7 @@ install_bibata_hyprlab() {
         yarn install >/dev/null 2>&1
 
         if ! command -v ctgen >/dev/null 2>&1; then
+            touch "${STATE_DIR}/clickgen-managed"
             pipx install clickgen >/dev/null 2>&1 || pipx upgrade clickgen >/dev/null 2>&1
         fi
         export PATH="${HOME}/.local/bin:${PATH}"
@@ -450,6 +473,17 @@ install_fluent_teal() {
 
 THEMES_OK=1
 if (( INSTALL_THEMES )); then
+    if [[ ! -d "${HOME}/.local/share/icons/Bibata-Modern-Hypr-Lab" ]]; then
+        touch "${STATE_DIR}/bibata-managed"
+    fi
+    if [[ ! -d "${HOME}/.local/share/icons/Fluent-teal-dark" ]]; then
+        touch "${STATE_DIR}/fluent-teal-managed"
+    fi
+    if command -v gsettings >/dev/null 2>&1; then
+        [[ -f "${STATE_DIR}/previous-cursor-theme" ]] || gsettings get org.gnome.desktop.interface cursor-theme > "${STATE_DIR}/previous-cursor-theme" 2>/dev/null || true
+        [[ -f "${STATE_DIR}/previous-cursor-size" ]] || gsettings get org.gnome.desktop.interface cursor-size > "${STATE_DIR}/previous-cursor-size" 2>/dev/null || true
+        [[ -f "${STATE_DIR}/previous-icon-theme" ]] || gsettings get org.gnome.desktop.interface icon-theme > "${STATE_DIR}/previous-icon-theme" 2>/dev/null || true
+    fi
     if install_bibata_hyprlab; then
         echo "  Bibata-Modern-Hypr-Lab installed."
     else
@@ -535,13 +569,18 @@ if (( CONFIGURE_LOGIN )); then
         elif ! confirm "Replace its next-boot login with greetd/tuigreet for Hypr-Lab?" n; then
             configure_greetd=0
         else
+            printf '%s\n' "$other_dm" > "${STATE_DIR}/previous-display-manager"
             sudo systemctl disable "$other_dm" >/dev/null 2>&1 || true
         fi
     fi
 
     if (( configure_greetd )); then
+        if systemctl is-enabled greetd.service >/dev/null 2>&1 && [[ ! -f "${STATE_DIR}/greetd-managed" ]]; then
+            touch "${STATE_DIR}/greetd-was-enabled"
+        fi
         sudo install -Dm644 "${SYSTEM_PAYLOAD}/greetd/config.toml" /etc/greetd/config.toml
         sudo systemctl enable greetd.service >/dev/null
+        touch "${STATE_DIR}/greetd-managed"
         echo "  greetd enabled; successful login launches start-hyprland."
     else
         echo "  greetd configuration skipped."
