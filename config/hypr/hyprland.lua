@@ -59,6 +59,9 @@ hl.on("hyprland.start", function()
         "~/.config/hypr/hyprlab-scripts/hyprlab-xdg.sh"
     )
 
+    -- Hypr-Lab Desktop
+    hl.exec_cmd("quickshell")
+
     -- Re-apply persistent values changed from Hypr-Lab Settings.
     hl.exec_cmd("~/.config/hypr/hyprlab-scripts/hyprlab-settings.sh apply")
 
