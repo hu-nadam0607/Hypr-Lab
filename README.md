@@ -511,7 +511,6 @@ Hypr-Lab/
 ├── manifest.json
 ├── README.md
 ├── RELEASE_NOTES.md
-├── REPO_SETUP.md
 ├── THIRD_PARTY_NOTICES.md
 └── LICENSE
 ```
