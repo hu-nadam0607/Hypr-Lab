@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.0.0-rc3"
+VERSION="1.0.0"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PAYLOAD="${SCRIPT_DIR}/config"
 SYSTEM_PAYLOAD="${SCRIPT_DIR}/system"
@@ -13,6 +13,7 @@ SKIP_DEPS=0
 INSTALL_GTK=1
 INSTALL_THEMES=1
 CONFIGURE_LOGIN=1
+LANG_CHOICE=""
 
 for arg in "$@"; do
     case "$arg" in
@@ -21,43 +22,86 @@ for arg in "$@"; do
         --no-gtk) INSTALL_GTK=0 ;;
         --no-themes) INSTALL_THEMES=0 ;;
         --no-login-manager) CONFIGURE_LOGIN=0 ;;
+        --lang=hu) LANG_CHOICE="hu" ;;
+        --lang=en) LANG_CHOICE="en" ;;
         -h|--help)
             cat <<EOH
-Hypr-Lab ${VERSION} installer
+Hypr-Lab ${VERSION} installer / telepítő
 
-Usage:
+Usage / Használat:
   ./install.sh [options]
 
-Options:
+Options / Opciók:
   -y, --yes            Accept normal prompts automatically.
+                       Normál kérdések automatikus elfogadása.
   --skip-deps          Do not install/check Arch packages with pacman.
+                       Arch csomagok telepítésének/ellenőrzésének kihagyása.
   --no-gtk             Do not install Hypr-Lab GTK3/GTK4 CSS.
+                       Hypr-Lab GTK3/GTK4 CSS telepítésének kihagyása.
   --no-themes          Do not install Bibata Hypr-Lab cursor / Fluent icons.
+                       Bibata Hypr-Lab kurzor / Fluent ikonok kihagyása.
   --no-login-manager   Do not configure greetd/tuigreet login.
+                       A greetd/tuigreet bejelentkezés konfigurálásának kihagyása.
+  --lang=en            Force English installer language.
+                       Angol telepítőnyelv kényszerítése.
+  --lang=hu            Force Hungarian installer language.
+                       Magyar telepítőnyelv kényszerítése.
   -h, --help           Show this help.
+                       Súgó megjelenítése.
 EOH
             exit 0
             ;;
         *)
-            echo "Unknown option: $arg" >&2
+            printf "Unknown option / Ismeretlen opció: %s\n" "$arg" >&2
             exit 2
             ;;
     esac
 done
 
+if [[ -z "$LANG_CHOICE" ]]; then
+    case "${LANG:-}" in
+        hu_HU*|hu*) LANG_CHOICE="hu" ;;
+        *) LANG_CHOICE="en" ;;
+    esac
+fi
+
+msg() {
+    local en="$1"
+    local hu="$2"
+    if [[ "$LANG_CHOICE" == "hu" ]]; then
+        printf '%s' "$hu"
+    else
+        printf '%s' "$en"
+    fi
+}
+
+say() {
+    local en="$1"
+    local hu="$2"
+    if [[ "$LANG_CHOICE" == "hu" ]]; then
+        printf '%s\n' "$hu"
+    else
+        printf '%s\n' "$en"
+    fi
+}
+
+prompt_text() {
+    msg "$1" "$2"
+}
+
 if [[ ${EUID} -eq 0 ]]; then
-    echo "Do not run Hypr-Lab installer as root."
-    echo "Run it as your normal user; sudo is requested only when required."
+    say "Do not run Hypr-Lab installer as root." "Ne futtasd a Hypr-Lab telepítőt root felhasználóként."
+    say "Run it as your normal user; sudo is requested only when required." "Normál felhasználóként indítsd; sudo jogosultságot csak szükség esetén kér."
     exit 1
 fi
 
 if [[ ! -f /etc/arch-release ]]; then
-    echo "Hypr-Lab v1.0 currently targets Arch Linux."
+    say "Hypr-Lab v1.0 currently targets Arch Linux." "A Hypr-Lab v1.0 jelenleg Arch Linuxot céloz."
     exit 1
 fi
 
 if [[ ! -d "$PAYLOAD/quickshell" || ! -d "$PAYLOAD/hypr" ]]; then
-    echo "Installer payload is incomplete." >&2
+    say "Installer payload is incomplete." "A telepítő payloadja hiányos." >&2
     exit 1
 fi
 
@@ -91,22 +135,37 @@ echo "========================================================"
 echo "                  HYPR-LAB ${VERSION}"
 echo "========================================================"
 echo
-echo "This installer will:"
-echo "  • install/check required Arch packages"
-echo "  • back up existing Hypr/Quickshell configuration"
-echo "  • install the Hypr-Lab shell and Hyprland Lua config"
-echo "  • configure the detected file manager"
-echo "  • keep your/default browser selection XDG-based"
-echo "  • install the notification-audio WirePlumber rule"
-echo "  • optionally install Hypr-Lab GTK CSS"
-echo "  • install Bibata-Modern-Hypr-Lab + Fluent-teal-dark by default"
-echo "  • configure greetd/tuigreet to launch Hyprland with start-hyprland"
-echo
-echo "It does NOT install a custom Ghostty config or Fastfetch config."
+if [[ "$LANG_CHOICE" == "hu" ]]; then
+    echo "A telepítő a következőket végzi el:"
+    echo "  • ellenőrzi/telepíti a szükséges Arch csomagokat"
+    echo "  • biztonsági mentést készít a meglévő Hypr/Quickshell konfigurációról"
+    echo "  • telepíti a Hypr-Lab shellt és a Hyprland Lua konfigurációt"
+    echo "  • beállítja a felismert fájlkezelőt"
+    echo "  • az alapértelmezett böngészőt XDG-alapon kezeli"
+    echo "  • telepíti az értesítési hanghoz szükséges WirePlumber szabályt"
+    echo "  • opcionálisan telepíti a Hypr-Lab GTK CSS-t"
+    echo "  • alapértelmezetten telepíti a Bibata-Modern-Hypr-Lab kurzort és a Fluent-teal-dark ikonokat"
+    echo "  • beállítja a greetd/tuigreet login folyamatot start-hyprland indítással"
+    echo
+    echo "NEM telepít egyedi Ghostty- vagy Fastfetch-konfigurációt."
+else
+    echo "This installer will:"
+    echo "  • install/check required Arch packages"
+    echo "  • back up existing Hypr/Quickshell configuration"
+    echo "  • install the Hypr-Lab shell and Hyprland Lua config"
+    echo "  • configure the detected file manager"
+    echo "  • keep your/default browser selection XDG-based"
+    echo "  • install the notification-audio WirePlumber rule"
+    echo "  • optionally install Hypr-Lab GTK CSS"
+    echo "  • install Bibata-Modern-Hypr-Lab + Fluent-teal-dark by default"
+    echo "  • configure greetd/tuigreet to launch Hyprland with start-hyprland"
+    echo
+    echo "It does NOT install a custom Ghostty config or Fastfetch config."
+fi
 echo
 
-if ! confirm "Continue with Hypr-Lab installation?" y; then
-    echo "Cancelled."
+if ! confirm "$(prompt_text "Continue with Hypr-Lab installation?" "Folytatod a Hypr-Lab telepítését?")" y; then
+    say "Cancelled." "Megszakítva."
     exit 0
 fi
 
@@ -167,7 +226,7 @@ THEME_BUILD_PACKAGES=(
 
 if (( ! SKIP_DEPS )); then
     echo
-    echo "[1/11] Checking dependencies..."
+    say "[1/11] Checking dependencies..." "[1/11] Függőségek ellenőrzése..."
 
     missing=()
     for pkg in "${REQUIRED_PACKAGES[@]}"; do
@@ -186,23 +245,23 @@ if (( ! SKIP_DEPS )); then
 
     if ((${#missing[@]})); then
         echo
-        echo "Missing packages:"
+        say "Missing packages:" "Hiányzó csomagok:"
         printf '  • %s\n' "${missing[@]}"
         echo
 
-        if confirm "Install missing packages with pacman?" y; then
+        if confirm "$(prompt_text "Install missing packages with pacman?" "Telepíted a hiányzó csomagokat pacmannel?")" y; then
             sudo pacman -S --needed "${missing[@]}"
             record_managed_packages "${missing[@]}"
         else
-            echo "Cannot guarantee a working Hypr-Lab installation without them."
+            say "Cannot guarantee a working Hypr-Lab installation without them." "Nélkülük nem garantálható a Hypr-Lab megfelelő működése."
             exit 1
         fi
     else
-        echo "  All required packages are installed."
+        say "  All required packages are installed." "  Minden szükséges csomag telepítve van."
     fi
 else
     echo
-    echo "[1/11] Dependency installation skipped by request."
+    say "[1/11] Dependency installation skipped by request." "[1/11] A függőségek telepítése kérésre kihagyva."
 fi
 
 # ------------------------------------------------------------
@@ -236,12 +295,12 @@ KB_LAYOUT="$DETECTED_LAYOUT"
 
 if (( ! ASSUME_YES )); then
     echo
-    read -rp "Keyboard layout [${DETECTED_LAYOUT}]: " entered_layout
+    read -rp "$(prompt_text "Keyboard layout" "Billentyűzetkiosztás") [${DETECTED_LAYOUT}]: " entered_layout
     KB_LAYOUT="${entered_layout:-$DETECTED_LAYOUT}"
 fi
 
 if [[ ! "$KB_LAYOUT" =~ ^[A-Za-z0-9_,+-]+$ ]]; then
-    echo "Unsupported keyboard-layout value: $KB_LAYOUT" >&2
+    say "Unsupported keyboard-layout value: $KB_LAYOUT" "Nem támogatott billentyűzetkiosztás-érték: $KB_LAYOUT" >&2
     exit 1
 fi
 
@@ -250,7 +309,7 @@ fi
 # ------------------------------------------------------------
 
 echo
-echo "[2/11] Creating backup..."
+say "[2/11] Creating backup..." "[2/11] Biztonsági mentés készítése..."
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP_ROOT="${STATE_HOME}/hypr-lab/backups/${STAMP}"
@@ -282,14 +341,14 @@ if [[ ! -f "${STATE_DIR}/original-backup" ]]; then
     oldest_backup="$(find "${STATE_DIR}/backups" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort | head -n1 || true)"
     [[ -n "$oldest_backup" ]] && printf '%s\n' "$oldest_backup" > "${STATE_DIR}/original-backup"
 fi
-echo "  Backup: $BACKUP_ROOT"
+say "  Backup: $BACKUP_ROOT" "  Biztonsági mentés: $BACKUP_ROOT"
 
 # ------------------------------------------------------------
 # 3. Install clean config
 # ------------------------------------------------------------
 
 echo
-echo "[3/11] Installing Hypr-Lab configuration..."
+say "[3/11] Installing Hypr-Lab configuration..." "[3/11] Hypr-Lab konfiguráció telepítése..."
 
 rm -rf "${HOME}/.config/hypr" "${HOME}/.config/quickshell"
 mkdir -p "${HOME}/.config"
@@ -308,7 +367,7 @@ layout = sys.argv[2]
 text = path.read_text()
 marker = '__HYPRLAB_KB_LAYOUT__'
 if marker not in text:
-    raise SystemExit("Keyboard-layout placeholder not found in hyprland.lua")
+    raise SystemExit("Keyboard-layout placeholder not found in hyprland.lua / A billentyűzetkiosztás-placeholder nem található a hyprland.lua fájlban")
 path.write_text(text.replace(marker, layout, 1))
 PY
 
@@ -322,7 +381,7 @@ printf '[]\n' > "${HOME}/.config/hypr/hyprlab-settings/monitors.json"
 # ------------------------------------------------------------
 
 echo
-echo "[4/11] Detecting file managers..."
+say "[4/11] Detecting file managers..." "[4/11] Fájlkezelők felismerése..."
 
 declare -a FM_NAMES=()
 declare -a FM_CMDS=()
@@ -347,29 +406,29 @@ selected_fm=""
 
 if ((${#FM_CMDS[@]} == 1)); then
     selected_fm="${FM_CMDS[0]}"
-    echo "  Using ${FM_NAMES[0]}."
+    say "  Using ${FM_NAMES[0]}." "  Használatban: ${FM_NAMES[0]}."
 elif ((${#FM_CMDS[@]} > 1)); then
-    echo "  Detected:"
+    say "  Detected:" "  Felismerve:"
     for i in "${!FM_CMDS[@]}"; do
         printf '    %d) %s [%s]\n' "$((i + 1))" "${FM_NAMES[$i]}" "${FM_CMDS[$i]}"
     done
 
     if (( ASSUME_YES )); then
         selected_fm="${FM_CMDS[0]}"
-        echo "  --yes: using ${FM_NAMES[0]}."
+        say "  --yes: using ${FM_NAMES[0]}." "  --yes: ${FM_NAMES[0]} használata."
     else
         while true; do
-            read -rp "  Choose file manager [1-${#FM_CMDS[@]}]: " choice
+            read -rp "$(prompt_text "  Choose file manager" "  Válassz fájlkezelőt") [1-${#FM_CMDS[@]}]: " choice
             if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#FM_CMDS[@]} )); then
                 selected_fm="${FM_CMDS[$((choice - 1))]}"
                 break
             fi
-            echo "  Invalid choice."
+            say "  Invalid choice." "  Érvénytelen választás."
         done
     fi
 else
-    echo "  No supported file manager detected."
-    echo "  SUPER+E will use the runtime auto-detect wrapper until one is installed."
+    say "  No supported file manager detected." "  Nem található támogatott fájlkezelő."
+    say "  SUPER+E will use the runtime auto-detect wrapper until one is installed." "  A SUPER+E a futásidejű automatikus felismerést használja, amíg nem telepítesz támogatott fájlkezelőt."
 fi
 
 if [[ -n "$selected_fm" ]]; then
@@ -386,7 +445,7 @@ fi
 # ------------------------------------------------------------
 
 echo
-echo "[5/11] Installing notification-audio configuration..."
+say "[5/11] Installing notification-audio configuration..." "[5/11] Értesítési hang konfigurációjának telepítése..."
 
 mkdir -p "${HOME}/.config/wireplumber/wireplumber.conf.d"
 install -Dm644 \
@@ -400,14 +459,14 @@ systemctl --user restart wireplumber 2>/dev/null || true
 # ------------------------------------------------------------
 
 echo
-echo "[6/11] Desktop themes..."
+say "[6/11] Desktop themes..." "[6/11] Asztali témák..."
 
 install_bibata_hyprlab() {
     local tmp
     tmp="$(mktemp -d)"
     local repo="${tmp}/Bibata_Cursor"
 
-    echo "  Building Bibata-Modern-Hypr-Lab..."
+    say "  Building Bibata-Modern-Hypr-Lab..." "  Bibata-Modern-Hypr-Lab építése..."
     git clone --depth 1 --branch v2.0.7 https://github.com/ful1e5/Bibata_Cursor.git "$repo" >/dev/null 2>&1 || { rm -rf "$tmp"; return 1; }
 
     (
@@ -459,7 +518,7 @@ install_fluent_teal() {
     tmp="$(mktemp -d)"
     local repo="${tmp}/Fluent-icon-theme"
 
-    echo "  Installing Fluent teal icons..."
+    say "  Installing Fluent teal icons..." "  Fluent teal ikonok telepítése..."
     git clone --depth 1 --branch 2026-07-27 https://github.com/vinceliuice/Fluent-icon-theme.git "$repo" >/dev/null 2>&1 || { rm -rf "$tmp"; return 1; }
 
     (
@@ -485,16 +544,16 @@ if (( INSTALL_THEMES )); then
         [[ -f "${STATE_DIR}/previous-icon-theme" ]] || gsettings get org.gnome.desktop.interface icon-theme > "${STATE_DIR}/previous-icon-theme" 2>/dev/null || true
     fi
     if install_bibata_hyprlab; then
-        echo "  Bibata-Modern-Hypr-Lab installed."
+        say "  Bibata-Modern-Hypr-Lab installed." "  Bibata-Modern-Hypr-Lab telepítve."
     else
-        warn "Bibata-Modern-Hypr-Lab build failed; Hypr-Lab core installation will continue."
+        warn "Bibata-Modern-Hypr-Lab build failed; Hypr-Lab core installation will continue." "A Bibata-Modern-Hypr-Lab build sikertelen; a Hypr-Lab alaptelepítése folytatódik."
         THEMES_OK=0
     fi
 
     if install_fluent_teal; then
-        echo "  Fluent teal icon theme installed."
+        say "  Fluent teal icon theme installed." "  Fluent teal ikontéma telepítve."
     else
-        warn "Fluent teal icon installation failed; Hypr-Lab core installation will continue."
+        warn "Fluent teal icon installation failed; Hypr-Lab core installation will continue." "A Fluent teal ikonok telepítése sikertelen; a Hypr-Lab alaptelepítése folytatódik."
         THEMES_OK=0
     fi
 
@@ -510,7 +569,7 @@ EOF_ENV
         gsettings set org.gnome.desktop.interface icon-theme 'Fluent-teal-dark' 2>/dev/null || true
     fi
 else
-    echo "  Theme installation disabled with --no-themes."
+    say "  Theme installation disabled with --no-themes." "  A témák telepítése letiltva a --no-themes opcióval."
 fi
 
 # ------------------------------------------------------------
@@ -518,10 +577,10 @@ fi
 # ------------------------------------------------------------
 
 echo
-echo "[7/11] GTK integration..."
+say "[7/11] GTK integration..." "[7/11] GTK integráció..."
 
 if (( INSTALL_GTK )); then
-    if (( ASSUME_YES )) || confirm "Install Hypr-Lab GTK3/GTK4 CSS?" y; then
+    if (( ASSUME_YES )) || confirm "$(prompt_text "Install Hypr-Lab GTK3/GTK4 CSS?" "Telepíted a Hypr-Lab GTK3/GTK4 CSS-t?")" y; then
         mkdir -p "${HOME}/.config/gtk-3.0" "${HOME}/.config/gtk-4.0"
         install -Dm644 "${PAYLOAD}/gtk-3.0/gtk.css" "${HOME}/.config/gtk-3.0/gtk.css"
         install -Dm644 "${PAYLOAD}/gtk-4.0/gtk.css" "${HOME}/.config/gtk-4.0/gtk.css"
@@ -536,12 +595,12 @@ gtk-cursor-theme-size=24
 EOF_GTK
             done
         fi
-        echo "  GTK integration installed."
+        say "  GTK integration installed." "  GTK integráció telepítve."
     else
-        echo "  GTK CSS skipped."
+        say "  GTK CSS skipped." "  GTK CSS kihagyva."
     fi
 else
-    echo "  GTK CSS disabled with --no-gtk."
+    say "  GTK CSS disabled with --no-gtk." "  GTK CSS letiltva a --no-gtk opcióval."
 fi
 
 # ------------------------------------------------------------
@@ -549,7 +608,7 @@ fi
 # ------------------------------------------------------------
 
 echo
-echo "[8/11] Configuring Hypr-Lab login session..."
+say "[8/11] Configuring Hypr-Lab login session..." "[8/11] Hypr-Lab bejelentkezési munkamenet beállítása..."
 
 if (( CONFIGURE_LOGIN )); then
     other_dm=""
@@ -562,11 +621,11 @@ if (( CONFIGURE_LOGIN )); then
 
     configure_greetd=1
     if [[ -n "$other_dm" ]]; then
-        echo "  Existing display manager detected: $other_dm"
+        say "  Existing display manager detected: $other_dm" "  Meglévő display manager felismerve: $other_dm"
         if (( ASSUME_YES )); then
-            echo "  --yes: leaving the existing display manager untouched."
+            say "  --yes: leaving the existing display manager untouched." "  --yes: a meglévő display manager érintetlen marad."
             configure_greetd=0
-        elif ! confirm "Replace its next-boot login with greetd/tuigreet for Hypr-Lab?" n; then
+        elif ! confirm "$(prompt_text "Replace its next-boot login with greetd/tuigreet for Hypr-Lab?" "A következő boot bejelentkezését lecseréled greetd/tuigreet-re a Hypr-Labhoz?")" n; then
             configure_greetd=0
         else
             printf '%s\n' "$other_dm" > "${STATE_DIR}/previous-display-manager"
@@ -581,12 +640,12 @@ if (( CONFIGURE_LOGIN )); then
         sudo install -Dm644 "${SYSTEM_PAYLOAD}/greetd/config.toml" /etc/greetd/config.toml
         sudo systemctl enable greetd.service >/dev/null
         touch "${STATE_DIR}/greetd-managed"
-        echo "  greetd enabled; successful login launches start-hyprland."
+        say "  greetd enabled; successful login launches start-hyprland." "  greetd engedélyezve; sikeres bejelentkezéskor a start-hyprland indul."
     else
-        echo "  greetd configuration skipped."
+        say "  greetd configuration skipped." "  greetd konfiguráció kihagyva."
     fi
 else
-    echo "  Login-manager configuration disabled with --no-login-manager."
+    say "  Login-manager configuration disabled with --no-login-manager." "  A login manager konfigurálása letiltva a --no-login-manager opcióval."
 fi
 
 # ------------------------------------------------------------
@@ -594,7 +653,7 @@ fi
 # ------------------------------------------------------------
 
 echo
-echo "[9/11] Finalizing desktop integration..."
+say "[9/11] Finalizing desktop integration..." "[9/11] Asztali integráció véglegesítése..."
 
 xdg-user-dirs-update >/dev/null 2>&1 || true
 
@@ -607,7 +666,7 @@ fi
 # ------------------------------------------------------------
 
 echo
-echo "[10/11] Verifying installed files..."
+say "[10/11] Verifying installed files..." "[10/11] Telepített fájlok ellenőrzése..."
 
 required_files=(
     "${HOME}/.config/hypr/hyprland.lua"
@@ -625,56 +684,93 @@ required_files=(
 failed=0
 for file in "${required_files[@]}"; do
     if [[ ! -f "$file" ]]; then
-        echo "  MISSING: $file"
+        if [[ "$LANG_CHOICE" == "hu" ]]; then
+            echo "  HIÁNYZIK: $file"
+        else
+            echo "  MISSING: $file"
+        fi
         failed=1
     fi
 done
 
 if (( failed )); then
     echo
-    echo "Installation payload verification failed."
-    echo "Backup is available at:"
+    say "Installation payload verification failed." "A telepített payload ellenőrzése sikertelen."
+    say "Backup is available at:" "A biztonsági mentés itt található:"
     echo "  $BACKUP_ROOT"
     exit 1
 fi
 
-echo "  Core payload verified."
+say "  Core payload verified." "  Alap payload ellenőrizve."
 
 # ------------------------------------------------------------
 # 11. Summary
 # ------------------------------------------------------------
 
 echo
-echo "[11/11] Install summary"
+say "[11/11] Install summary" "[11/11] Telepítési összegzés"
 echo
 echo "========================================================"
-echo "               HYPR-LAB INSTALL COMPLETE"
+if [[ "$LANG_CHOICE" == "hu" ]]; then
+    echo "             HYPR-LAB TELEPÍTÉS KÉSZ"
+else
+    echo "               HYPR-LAB INSTALL COMPLETE"
+fi
 echo "========================================================"
 echo
-echo "Version:          ${VERSION}"
-echo "Keyboard layout:  ${KB_LAYOUT}"
-echo "Backup:           ${BACKUP_ROOT}"
+if [[ "$LANG_CHOICE" == "hu" ]]; then
+    echo "Verzió:            ${VERSION}"
+    echo "Billentyűzet:       ${KB_LAYOUT}"
+    echo "Biztonsági mentés:  ${BACKUP_ROOT}"
+else
+    echo "Version:          ${VERSION}"
+    echo "Keyboard layout:  ${KB_LAYOUT}"
+    echo "Backup:           ${BACKUP_ROOT}"
+fi
 if (( INSTALL_THEMES )); then
     echo "Cursor:           Bibata-Modern-Hypr-Lab (24)"
     echo "Icons:            Fluent-teal-dark"
-    (( THEMES_OK )) || echo "Theme status:      completed with warning(s)"
+    if (( ! THEMES_OK )); then
+        say "Theme status:      completed with warning(s)" "Témaállapot:        figyelmeztetéssel fejeződött be"
+    fi
 fi
 echo
-echo "Recommended next step:"
-echo "  Reboot. greetd/tuigreet will provide the Hypr-Lab login and launch"
-echo "  Hyprland through start-hyprland on a clean Arch installation."
-echo
-echo "If you intentionally skipped greetd, start the session from a TTY with:"
-echo "  start-hyprland"
-echo
-echo "On first graphical login the Welcome Screen should appear automatically."
-echo
-echo "Useful shortcuts:"
-echo "  SUPER+SPACE       App Launcher"
-echo "  SUPER+SHIFT+C     Control Center"
-echo "  SUPER+SHIFT+V     Audio Control"
-echo "  SUPER+SHIFT+N     Notification Center"
-echo "  SUPER+SHIFT+W     Wallpaper Picker"
-echo "  SUPER+L           Lock"
-echo
-echo "Enjoy Hypr-Lab."
+if [[ "$LANG_CHOICE" == "hu" ]]; then
+    echo "Ajánlott következő lépés:"
+    echo "  Indítsd újra a gépet. Tiszta Arch telepítésen a greetd/tuigreet biztosítja"
+    echo "  a Hypr-Lab bejelentkezést, majd a start-hyprland indítja a Hyprlandet."
+    echo
+    echo "Ha szándékosan kihagytad a greetd beállítását, TTY-ből indítsd a munkamenetet ezzel:"
+    echo "  start-hyprland"
+    echo
+    echo "Az első grafikus bejelentkezéskor a Welcome Screennek automatikusan meg kell jelennie."
+    echo
+    echo "Hasznos gyorsbillentyűk:"
+    echo "  SUPER+SPACE       App Launcher"
+    echo "  SUPER+SHIFT+C     Control Center"
+    echo "  SUPER+SHIFT+V     Audio Control"
+    echo "  SUPER+SHIFT+N     Notification Center"
+    echo "  SUPER+SHIFT+W     Wallpaper Picker"
+    echo "  SUPER+L           Képernyőzár"
+    echo
+    echo "Jó Hypr-Lab használatot!"
+else
+    echo "Recommended next step:"
+    echo "  Reboot. greetd/tuigreet will provide the Hypr-Lab login and launch"
+    echo "  Hyprland through start-hyprland on a clean Arch installation."
+    echo
+    echo "If you intentionally skipped greetd, start the session from a TTY with:"
+    echo "  start-hyprland"
+    echo
+    echo "On first graphical login the Welcome Screen should appear automatically."
+    echo
+    echo "Useful shortcuts:"
+    echo "  SUPER+SPACE       App Launcher"
+    echo "  SUPER+SHIFT+C     Control Center"
+    echo "  SUPER+SHIFT+V     Audio Control"
+    echo "  SUPER+SHIFT+N     Notification Center"
+    echo "  SUPER+SHIFT+W     Wallpaper Picker"
+    echo "  SUPER+L           Lock"
+    echo
+    echo "Enjoy Hypr-Lab."
+fi

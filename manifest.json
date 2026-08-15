@@ -1,6 +1,6 @@
 {
   "name": "Hypr-Lab",
-  "version": "1.0.0-rc3",
+  "version": "1.0.0",
   "platform": "Arch Linux / Hyprland Lua / Wayland",
   "license": "GPL-3.0",
   "login_manager": "greetd + tuigreet + start-hyprland",
