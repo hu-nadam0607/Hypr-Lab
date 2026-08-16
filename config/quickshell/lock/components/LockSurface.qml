@@ -20,25 +20,6 @@ WlSessionLockSurface {
     readonly property string fallbackWallpaper:
         Quickshell.env("HOME") + "/.config/hypr/hyprlab-wpp/HL_WP1.png"
 
-    // ============================================================
-    // WALLPAPER STATE
-    // ============================================================
-    //
-    // A desktop háttérképet már maga a Quickshell kezeli.
-    //
-    // Ezért nem használunk többé:
-    //
-    //     awww query
-    //
-    // A WallpaperManager az aktuális háttérkép elérési
-    // útját egy cache fájlba írja, ezt olvassuk be.
-    //
-    // FONTOS:
-    // ez kizárólag a háttérképet érinti.
-    //
-    // PAM / session lock / unlock logika érintetlen.
-    // ============================================================
-
     Process {
         id: wallpaperStateReader
 
@@ -65,10 +46,6 @@ WlSessionLockSurface {
         }
     }
 
-    // ============================================================
-    // SCENE
-    // ============================================================
-
     Item {
         id: scene
 
@@ -78,18 +55,12 @@ WlSessionLockSurface {
         clip:
             true
 
-        // ========================================================
-        // WALLPAPER
-        // ========================================================
-
         Image {
             id: wallpaper
 
             anchors.fill:
                 parent
 
-            // A blur miatt kicsit túlhúzzuk,
-            // így a széleken sem jelenik meg üres sáv.
             anchors.margins:
                 -36
 
@@ -113,15 +84,9 @@ WlSessionLockSurface {
             mipmap:
                 true
 
-            // Fontos:
-            // a MultiEffectnek valódi, renderelt source kell.
             visible:
                 true
         }
-
-        // ========================================================
-        // WALLPAPER BLUR
-        // ========================================================
 
         MultiEffect {
             anchors.fill:
@@ -140,10 +105,6 @@ WlSessionLockSurface {
                 64
         }
 
-        // ========================================================
-        // DARK OVERLAY
-        // ========================================================
-
         Rectangle {
             anchors.fill:
                 parent
@@ -157,10 +118,6 @@ WlSessionLockSurface {
                 )
         }
 
-        // ========================================================
-        // SUBTLE HYPR-LAB CYAN TINT
-        // ========================================================
-
         Rectangle {
             anchors.fill:
                 parent
@@ -173,10 +130,6 @@ WlSessionLockSurface {
                     0.025
                 )
         }
-
-        // ========================================================
-        // CENTRAL CONTENT
-        // ========================================================
 
         Column {
             id: content
@@ -196,10 +149,6 @@ WlSessionLockSurface {
                 y:
                     -surface.height
             }
-
-            // ====================================================
-            // CLOCK / DATE
-            // ====================================================
 
             Column {
                 anchors.horizontalCenter:
@@ -270,10 +219,6 @@ WlSessionLockSurface {
                 }
             }
 
-            // ====================================================
-            // LOGIN CARD
-            // ====================================================
-
             Rectangle {
                 id: loginCard
 
@@ -320,10 +265,6 @@ WlSessionLockSurface {
 
                     spacing:
                         16
-
-                    // ============================================
-                    // USER
-                    // ============================================
 
                     Row {
                         anchors.horizontalCenter:
@@ -373,10 +314,6 @@ WlSessionLockSurface {
                                 Font.DemiBold
                         }
                     }
-
-                    // ============================================
-                    // PASSWORD CAPSULE
-                    // ============================================
 
                     Rectangle {
                         id: passwordCapsule
@@ -527,10 +464,6 @@ WlSessionLockSurface {
                                         forceActiveFocus()
                                 }
 
-                                // ================================
-                                // PASSWORD DOTS
-                                // ================================
-
                                 Row {
                                     id: passwordDots
 
@@ -641,10 +574,6 @@ WlSessionLockSurface {
                                         }
                                     }
 
-                                    // ============================
-                                    // CUSTOM CURSOR
-                                    // ============================
-
                                     Rectangle {
                                         id: passwordCursor
 
@@ -730,10 +659,6 @@ WlSessionLockSurface {
                         }
                     }
 
-                    // ============================================
-                    // AUTH MESSAGE
-                    // ============================================
-
                     Text {
                         anchors.horizontalCenter:
                             parent.horizontalCenter
@@ -783,10 +708,6 @@ WlSessionLockSurface {
             }
         }
 
-        // ========================================================
-        // FOOTER
-        // ========================================================
-
         Text {
             id: footer
 
@@ -823,10 +744,6 @@ WlSessionLockSurface {
                 2.4
         }
 
-        // ========================================================
-        // AUTH STATE CONNECTIONS
-        // ========================================================
-
         Connections {
             target:
                 controller
@@ -842,10 +759,6 @@ WlSessionLockSurface {
                     launchAnimation.restart()
             }
         }
-
-        // ========================================================
-        // INTRO ANIMATION
-        // ========================================================
 
         SequentialAnimation {
             id: introAnimation
@@ -930,10 +843,6 @@ WlSessionLockSurface {
             }
         }
 
-        // ========================================================
-        // SUCCESS / EXIT ANIMATION
-        // ========================================================
-
         SequentialAnimation {
             id: launchAnimation
 
@@ -974,14 +883,7 @@ WlSessionLockSurface {
                 easing.type:
                     Easing.InCubic
             }
-
-            // A tényleges session unlockot továbbra is
-            // a lock/shell.qml root Timer végzi.
         }
-
-        // ========================================================
-        // WRONG PASSWORD SHAKE
-        // ========================================================
 
         SequentialAnimation {
             id: shakeAnimation

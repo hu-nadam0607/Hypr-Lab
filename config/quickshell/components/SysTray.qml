@@ -4,13 +4,8 @@ import Quickshell.Services.SystemTray
 Item {
     id: sysTrayRoot
 
-    // ============================================================
-    // SETTINGS
-    // ============================================================
-
     property bool expanded: false
 
-    // Hány tray popup van jelenleg nyitva.
     property int activePopupCount: 0
 
     readonly property bool popupActive:
@@ -22,10 +17,6 @@ Item {
     property int openDuration: 280
     property int closeDuration: 220
 
-    // ============================================================
-    // SIZE
-    // ============================================================
-
     implicitWidth:
         buttonSize
         + drawerViewport.width
@@ -36,18 +27,12 @@ Item {
     width: implicitWidth
     height: implicitHeight
 
-    // ============================================================
-    // CLOSE LOGIC
-    // ============================================================
-
     function requestClose() {
-        // Popup aktív -> tilos becsukni.
         if (popupActive) {
             closeTimer.stop()
             return
         }
 
-        // Az egér még a tray területén van.
         if (trayHover.hovered) {
             closeTimer.stop()
             return
@@ -72,10 +57,6 @@ Item {
             requestClose()
     }
 
-    // ============================================================
-    // AUTO CLOSE
-    // ============================================================
-
     Timer {
         id: closeTimer
 
@@ -83,19 +64,12 @@ Item {
         repeat: false
 
         onTriggered: {
-            // Még egyszer ellenőrizzük,
-            // nehogy közben popup nyíljon vagy az egér visszajöjjön.
             if (!sysTrayRoot.popupActive
                     && !trayHover.hovered) {
-
                 sysTrayRoot.expanded = false
             }
         }
     }
-
-    // ============================================================
-    // WHOLE TRAY HOVER
-    // ============================================================
 
     HoverHandler {
         id: trayHover
@@ -109,10 +83,6 @@ Item {
         }
     }
 
-    // ============================================================
-    // CONTENT
-    // ============================================================
-
     Row {
         id: contentRow
 
@@ -123,10 +93,6 @@ Item {
             drawerViewport.width > 0
             ? sysTrayRoot.drawerSpacing
             : 0
-
-        // ========================================================
-        // SLIDING TRAY DRAWER
-        // ========================================================
 
         Item {
             id: drawerViewport
@@ -155,10 +121,6 @@ Item {
                         : Easing.InCubic
                 }
             }
-
-            // ====================================================
-            // TRAY ICON ROW
-            // ====================================================
 
             Row {
                 id: trayRow
@@ -225,10 +187,6 @@ Item {
             }
         }
 
-        // ========================================================
-        // DRAWER BUTTON
-        // ========================================================
-
         Item {
             id: drawerButton
 
@@ -236,10 +194,6 @@ Item {
             height: sysTrayRoot.buttonSize
 
             anchors.verticalCenter: parent.verticalCenter
-
-            // ====================================================
-            // BUTTON BACKGROUND
-            // ====================================================
 
             Rectangle {
     id: buttonBackground
@@ -309,10 +263,6 @@ Item {
     }
 }
 
-            // ====================================================
-            // DRAWER ICON
-            // ====================================================
-
             Text {
                 id: drawerIcon
 
@@ -364,10 +314,6 @@ Item {
                 }
             }
 
-            // ====================================================
-            // CLICK
-            // ====================================================
-
             MouseArea {
                 id: drawerMouse
 
@@ -381,8 +327,6 @@ Item {
                 onClicked: {
                     closeTimer.stop()
 
-                    // Ha popup aktív, ne engedjük
-                    // a drawer manuális összecsukását sem.
                     if (sysTrayRoot.popupActive)
                         return
 

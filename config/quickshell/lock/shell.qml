@@ -1,6 +1,3 @@
-//@ pragma ShellId hypr-lab-lock
-//@ pragma UseQApplication
-
 import QtQuick
 import Quickshell
 import Quickshell.Services.Pam
@@ -73,8 +70,6 @@ ShellRoot {
             root.pendingPassword = ""
 
             if (result === PamResult.Success) {
-                // A vizuális exit animáció minden lock surface-en elindul,
-                // a tényleges unlockot viszont a root Timer végzi megbízhatóan.
                 root.authSucceeded = true
                 unlockTimer.restart()
             } else {

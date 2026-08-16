@@ -16,6 +16,7 @@ Item {
     property bool blurEnabled: true
     property int blurSize: 4
     property int blurPasses: 3
+    property bool xrayEnabled: false
     property bool animationsEnabled: true
     property int gapsIn: 5
     property int gapsOut: 10
@@ -42,6 +43,7 @@ Item {
                     else if(k==="BLUR") root.blurEnabled=v==="1"
                     else if(k==="BLUR_SIZE") root.blurSize=parseInt(v)
                     else if(k==="BLUR_PASSES") root.blurPasses=parseInt(v)
+                    else if(k==="XRAY") root.xrayEnabled=v==="1"
                     else if(k==="ANIMATIONS") root.animationsEnabled=v==="1"
                     else if(k==="GAPS_IN") root.gapsIn=parseInt(v)
                     else if(k==="GAPS_OUT") root.gapsOut=parseInt(v)
@@ -222,6 +224,16 @@ Item {
                 onIncrease: {
                     root.blurPasses = root.clamp(root.blurPasses + 1, 1, 6)
                     root.setValue("BLUR_PASSES", root.blurPasses)
+                }
+            }
+
+            SettingToggle {
+                subtitle: "Blur through opaque surfaces"
+                checked: root.xrayEnabled
+
+                onToggled: function(value) {
+                    root.xrayEnabled = value
+                    root.setValue("XRAY", value ? 1 : 0)
                 }
             }
 

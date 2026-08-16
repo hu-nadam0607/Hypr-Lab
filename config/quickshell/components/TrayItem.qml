@@ -5,10 +5,6 @@ import Quickshell.Widgets
 Item {
     id: trayItemRoot
 
-    // ============================================================
-    // PUBLIC API
-    // ============================================================
-
     property SystemTrayItem item: null
 
     signal popupOpened()
@@ -16,16 +12,8 @@ Item {
 
     property bool popupReportedOpen: false
 
-    // ============================================================
-    // SIZE
-    // ============================================================
-
     width: 28
     height: 28
-
-    // ============================================================
-    // ICON
-    // ============================================================
 
     IconImage {
         id: trayIcon
@@ -40,7 +28,6 @@ Item {
             ? trayItemRoot.item.icon
             : ""
 
-        // Finom hover-visszajelzés kör nélkül.
         opacity:
             mouseArea.containsMouse
             ? 1.0
@@ -65,10 +52,6 @@ Item {
             }
         }
     }
-
-    // ============================================================
-    // HYPR-LAB MENU
-    // ============================================================
 
     TrayMenu {
         id: trayMenu
@@ -95,10 +78,6 @@ Item {
         }
     }
 
-    // ============================================================
-    // MOUSE
-    // ============================================================
-
     MouseArea {
         id: mouseArea
 
@@ -115,18 +94,10 @@ Item {
             if (!trayItemRoot.item)
                 return
 
-            // ====================================================
-            // LEFT CLICK
-            // ====================================================
-
             if (mouse.button === Qt.LeftButton) {
                 trayItemRoot.item.activate()
                 return
             }
-
-            // ====================================================
-            // RIGHT CLICK
-            // ====================================================
 
             if (mouse.button === Qt.RightButton) {
                 if (!trayItemRoot.item.hasMenu)

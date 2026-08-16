@@ -6,10 +6,6 @@ import Quickshell.Io
 Rectangle {
     id: wsBtn
 
-    // ============================================================
-    // PUBLIC API
-    // ============================================================
-
     property int workspaceId: 1
 
     property bool isActive:
@@ -29,10 +25,6 @@ Rectangle {
         return false
     }
 
-    // ============================================================
-    // SIZE
-    // ============================================================
-
     width:
         isActive
         ? 28
@@ -42,10 +34,6 @@ Rectangle {
 
     radius:
         height / 2
-
-    // ============================================================
-    // BACKGROUND
-    // ============================================================
 
     color:
         isActive
@@ -80,10 +68,6 @@ Rectangle {
                 )
           )
 
-    // ============================================================
-    // ANIMATIONS
-    // ============================================================
-
     Behavior on width {
         SpringAnimation {
             spring: 4
@@ -97,27 +81,11 @@ Rectangle {
         }
     }
 
-    // ============================================================
-    // WORKSPACE SWITCH PROCESS
-    // ============================================================
-
     Process {
         id: workspaceSwitchProcess
     }
 
-    // ============================================================
-    // SWITCH FUNCTION
-    // ============================================================
-
     function switchWorkspace() {
-
-        // Hyprland 0.55+ Lua dispatcher syntax.
-        //
-        // Példa:
-        //
-        // hyprctl dispatch
-        // 'hl.dsp.focus({ workspace = "3" })'
-
         workspaceSwitchProcess.command = [
             "hyprctl",
             "dispatch",
@@ -128,10 +96,6 @@ Rectangle {
 
         workspaceSwitchProcess.running = true
     }
-
-    // ============================================================
-    // WORKSPACE NUMBER
-    // ============================================================
 
     Text {
         anchors.centerIn:
@@ -159,10 +123,6 @@ Rectangle {
             ? 1.0
             : 0.5
     }
-
-    // ============================================================
-    // MOUSE
-    // ============================================================
 
     MouseArea {
         id: mouseArea

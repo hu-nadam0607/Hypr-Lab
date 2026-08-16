@@ -7,24 +7,13 @@ import Quickshell.Wayland
 Scope {
     id: powerMenuScope
 
-    // ============================================================
-    // PUBLIC STATE
-    // ============================================================
-
     property bool isOpen: false
 
-    // A PanelWindow nem tűnhet el azonnal,
-    // különben a close animáció sem látszana.
     property bool windowVisible: false
 
-    // Animációs rétegek külön vezérlése
     property bool glassVisible: false
     property bool borderVisible: false
     property bool contentVisible: false
-
-    // ============================================================
-    // OPEN / CLOSE
-    // ============================================================
 
     function open() {
         closeGlassTimer.stop()
@@ -51,16 +40,12 @@ Scope {
 
         isOpen = false
 
-        // Először az ikonok tűnnek el.
         contentVisible = false
 
-        // Utána a border.
         borderVisible = false
 
-        // Végül maga az üveg.
         closeGlassTimer.restart()
 
-        // Legvégén szűnik meg a fullscreen surface.
         closeWindowTimer.restart()
     }
 
@@ -70,10 +55,6 @@ Scope {
         else
             open()
     }
-
-    // ============================================================
-    // IPC
-    // ============================================================
 
     IpcHandler {
         target: "powermenu"
@@ -90,10 +71,6 @@ Scope {
             powerMenuScope.close()
         }
     }
-
-    // ============================================================
-    // OPEN TIMERS
-    // ============================================================
 
     Timer {
         id: borderOpenTimer
@@ -119,10 +96,6 @@ Scope {
         }
     }
 
-    // ============================================================
-    // CLOSE TIMERS
-    // ============================================================
-
     Timer {
         id: closeGlassTimer
 
@@ -146,10 +119,6 @@ Scope {
                 powerMenuScope.windowVisible = false
         }
     }
-
-    // ============================================================
-    // FULLSCREEN OVERLAY
-    // ============================================================
 
     PanelWindow {
         id: menuWindow
@@ -185,10 +154,6 @@ Scope {
         WlrLayershell.keyboardFocus:
             WlrKeyboardFocus.Exclusive
 
-        // ========================================================
-        // KEYBOARD FOCUS
-        // ========================================================
-
         FocusScope {
             anchors.fill:
                 parent
@@ -200,18 +165,12 @@ Scope {
                 powerMenuScope.close()
             }
 
-            // ====================================================
-            // DESKTOP DIM / GLASS BACKDROP
-            // ====================================================
-
             Rectangle {
                 id: backdrop
 
                 anchors.fill:
                     parent
 
-                // Sokkal kevésbé "modal dialog" érzés.
-                // A Hyprland blur jobban érvényesül.
                 color:
                     Qt.rgba(
                         5 / 255,
@@ -232,10 +191,6 @@ Scope {
                     }
                 }
 
-                // ================================================
-                // BACKDROP CLICK
-                // ================================================
-
                 MouseArea {
                     anchors.fill:
                         parent
@@ -244,10 +199,6 @@ Scope {
                         powerMenuScope.close()
                     }
                 }
-
-                // ================================================
-                // POWER CAPSULE WRAPPER
-                // ================================================
 
                 Item {
                     id: capsuleWrapper
@@ -281,10 +232,6 @@ Scope {
                             easing.type: Easing.OutBack
                         }
                     }
-
-                    // ============================================
-                    // SHADOW / OUTER GLOW
-                    // ============================================
 
                     Rectangle {
                         anchors.centerIn:
@@ -338,10 +285,6 @@ Scope {
                         }
                     }
 
-                    // ============================================
-                    // MAIN GLASS CAPSULE
-                    // ============================================
-
                     Rectangle {
                         id: glassCapsule
 
@@ -364,10 +307,6 @@ Scope {
 
                         clip:
                             true
-
-                        // ========================================
-                        // INNER GLASS HIGHLIGHT
-                        // ========================================
 
                         Rectangle {
                             anchors {
@@ -392,8 +331,6 @@ Scope {
                                 )
                         }
 
-                        // A kapszulára kattintás ne jusson át
-                        // a háttér MouseArea-jára.
                         MouseArea {
                             anchors.fill:
                                 parent
@@ -404,10 +341,6 @@ Scope {
                                 }
                         }
 
-                        // ========================================
-                        // OPTIONS
-                        // ========================================
-
                         Row {
                             id: optionRow
 
@@ -416,10 +349,6 @@ Scope {
 
                             spacing:
                                 22
-
-                            // ====================================
-                            // LOCK
-                            // ====================================
 
                             PowerMenuOption {
                                 iconText:
@@ -445,10 +374,6 @@ Scope {
                                 }
                             }
 
-                            // ====================================
-                            // LOGOUT
-                            // ====================================
-
                             PowerMenuOption {
                                 iconText:
                                     "󰍃"
@@ -473,10 +398,6 @@ Scope {
                                 }
                             }
 
-                            // ====================================
-                            // REBOOT
-                            // ====================================
-
                             PowerMenuOption {
                                 iconText:
                                     "󰜉"
@@ -499,10 +420,6 @@ Scope {
                                     powerMenuScope.close()
                                 }
                             }
-
-                            // ====================================
-                            // SHUTDOWN
-                            // ====================================
 
                             PowerMenuOption {
                                 iconText:
@@ -531,10 +448,6 @@ Scope {
                             }
                         }
                     }
-
-                    // ============================================
-                    // CYAN BORDER
-                    // ============================================
 
                     Rectangle {
                         anchors.fill:

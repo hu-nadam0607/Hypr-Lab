@@ -165,9 +165,7 @@ Scope {
                     anchors.fill: parent
                     radius: 24
                     color: Qt.rgba(8/255, 14/255, 19/255, 0.82)
-                    // Egységes, 2 px-es Hypr-Lab cyan keret.
-                    // Nincs külön felső highlight vagy belső második border,
-                    // így minden oldalon azonos vastagságú marad.
+
                     border.width: 2
                     border.color: Qt.rgba(55/255, 245/255, 235/255, 0.34)
                 }

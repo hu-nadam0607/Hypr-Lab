@@ -7,19 +7,11 @@ import Quickshell.Io
 Scope {
     id: root
 
-    // ============================================================
-    // HYPR-LAB WALLPAPER SETTINGS
-    // ============================================================
-
     property string wallpaperDirectory:
         Quickshell.env("HOME") + "/.config/hypr/hyprlab-wpp"
 
     property url currentWallpaper: ""
     property int transitionEffect: 0
-
-    // ============================================================
-    // PERSISTENT WALLPAPER STATE
-    // ============================================================
 
     readonly property string wallpaperStateDirectory:
         Quickshell.env("HOME") + "/.cache/hypr-lab"
@@ -28,32 +20,10 @@ Scope {
         wallpaperStateDirectory
         + "/current-wallpaper"
 
-    // Addig nem választunk fallback képet,
-    // amíg meg nem próbáltuk visszaolvasni
-    // az előző session háttérképét.
     property bool stateReadFinished: false
-
-    // ============================================================
-    // TRANSITION EFFECTS
-    // ============================================================
-
-    // 0 = fade
-    // 1 = zoom
-    // 2 = slide right
-    // 3 = slide left
-    // 4 = slide bottom
-    // 5 = slide top
-    // 6 = brush wipe
-    // 7 = falling tiles
-    // 8 = soft spiral
-    // 9 = silk wave
 
     readonly property int effectCount:
         10
-
-    // ============================================================
-    // WALLPAPER DIRECTORY
-    // ============================================================
 
     FolderListModel {
         id: wallpaperModel
@@ -83,10 +53,6 @@ Scope {
         sortField:
             FolderListModel.Name
     }
-
-    // ============================================================
-    // HELPERS
-    // ============================================================
 
     function wallpaperCount(): int {
         return wallpaperModel.count
@@ -209,10 +175,6 @@ Scope {
         return index
     }
 
-    // ============================================================
-    // PERSIST CURRENT WALLPAPER
-    // ============================================================
-
     function persistCurrentWallpaper(): void {
         const path =
             localPath(currentWallpaper)
@@ -236,10 +198,6 @@ Scope {
         wallpaperStateWriter.running =
             true
     }
-
-    // ============================================================
-    // SET WALLPAPER
-    // ============================================================
 
     function setWallpaper(
         source: url,
@@ -268,10 +226,6 @@ Scope {
             source
     }
 
-    // ============================================================
-    // RANDOM WALLPAPER
-    // ============================================================
-
     function randomWallpaper(): void {
         const index =
             randomIndexExcludingCurrent()
@@ -292,13 +246,7 @@ Scope {
         )
     }
 
-    // ============================================================
-    // INITIAL WALLPAPER FALLBACK
-    // ============================================================
-
     function ensureInitialWallpaper(): void {
-        // Előbb várjuk meg az előző session
-        // háttérképének visszaolvasását.
         if (!stateReadFinished)
             return
 
@@ -326,25 +274,15 @@ Scope {
             return
         }
 
-        // Ha nincs előző háttérkép,
-        // az első fájllal indulunk.
         transitionEffect = 0
 
         currentWallpaper =
             wallpaperAt(0)
     }
 
-    // ============================================================
-    // STATE WRITER
-    // ============================================================
-
     Process {
         id: wallpaperStateWriter
     }
-
-    // ============================================================
-    // STATE READER
-    // ============================================================
 
     Process {
         id: wallpaperStateReader
@@ -363,7 +301,6 @@ Scope {
                     text.trim()
 
                 if (path.length > 0) {
-                    // Startupnál nincs animáció.
                     root.transitionEffect = 0
 
                     root.currentWallpaper =
@@ -380,10 +317,6 @@ Scope {
         }
     }
 
-    // ============================================================
-    // KEEP STATE FILE UPDATED
-    // ============================================================
-
     onCurrentWallpaperChanged: {
         if (
             currentWallpaper
@@ -393,14 +326,9 @@ Scope {
         }
     }
 
-    // Public helper a Control Centernek.
     function togglePicker(): void {
         picker.toggle()
     }
-
-    // ============================================================
-    // IPC
-    // ============================================================
 
     IpcHandler {
         target:
@@ -423,10 +351,6 @@ Scope {
         }
     }
 
-    // ============================================================
-    // WALLPAPER MODEL READY
-    // ============================================================
-
     Connections {
         target:
             wallpaperModel
@@ -441,20 +365,10 @@ Scope {
         }
     }
 
-    // ============================================================
-    // INITIAL LOAD
-    // ============================================================
-
     Component.onCompleted: {
-        // Először az előző session
-        // háttérképét próbáljuk visszaállítani.
         wallpaperStateReader.running =
             true
     }
-
-    // ============================================================
-    // ONE WALLPAPER SURFACE PER MONITOR
-    // ============================================================
 
     Variants {
         model:
@@ -473,10 +387,6 @@ Scope {
                 root.transitionEffect
         }
     }
-
-    // ============================================================
-    // HYPR-LAB WALLPAPER PICKER
-    // ============================================================
 
     WallpaperPicker {
         id: picker

@@ -133,7 +133,6 @@ Item {
             width: scroller.width
             spacing: 8
 
-            // A Flickable clip-je ne érjen bele a felső cím betűibe.
             Item { width: 1; height: 4 }
 
             Text {

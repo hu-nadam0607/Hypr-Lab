@@ -41,8 +41,6 @@ Item {
         z: -1
     }
 
-    // A kernel LED állapotait olvassuk. Ez nem függ külön X11-es segédprogramtól,
-    // és Waylanden is a tényleges billentyűzetállapotot követi.
     Process {
         id: lockStateProcess
         command: [
@@ -86,7 +84,6 @@ Item {
         spacing: 7
         z: 1
 
-        // USB manager – csak akkor látható, ha USB háttértár van csatlakoztatva.
         BarActionButton {
             id: usbButton
             visible: rightBarRoot.usbAvailable
@@ -96,7 +93,6 @@ Item {
             onClicked: rightBarRoot.toggleUsbManager(usbButton)
         }
 
-        // Audio – közvetlen belépés a Control Center Audio oldalára.
         BarActionButton {
             id: audioButton
             icon: "󰕾"
@@ -105,7 +101,6 @@ Item {
             onClicked: Quickshell.execDetached(["qs", "ipc", "call", "controlcenter", "audio"])
         }
 
-        // Control Center – állandó, közvetlen belépési pont.
         BarActionButton {
             id: controlCenterButton
             icon: "󰒓"
@@ -121,7 +116,6 @@ Item {
             color: Qt.rgba(1, 1, 1, 0.10)
         }
 
-        // Caps Lock és Num Lock mindig látható: cyan = aktív, tompa = kikapcsolt.
         Row {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 3

@@ -36,7 +36,6 @@ Item {
         spacing: 7
         z: 1
 
-        // Hypr-Lab / Arch launcher button.
         BarActionButton {
             id: launcherButton
             icon: "󰣇"
@@ -44,7 +43,6 @@ Item {
             onClicked: leftBarRoot.openAppLauncher()
         }
 
-        // Visszafogott elválasztás a launcher és a workspace-ek között.
         Rectangle {
             width: 1
             height: 18

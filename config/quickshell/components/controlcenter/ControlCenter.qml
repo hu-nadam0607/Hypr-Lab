@@ -115,8 +115,6 @@ Scope {
         else open()
     }
 
-    // C bind semantics:
-    // closed -> main, audio -> main, main -> close
     function toggleMain() {
         if (isOpen && currentPage === "main") close()
         else open()
@@ -232,8 +230,7 @@ Scope {
 
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
-        // OnDemand focus is enough for Esc handling without the old Exclusive
-        // keyboard grab that made the rest of the desktop feel modal.
+
         focusable: true
         aboveWindows: true
 
@@ -241,7 +238,6 @@ Scope {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
-        // Keyboard catcher: Esc closes the whole Control Center from either page.
         Item {
             id: keyCatcher
             anchors.fill: parent
@@ -254,7 +250,6 @@ Scope {
             }
         }
 
-        // Click-catcher: az üres területre kattintva bezárjuk a CC-t.
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton
@@ -280,7 +275,6 @@ Scope {
                 NumberAnimation { duration: 170; easing.type: Easing.OutCubic }
             }
 
-            // A kártyán belüli kattintás ne jusson át a háttér click-catchernek.
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton

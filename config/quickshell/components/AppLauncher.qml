@@ -12,26 +12,16 @@ Scope {
     property real shellProgress: 0.0
     property real bodyProgress: 0.0
 
-    // ============================================================
-    // HYPR-LAB BORDER DRAW
-    // ============================================================
-
     property real borderProgress: 0.0
 
     readonly property int borderAnimationDuration: 520
 
-    // Ha alkalmazást választunk, csak a teljes
-    // bezárási animáció UTÁN indítjuk el.
     property var pendingLaunchApp: null
 
     onBorderProgressChanged: {
         if (borderCanvas)
             borderCanvas.requestPaint()
     }
-
-    // ============================================================
-    // SEARCH HELPERS
-    // ============================================================
 
     function normalize(value) {
         return (value || "")
@@ -247,15 +237,10 @@ Scope {
             )
     }
 
-    // ============================================================
-    // OPEN
-    // ============================================================
-
     function open() {
         if (isOpen)
             return
 
-        // Minden esetleges zárási folyamat álljon le.
         borderCloseDelay.stop()
         shellCloseDelay.stop()
         windowHideDelay.stop()
@@ -265,25 +250,16 @@ Scope {
         windowVisible = true
         isOpen = true
 
-        // Mindig border nélkül indulunk.
         borderProgress = 0.0
 
-        // 1. Glass shell megjelenik.
         shellProgress = 1.0
 
-        // 2. Body kinyílik.
         bodyOpenDelay.restart()
 
-        // 3. Amikor teljesen kinyílt,
-        // körbefut a cyan border.
         borderOpenDelay.restart()
 
         focusDelay.restart()
     }
-
-    // ============================================================
-    // CLOSE
-    // ============================================================
 
     function close() {
         if (!windowVisible)
@@ -294,14 +270,6 @@ Scope {
         bodyOpenDelay.stop()
         borderOpenDelay.stop()
         focusDelay.stop()
-
-        // ========================================================
-        // REVERSE ORDER
-        //
-        // 1. border eltűnik
-        // 2. body összecsukódik
-        // 3. glass shell eltűnik
-        // ========================================================
 
         borderProgress = 0.0
 
@@ -314,10 +282,6 @@ Scope {
         else
             open()
     }
-
-    // ============================================================
-    // SELECTION
-    // ============================================================
 
     function moveSelection(delta) {
         if (resultList.count <= 0)
@@ -340,10 +304,6 @@ Scope {
         )
     }
 
-    // ============================================================
-    // LAUNCH APPLICATION
-    // ============================================================
-
     function launchSelected() {
         if (
             resultList.count <= 0
@@ -360,17 +320,10 @@ Scope {
         if (!app)
             return
 
-        // Nem indítjuk el azonnal.
-        // Előbb végigmegy a teljes
-        // reverse launcher animáció.
         pendingLaunchApp = app
 
         close()
     }
-
-    // ============================================================
-    // IPC
-    // ============================================================
 
     IpcHandler {
         target:
@@ -389,10 +342,6 @@ Scope {
         }
     }
 
-    // ============================================================
-    // OPEN TIMING
-    // ============================================================
-
     Timer {
         id: bodyOpenDelay
 
@@ -403,11 +352,6 @@ Scope {
             launcherRoot.bodyProgress =
                 1.0
     }
-
-    // ------------------------------------------------------------
-    // BORDER CSAK AKKOR INDUL,
-    // AMIKOR A BODY MÁR TELJESEN KINYÍLT
-    // ------------------------------------------------------------
 
     Timer {
         id: borderOpenDelay
@@ -420,10 +364,6 @@ Scope {
                 1.0
     }
 
-    // ============================================================
-    // FOCUS
-    // ============================================================
-
     Timer {
         id: focusDelay
 
@@ -435,15 +375,6 @@ Scope {
             searchInput.selectAll()
         }
     }
-
-    // ============================================================
-    // CLOSE TIMING
-    // ============================================================
-
-    // ------------------------------------------------------------
-    // 1. előbb várjuk meg,
-    // hogy a border visszafusson
-    // ------------------------------------------------------------
 
     Timer {
         id: borderCloseDelay
@@ -461,11 +392,6 @@ Scope {
         }
     }
 
-    // ------------------------------------------------------------
-    // 2. body összecsukódott
-    // -> eltűnik a glass shell
-    // ------------------------------------------------------------
-
     Timer {
         id: shellCloseDelay
 
@@ -479,10 +405,6 @@ Scope {
             windowHideDelay.restart()
         }
     }
-
-    // ------------------------------------------------------------
-    // 3. teljes window eltűnik
-    // ------------------------------------------------------------
 
     Timer {
         id: windowHideDelay
@@ -509,11 +431,6 @@ Scope {
             launcherRoot.borderProgress =
                 0.0
 
-            // ====================================================
-            // HA APP INDÍTÁS MIATT ZÁRTUK BE,
-            // MOST INDÍTJUK EL.
-            // ====================================================
-
             if (launcherRoot.pendingLaunchApp) {
                 const app =
                     launcherRoot.pendingLaunchApp
@@ -526,10 +443,6 @@ Scope {
         }
     }
 
-    // ============================================================
-    // SHELL ANIMATION
-    // ============================================================
-
     Behavior on shellProgress {
         NumberAnimation {
             duration: 290
@@ -538,10 +451,6 @@ Scope {
                 Easing.InOutCubic
         }
     }
-
-    // ============================================================
-    // BODY ANIMATION
-    // ============================================================
 
     Behavior on bodyProgress {
         NumberAnimation {
@@ -552,10 +461,6 @@ Scope {
         }
     }
 
-    // ============================================================
-    // BORDER DRAW ANIMATION
-    // ============================================================
-
     Behavior on borderProgress {
         NumberAnimation {
             duration:
@@ -565,10 +470,6 @@ Scope {
                 Easing.InOutCubic
         }
     }
-
-    // ============================================================
-    // FULLSCREEN INPUT SURFACE
-    // ============================================================
 
     PanelWindow {
         id: launcherWindow
@@ -604,10 +505,6 @@ Scope {
         WlrLayershell.keyboardFocus:
             WlrKeyboardFocus.Exclusive
 
-        // ========================================================
-        // FULLSCREEN CLICK CATCHER
-        // ========================================================
-
         Item {
             anchors.fill:
                 parent
@@ -620,10 +517,6 @@ Scope {
                     launcherRoot.close()
             }
         }
-
-        // ========================================================
-        // LAUNCHER CONTAINER
-        // ========================================================
 
         Item {
             id: launcherContainer
@@ -671,10 +564,6 @@ Scope {
                 }
             }
 
-            // ====================================================
-            // GLASS CARD
-            // ====================================================
-
             Rectangle {
                 id: launcherCard
 
@@ -689,10 +578,6 @@ Scope {
                         * launcherRoot.bodyProgress
                     )
 
-                // =================================================
-                // HYPR-LAB GLASS
-                // =================================================
-
                 color:
                     Qt.rgba(
                         10 / 255,
@@ -701,11 +586,6 @@ Scope {
                         0.80
                     )
 
-                // FONTOS:
-                //
-                // A Rectangle saját borderét kikapcsoljuk.
-                // A cyan keretet a Canvas rajzolja
-                // körbe animálva.
                 border.width:
                     0
 
@@ -734,10 +614,6 @@ Scope {
                                 true
                         }
                 }
-
-                // =================================================
-                // SEARCH AREA
-                // =================================================
 
                 Rectangle {
                     id: searchArea
@@ -801,10 +677,6 @@ Scope {
                             parent.color
                     }
 
-                    // =============================================
-                    // SEARCH ICON
-                    // =============================================
-
                     Rectangle {
                         anchors.left:
                             parent.left
@@ -854,10 +726,6 @@ Scope {
                                 22
                         }
                     }
-
-                    // =============================================
-                    // SEARCH INPUT
-                    // =============================================
 
                     TextInput {
                         id: searchInput
@@ -913,7 +781,6 @@ Scope {
 
                         Keys.onPressed:
                             event => {
-
                                 if (
                                     event.key
                                     === Qt.Key_Down
@@ -923,7 +790,6 @@ Scope {
 
                                     event.accepted =
                                         true
-
                                 } else if (
                                     event.key
                                     === Qt.Key_Up
@@ -933,7 +799,6 @@ Scope {
 
                                     event.accepted =
                                         true
-
                                 } else if (
                                     event.key
                                     === Qt.Key_Return
@@ -946,7 +811,6 @@ Scope {
 
                                     event.accepted =
                                         true
-
                                 } else if (
                                     event.key
                                     === Qt.Key_Escape
@@ -959,10 +823,6 @@ Scope {
                                 }
                             }
                     }
-
-                    // =============================================
-                    // PLACEHOLDER
-                    // =============================================
 
                     Text {
                         anchors.left:
@@ -993,10 +853,6 @@ Scope {
                             16
                     }
 
-                    // =============================================
-                    // SEPARATOR
-                    // =============================================
-
                     Rectangle {
                         anchors.left:
                             parent.left
@@ -1021,10 +877,6 @@ Scope {
                             )
                     }
                 }
-
-                // =================================================
-                // RESULTS AREA
-                // =================================================
 
                 Item {
                     id: resultsArea
@@ -1114,10 +966,6 @@ Scope {
                             }
                     }
 
-                    // =============================================
-                    // EMPTY STATE
-                    // =============================================
-
                     Column {
                         anchors.centerIn:
                             parent
@@ -1178,10 +1026,6 @@ Scope {
                 }
             }
 
-            // ====================================================
-            // ANIMATED CYAN BORDER
-            // ====================================================
-
             Canvas {
                 id: borderCanvas
 
@@ -1194,7 +1038,6 @@ Scope {
                 antialiasing:
                     true
 
-                // Semmilyen inputot ne kapjon.
                 enabled:
                     false
 
@@ -1203,17 +1046,6 @@ Scope {
 
                 onHeightChanged:
                     requestPaint()
-
-                // =================================================
-                // PARTIAL ROUNDED RECTANGLE
-                //
-                // A teljes kerületből csak annyit rajzolunk ki,
-                // amennyit a borderProgress enged.
-                //
-                // borderProgress:
-                // 0.0 = nincs border
-                // 1.0 = teljes border
-                // =================================================
 
                 function drawRoundedProgress(
                     ctx,
@@ -1257,17 +1089,10 @@ Scope {
 
                     ctx.beginPath()
 
-                    // Kezdőpont:
-                    // felső oldal közepe helyett
-                    // bal felső ív utáni pont.
                     ctx.moveTo(
                         x + r,
                         y
                     )
-
-                    // ---------------------------------------------
-                    // TOP
-                    // ---------------------------------------------
 
                     if (remaining <= topLength) {
                         ctx.lineTo(
@@ -1286,10 +1111,6 @@ Scope {
 
                     remaining -=
                         topLength
-
-                    // ---------------------------------------------
-                    // TOP RIGHT ARC
-                    // ---------------------------------------------
 
                     if (remaining <= arcLength) {
                         const angle =
@@ -1326,10 +1147,6 @@ Scope {
                     remaining -=
                         arcLength
 
-                    // ---------------------------------------------
-                    // RIGHT
-                    // ---------------------------------------------
-
                     if (remaining <= sideLength) {
                         ctx.lineTo(
                             x + w,
@@ -1347,10 +1164,6 @@ Scope {
 
                     remaining -=
                         sideLength
-
-                    // ---------------------------------------------
-                    // BOTTOM RIGHT ARC
-                    // ---------------------------------------------
 
                     if (remaining <= arcLength) {
                         const angle =
@@ -1385,10 +1198,6 @@ Scope {
                     remaining -=
                         arcLength
 
-                    // ---------------------------------------------
-                    // BOTTOM
-                    // ---------------------------------------------
-
                     if (remaining <= topLength) {
                         ctx.lineTo(
                             x + w - r - remaining,
@@ -1406,10 +1215,6 @@ Scope {
 
                     remaining -=
                         topLength
-
-                    // ---------------------------------------------
-                    // BOTTOM LEFT ARC
-                    // ---------------------------------------------
 
                     if (remaining <= arcLength) {
                         const angle =
@@ -1446,10 +1251,6 @@ Scope {
                     remaining -=
                         arcLength
 
-                    // ---------------------------------------------
-                    // LEFT
-                    // ---------------------------------------------
-
                     if (remaining <= sideLength) {
                         ctx.lineTo(
                             x,
@@ -1467,10 +1268,6 @@ Scope {
 
                     remaining -=
                         sideLength
-
-                    // ---------------------------------------------
-                    // TOP LEFT ARC
-                    // ---------------------------------------------
 
                     if (remaining <= arcLength) {
                         const angle =
@@ -1507,10 +1304,6 @@ Scope {
                     ctx.stroke()
                 }
 
-                // =================================================
-                // PAINT
-                // =================================================
-
                 onPaint: {
                     const ctx =
                         getContext("2d")
@@ -1534,10 +1327,6 @@ Scope {
                             - inset
                         )
 
-                    // ---------------------------------------------
-                    // SOFT CYAN GLOW
-                    // ---------------------------------------------
-
                     ctx.lineWidth =
                         5
 
@@ -1553,10 +1342,6 @@ Scope {
                         radius,
                         launcherRoot.borderProgress
                     )
-
-                    // ---------------------------------------------
-                    // MAIN CYAN BORDER
-                    // ---------------------------------------------
 
                     ctx.lineWidth =
                         2

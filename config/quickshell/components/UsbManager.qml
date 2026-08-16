@@ -100,7 +100,6 @@ Scope {
             if (root.cleanText(disk.type) !== "disk")
                 continue
 
-            // TRAN=usb is the reliable signal for USB mass-storage devices.
             if (root.cleanText(disk.tran).toLowerCase() !== "usb")
                 continue
 
@@ -157,7 +156,6 @@ Scope {
             }
 
             if (partitionCount === 0) {
-                // Some removable media expose the filesystem directly on the disk.
                 const fs = root.cleanText(disk.fstype)
                 if (fs !== "") {
                     const mountPoint = root.firstMountPoint(disk)

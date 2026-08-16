@@ -9,20 +9,9 @@ import Quickshell.Services.Notifications
 Item {
     id: root
 
-    // ============================================================
-    // DO NOT DISTURB / UNREAD STATE
-    // ============================================================
-
-    // Egyetlen közös DND state: ezt használja a Control Center és az IPC bind is.
     property bool doNotDisturb: false
 
-    // A piros pötty nem a teljes history-t, hanem az olvasatlan állapotot jelzi.
-    // A Notification Center megnyitása "elolvasásnak" számít.
     property int unreadNotificationCount: 0
-
-    // ============================================================
-    // NOTIFICATION SOUND
-    // ============================================================
 
     property bool notificationSoundReady: false
     property bool notificationSoundWarmupRunning: false
@@ -32,8 +21,6 @@ Item {
     readonly property url notificationSoundUrl:
         Qt.resolvedUrl("../assets/sounds/notification-pop.wav")
 
-    // One persistent low-latency player. It is NOT warmed up until PipeWire
-    // already exposes a default sink and QtMultimedia has loaded the WAV.
     SoundEffect {
         id: notificationPopSound
 
@@ -46,8 +33,6 @@ Item {
         }
     }
 
-    // Login-safe retry loop. During a fresh Hyprland session Quickshell can
-    // appear before PipeWire/default sink or QtMultimedia is fully ready.
     Timer {
         id: notificationSoundInitTimer
 
@@ -60,8 +45,6 @@ Item {
         }
     }
 
-    // Let the silent warm-up run through the whole short WAV once. Afterwards
-    // the exact same SoundEffect instance is armed at full volume.
     Timer {
         id: notificationSoundWarmupTimer
 
@@ -87,9 +70,6 @@ Item {
         }
     }
 
-    // Small delay used when SoundEffect entered Error during early login.
-    // Reassigning the source makes QtMultimedia create the audio path again
-    // after PipeWire/default sink is available.
     Timer {
         id: notificationSoundReloadTimer
 
@@ -106,8 +86,6 @@ Item {
         if (root.notificationSoundReady || root.notificationSoundWarmupRunning)
             return
 
-        // Do not initialize the multimedia path before PipeWire has a real
-        // default output. This is the login race we specifically avoid.
         if (!root.sink)
             return
 
@@ -126,7 +104,6 @@ Item {
 
         root.notificationSoundWarmupRunning = true
 
-        // volume is 0.0 until notificationSoundReady becomes true
         notificationPopSound.stop()
         notificationPopSound.play()
         notificationSoundWarmupTimer.restart()
@@ -137,8 +114,6 @@ Item {
             return
 
         if (!root.notificationSoundReady) {
-            // If the very first notification races the login initialization,
-            // remember it instead of silently dropping the sound.
             root.notificationSoundPending = true
             root.ensureNotificationSound()
             return
@@ -183,10 +158,6 @@ Item {
             )
     }
 
-    // ============================================================
-    // STATE
-    // ============================================================
-
     property bool isHovered: hoverHandler.hovered
 
     property bool showVolume: false
@@ -194,10 +165,6 @@ Item {
 
     property bool showNotificationPreview: false
     property bool notificationCenterOpen: false
-
-    // ============================================================
-    // AUDIO
-    // ============================================================
 
     property var sink: Pipewire.defaultAudioSink
     property var audio: sink ? sink.audio : null
@@ -214,19 +181,11 @@ Item {
         objects: [root.sink]
     }
 
-    // ============================================================
-    // MEDIA
-    // ============================================================
-
     property var activePlayer: null
 
     property bool mediaInitialized: false
     property bool wasPlaying: false
     property int lastTrackId: -1
-
-    // ============================================================
-    // NOTIFICATIONS
-    // ============================================================
 
     property var latestNotification: null
 
@@ -239,16 +198,11 @@ Item {
     property bool hasNotifications:
         notificationCount > 0
 
-    // ============================================================
-    // UI STATES
-    // ============================================================
-
     property bool hoverMediaVisible:
         root.isHovered
         && root.activePlayer !== null
         && !root.notificationCenterOpen
 
-    // Preview lejárta után hoverre továbbra is megmutatjuk.
     property bool hoverNotificationVisible:
         root.isHovered
         && root.hasNotifications
@@ -264,14 +218,9 @@ Item {
         || root.showNotificationPreview
         || root.notificationCenterOpen
 
-    // ============================================================
-    // LAYOUT CONSTANTS
-    // ============================================================
-
     property int topPadding: 8
     property int bottomPadding: 14
 
-    // Az eredeti TimeBlock 65px magas hover állapotban jól működött.
     property int timeSlotHeight:
         root.expandedContent ? 65 : 40
 
@@ -295,10 +244,6 @@ Item {
         ? 68
         : 0
 
-    // Notification Center sizing:
-    // each item is 68px high and ListView spacing is 6px.
-    // Keep the whole list inside the island; once the panel reaches its
-    // maximum height, the ListView itself remains scrollable.
     property int notificationItemHeight: 68
     property int notificationItemSpacing: 6
     property int notificationCenterMaxHeight: 460
@@ -311,9 +256,6 @@ Item {
         )
         : 0
 
-    // 20px accounts for the separator + list top/bottom margins.
-    // This guarantees that even the first notification card is fully visible,
-    // while longer histories remain scrollable at the existing max height.
     property int centerSlotDesiredHeight:
         root.notificationCount === 0
         ? 66
@@ -344,10 +286,6 @@ Item {
         + root.previewSlotHeight
         + root.centerSlotHeight
         + root.bottomPadding
-
-    // ============================================================
-    // SIZE
-    // ============================================================
 
     property int targetWidth:
         root.notificationCenterOpen ? 360 :
@@ -388,10 +326,6 @@ Item {
     width: currentWidth
     height: currentHeight
 
-    // ============================================================
-    // SPRING
-    // ============================================================
-
     Behavior on currentWidth {
         SpringAnimation {
             spring: 3.5
@@ -406,16 +340,9 @@ Item {
         }
     }
 
-    // ============================================================
-    // NOTIFICATION SERVER
-    // ============================================================
-
     NotificationServer {
         id: notificationServer
 
-        // Advertise a richer freedesktop notification feature set.
-        // Chromium/Vivaldi and other clients use GetCapabilities() when
-        // deciding whether to hand notifications to the system daemon.
         bodySupported: true
         bodyMarkupSupported: true
         bodyImagesSupported: true
@@ -426,8 +353,6 @@ Item {
 
         persistenceSupported: true
 
-        // Compatibility capabilities also advertised by SwayNC.
-        // Quickshell appends extraHints directly to GetCapabilities().
         extraHints: [
             "synchronous",
             "private-synchronous",
@@ -442,14 +367,8 @@ Item {
             root.latestNotification = notification
             root.unreadNotificationCount += 1
 
-            // DND alatt minden külső értesítés bekerül a history-ba,
-            // de nem popupol. A saját DND ON/OFF visszajelzés mindig látszik.
             const dndStatus = root.isDndStatusNotification(notification)
 
-            // One restrained Hypr-Lab pop for normal incoming notifications.
-            // The sound is already loaded by SoundEffect, so playback does not
-            // need to create a new process/PipeWire stream on every event.
-            // DND status feedback stays silent, and DND suppresses sound.
             if (!root.doNotDisturb && !dndStatus) {
                 root.playNotificationSound()
             }
@@ -474,10 +393,6 @@ Item {
         }
     }
 
-    // ============================================================
-    // NOTIFICATION CENTER OPEN / CLOSE
-    // ============================================================
-
     function openNotificationCenter() {
         if (root.notificationCenterOpen)
             return
@@ -487,13 +402,11 @@ Item {
         root.showVolume = false
         root.showMediaEvent = false
 
-        // A history megnyitása elolvasásnak számít.
         root.unreadNotificationCount = 0
 
         notificationPreviewTimer.stop()
         volumeHideTimer.stop()
         mediaHideTimer.stop()
-
     }
 
     function closeNotificationCenter() {
@@ -502,10 +415,6 @@ Item {
 
         root.notificationCenterOpen = false
     }
-
-    // ============================================================
-    // IPC
-    // ============================================================
 
     IpcHandler {
         target: "notifications"
@@ -530,10 +439,6 @@ Item {
         }
     }
 
-    // ============================================================
-    // NOTIFICATION PREVIEW TIMER
-    // ============================================================
-
     Timer {
         id: notificationPreviewTimer
 
@@ -544,10 +449,6 @@ Item {
             root.showNotificationPreview = false
         }
     }
-
-    // ============================================================
-    // AUDIO
-    // ============================================================
 
     onLastVolumeChanged: {
         if (!audioInitialized) {
@@ -590,10 +491,6 @@ Item {
         }
     }
 
-    // ============================================================
-    // MEDIA DISCOVERY
-    // ============================================================
-
     Timer {
         id: mediaWatcher
 
@@ -605,20 +502,12 @@ Item {
             let players = Mpris.players.values
             let foundPlayer = null
 
-            // ----------------------------------------------------
-            // PLAYING
-            // ----------------------------------------------------
-
             for (let i = 0; i < players.length; i++) {
                 if (players[i].isPlaying) {
                     foundPlayer = players[i]
                     break
                 }
             }
-
-            // ----------------------------------------------------
-            // KEEP CURRENT
-            // ----------------------------------------------------
 
             if (!foundPlayer && root.activePlayer) {
                 for (let i = 0; i < players.length; i++) {
@@ -632,10 +521,6 @@ Item {
                 }
             }
 
-            // ----------------------------------------------------
-            // CONTROLLABLE
-            // ----------------------------------------------------
-
             if (!foundPlayer) {
                 for (let i = 0; i < players.length; i++) {
                     if (players[i].canControl) {
@@ -644,10 +529,6 @@ Item {
                     }
                 }
             }
-
-            // ----------------------------------------------------
-            // PLAYER CHANGE
-            // ----------------------------------------------------
 
             if (
                 foundPlayer
@@ -680,10 +561,6 @@ Item {
             if (!foundPlayer)
                 return
 
-            // ----------------------------------------------------
-            // PLAY / PAUSE
-            // ----------------------------------------------------
-
             if (
                 foundPlayer.isPlaying
                 !== root.wasPlaying
@@ -694,10 +571,6 @@ Item {
                 if (root.mediaInitialized)
                     root.triggerMediaPop()
             }
-
-            // ----------------------------------------------------
-            // TRACK CHANGE
-            // ----------------------------------------------------
 
             if (
                 foundPlayer.uniqueId
@@ -726,10 +599,6 @@ Item {
                 root.triggerMediaPop()
         }
     }
-
-    // ============================================================
-    // MEDIA EVENT
-    // ============================================================
 
     function triggerMediaPop() {
         if (
@@ -766,10 +635,6 @@ Item {
         }
     }
 
-    // ============================================================
-    // DISMISS
-    // ============================================================
-
     function dismissNotification(notification) {
         if (!notification)
             return
@@ -782,16 +647,11 @@ Item {
             root.showNotificationPreview = false
         }
 
-        // X-re az adott értesítést olvasottnak tekintjük.
         if (root.unreadNotificationCount > 0)
             root.unreadNotificationCount -= 1
 
         notification.dismiss()
     }
-
-    // ============================================================
-    // CAPSULE
-    // ============================================================
 
     Capsule {
         id: capsule
@@ -801,8 +661,6 @@ Item {
         capsuleWidth: root.currentWidth
         capsuleHeight: root.currentHeight
 
-        // A nyitott Notification Center panel legyen, ne óriás kapszula.
-        // A többi CenterIsland állapot megtartja az eredeti pill formát.
         capsuleRadius:
             root.notificationCenterOpen
             ? 20
@@ -818,12 +676,6 @@ Item {
         sourceItem: capsule
         z: -1
     }
-
-    // ============================================================
-    // EXPANDED CONTENT VIEWPORT
-    //
-    // A teljes tartalom a pill aktuális méretére van clipelve.
-    // ============================================================
 
     Item {
         id: contentViewport
@@ -845,7 +697,6 @@ Item {
         Column {
             id: contentColumn
 
-            // 16-16px belső margó.
             width:
                 Math.max(
                     0,
@@ -862,10 +713,6 @@ Item {
                 root.topPadding
 
             spacing: 0
-
-            // ====================================================
-            // TIME SLOT
-            // ====================================================
 
             Item {
                 id: timeSlot
@@ -885,10 +732,6 @@ Item {
                     expanded: true
                 }
             }
-
-            // ====================================================
-            // MEDIA SLOT
-            // ====================================================
 
             Item {
                 id: mediaSlot
@@ -919,10 +762,6 @@ Item {
                     }
                 }
             }
-
-            // ====================================================
-            // NOTIFICATION PREVIEW
-            // ====================================================
 
             Item {
                 id: previewSlot
@@ -961,10 +800,6 @@ Item {
                     }
                 }
             }
-
-            // ====================================================
-            // NOTIFICATION CENTER
-            // ====================================================
 
             Item {
                 id: notificationCenterSlot
@@ -1081,18 +916,11 @@ Item {
         }
     }
 
-    // ============================================================
-    // IDLE CLOCK
-    //
-    // Nincs wrapper-width számolás -> nincs binding loop.
-    // ============================================================
-
     TimeBlock {
         id: idleTimeBlock
 
         anchors.centerIn: parent
 
-        // Az óra + Zz + olvasatlan pötty együtt marad optikailag középen.
         anchors.horizontalCenterOffset:
             root.doNotDisturb
             ? (root.hasUnreadNotifications ? -15 : -11)
@@ -1107,10 +935,6 @@ Item {
 
         z: 5
     }
-
-    // ============================================================
-    // DND IDLE INDICATOR
-    // ============================================================
 
     Text {
         id: dndIdleIndicator
@@ -1138,10 +962,6 @@ Item {
         z: 6
     }
 
-    // ============================================================
-    // UNREAD NOTIFICATION DOT
-    // ============================================================
-
     Rectangle {
         id: idleDot
 
@@ -1161,7 +981,6 @@ Item {
         anchors.horizontalCenter:
             parent.horizontalCenter
 
-        // DND-nél a Zz mögé/jobbra kerül, különben marad az eredeti helyén.
         anchors.horizontalCenterOffset:
             root.doNotDisturb ? 67 : 40
 
@@ -1171,10 +990,6 @@ Item {
         z: 6
     }
 
-    // ============================================================
-    // VOLUME EVENT
-    // ============================================================
-
     VolumeBlock {
         anchors.centerIn: parent
 
@@ -1183,12 +998,6 @@ Item {
 
         z: 7
     }
-
-    // ============================================================
-    // MEDIA EVENT
-    //
-    // Trackváltás / play-pause popup MEGMARAD.
-    // ============================================================
 
     MediaBlock {
         id: eventMediaBlock
@@ -1210,10 +1019,6 @@ Item {
             root.triggerMediaPop()
         }
     }
-
-    // ============================================================
-    // PASSIVE HOVER
-    // ============================================================
 
     HoverHandler {
         id: hoverHandler

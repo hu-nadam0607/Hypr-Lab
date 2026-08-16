@@ -1,5 +1,3 @@
-//@ pragma UseQApplication
-
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
@@ -17,19 +15,11 @@ PanelWindow {
 
     color: "transparent"
 
-    // A Notification Centernek kell
-    // a függőleges hely.
     implicitHeight: 500
 
-    // Csak a felső sáv foglal helyet.
     exclusiveZone: 73
 
-    // ============================================================
-    // CLICK-THROUGH MASK
-    // ============================================================
-
     mask: Region {
-
         Region {
             item: leftBar
         }
@@ -43,41 +33,21 @@ PanelWindow {
         }
     }
 
-    // ============================================================
-    // HYPR-LAB WALLPAPER ENGINE
-    // ============================================================
-
     WallpaperManager {
         id: globalWallpaperManager
     }
-
-    // ============================================================
-    // POWER MENU
-    // ============================================================
 
     PowerMenu {
         id: globalPowerMenu
     }
 
-    // ============================================================
-    // HYPR-LAB APP LAUNCHER
-    // ============================================================
-
     AppLauncher {
         id: globalAppLauncher
     }
 
-    // ============================================================
-    // HYPR-LAB WELCOME
-    // ============================================================
-
     Welcome {
         id: globalWelcome
     }
-
-    // ============================================================
-    // HYPR-LAB CONTROL CENTER
-    // ============================================================
 
     ControlCenter {
         id: globalControlCenter
@@ -87,16 +57,10 @@ PanelWindow {
             globalWallpaperManager.togglePicker()
         }
 
-
         onPowerRequested: {
-            // Ugyanaz a QML objektum nyílik, mint SUPER+SHIFT+P-re.
             globalPowerMenu.toggle()
         }
     }
-
-    // ============================================================
-    // LEFT BAR
-    // ============================================================
 
     LeftBar {
         id: leftBar
@@ -117,10 +81,6 @@ PanelWindow {
             globalAppLauncher.toggle()
     }
 
-    // ============================================================
-    // CENTER ISLAND
-    // ============================================================
-
     CenterIsland {
         id: centerIsland
 
@@ -133,13 +93,6 @@ PanelWindow {
         anchors.topMargin:
             8
     }
-
-    // ============================================================
-    // NOTIFICATION CENTER DISMISS OVERLAY
-    //
-    // Full-screen transparent input layer while the Notification Center
-    // is open. A Region cutout leaves the CenterIsland itself clickable.
-    // ============================================================
 
     PanelWindow {
         id: notificationDismissOverlay
@@ -162,9 +115,6 @@ PanelWindow {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
-        // Only the area OUTSIDE the CenterIsland accepts pointer input.
-        // The small margin keeps the cyan glow/border comfortably inside
-        // the pass-through hole.
         mask: Region {
             width: notificationDismissOverlay.width
             height: notificationDismissOverlay.height
@@ -209,17 +159,9 @@ PanelWindow {
         }
     }
 
-    // ============================================================
-    // USB MANAGER
-    // ============================================================
-
     UsbManager {
         id: globalUsbManager
     }
-
-    // ============================================================
-    // RIGHT BAR
-    // ============================================================
 
     RightBar {
         id: rightBar

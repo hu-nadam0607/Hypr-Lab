@@ -5,16 +5,8 @@ import Quickshell.Wayland
 PopupWindow {
     id: menuRoot
 
-    // ============================================================
-    // PUBLIC API
-    // ============================================================
-
     property var menu: null
     property var anchorItem: null
-
-    // ============================================================
-    // WINDOW
-    // ============================================================
 
     implicitWidth: 250
     implicitHeight: menuColumn.implicitHeight + 20
@@ -25,27 +17,15 @@ PopupWindow {
 
     grabFocus: true
 
-    // ============================================================
-    // POSITION
-    // ============================================================
-
     anchor.item: menuRoot.anchorItem
 
-    // A tray ikon alsó jobb sarkát használjuk anchorpontnak.
     anchor.edges: Edges.Bottom | Edges.Right
 
-    // A popup LEFELÉ terjeszkedik.
     anchor.gravity: Edges.Bottom | Edges.Right
 
-    // Kis távolság a RightBar és a menü között.
     anchor.margins.bottom: -8
 
-    // Ha a képernyő széléhez ér, igazodjon.
     anchor.adjustment: PopupAdjustment.Flip | PopupAdjustment.Slide
-
-    // ============================================================
-    // OPEN ANIMATION
-    // ============================================================
 
     onVisibleChanged: {
         if (visible) {
@@ -84,27 +64,15 @@ PopupWindow {
         }
     }
 
-    // ============================================================
-    // GLASS BACKGROUND BLUR
-    // ============================================================
-
     BackgroundEffect.blurRegion: Region {
         item: menuBackground
     }
-
-    // ============================================================
-    // MENU DATA
-    // ============================================================
 
     QsMenuOpener {
         id: menuOpener
 
         menu: menuRoot.menu
     }
-
-    // ============================================================
-    // SHADOW
-    // ============================================================
 
     Shadow {
         id: menuShadow
@@ -114,10 +82,6 @@ PopupWindow {
         z: -2
     }
 
-    // ============================================================
-    // CYAN GLOW
-    // ============================================================
-
     Glow {
         id: menuGlow
 
@@ -125,10 +89,6 @@ PopupWindow {
 
         z: -1
     }
-
-    // ============================================================
-    // GLASS BACKGROUND
-    // ============================================================
 
     Rectangle {
         id: menuBackground
@@ -158,10 +118,6 @@ PopupWindow {
             0.55
         )
 
-        // ========================================================
-        // CONTENT
-        // ========================================================
-
         Column {
             id: menuColumn
 
@@ -174,7 +130,6 @@ PopupWindow {
                 model: menuOpener.children
 
                 delegate: Item {
-
                     required property var modelData
 
                     width: menuColumn.width
@@ -182,10 +137,6 @@ PopupWindow {
                     height: modelData.isSeparator
                             ? 9
                             : 34
-
-                    // =================================================
-                    // SEPARATOR
-                    // =================================================
 
                     Rectangle {
                         visible: modelData.isSeparator
@@ -203,10 +154,6 @@ PopupWindow {
                             0.10
                         )
                     }
-
-                    // =================================================
-                    // MENU ITEM
-                    // =================================================
 
                     Rectangle {
                         id: itemBackground
@@ -247,10 +194,6 @@ PopupWindow {
                             }
                         }
 
-                        // =================================================
-                        // ICON
-                        // =================================================
-
                         Image {
                             id: menuIcon
 
@@ -268,10 +211,6 @@ PopupWindow {
 
                             visible: source !== ""
                         }
-
-                        // =================================================
-                        // TEXT
-                        // =================================================
 
                         Text {
                             id: menuText
@@ -312,10 +251,6 @@ PopupWindow {
                             elide: Text.ElideRight
                         }
 
-                        // =================================================
-                        // SUBMENU ARROW
-                        // =================================================
-
                         Text {
                             id: menuArrow
 
@@ -337,10 +272,6 @@ PopupWindow {
                             font.family: "Inter"
                             font.pixelSize: 18
                         }
-
-                        // =================================================
-                        // MOUSE
-                        // =================================================
 
                         MouseArea {
                             id: mouseArea
@@ -364,10 +295,6 @@ PopupWindow {
             }
         }
     }
-
-    // ============================================================
-    // API
-    // ============================================================
 
     function showMenu() {
         menuRoot.visible = true

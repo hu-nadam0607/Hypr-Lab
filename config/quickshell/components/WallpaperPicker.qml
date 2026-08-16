@@ -26,10 +26,6 @@ Scope {
 
     readonly property int cellHeight: 150
 
-    // ============================================================
-    // PUBLIC API
-    // ============================================================
-
     function open(): void {
         if (isOpen)
             return
@@ -160,10 +156,6 @@ Scope {
             wallpaperChosen(source)
     }
 
-    // ============================================================
-    // OPEN / CLOSE
-    // ============================================================
-
     Timer {
         id: openDelay
 
@@ -210,10 +202,6 @@ Scope {
         }
     }
 
-    // ============================================================
-    // WINDOW
-    // ============================================================
-
     PanelWindow {
         id: pickerWindow
 
@@ -229,19 +217,6 @@ Scope {
 
         color: "transparent"
 
-        // ========================================================
-        // CRITICAL:
-        //
-        // A modal overlay NEM tiszteli a felső
-        // Hypr-Lab panel exclusive zone-ját.
-        //
-        // Így ténylegesen 0,0-tól a monitor
-        // legalsó pixeléig terjed.
-        //
-        // NE tegyünk mellé exclusiveZone: 0-t,
-        // mert az visszavált Normal módba.
-        // ========================================================
-
         exclusionMode:
             ExclusionMode.Ignore
 
@@ -256,10 +231,6 @@ Scope {
 
         WlrLayershell.keyboardFocus:
             WlrKeyboardFocus.Exclusive
-
-        // ========================================================
-        // BACKDROP
-        // ========================================================
 
         Rectangle {
             anchors.fill: parent
@@ -280,10 +251,6 @@ Scope {
                     root.close()
             }
         }
-
-        // ========================================================
-        // PICKER CONTAINER
-        // ========================================================
 
         Item {
             id: pickerContainer
@@ -318,10 +285,6 @@ Scope {
             transformOrigin:
                 Item.Center
 
-            // ====================================================
-            // OUTER GLOW
-            // ====================================================
-
             Rectangle {
                 anchors.fill:
                     pickerCard
@@ -349,10 +312,6 @@ Scope {
                 opacity:
                     root.openProgress
             }
-
-            // ====================================================
-            // CARD
-            // ====================================================
 
             Rectangle {
                 id: pickerCard
@@ -389,10 +348,6 @@ Scope {
                             mouse.accepted = true
                         }
                 }
-
-                // ================================================
-                // HEADER
-                // ================================================
 
                 Item {
                     id: header
@@ -501,10 +456,6 @@ Scope {
                     }
                 }
 
-                // ================================================
-                // GRID
-                // ================================================
-
                 GridView {
                     id: wallpaperGrid
 
@@ -574,10 +525,6 @@ Scope {
                             anchors.margins:
                                 7
 
-                            // ====================================
-                            // SELECTION BORDER
-                            // ====================================
-
                             Rectangle {
                                 anchors.fill:
                                     parent
@@ -630,10 +577,6 @@ Scope {
                                     }
                                 }
                             }
-
-                            // ====================================
-                            // THUMBNAIL
-                            // ====================================
 
                             Item {
                                 id: thumbnailFrame
@@ -736,7 +679,6 @@ Scope {
 
                                     gradient:
                                         Gradient {
-
                                             GradientStop {
                                                 position:
                                                     0.0
@@ -885,10 +827,6 @@ Scope {
             }
         }
 
-        // ========================================================
-        // KEYBOARD
-        // ========================================================
-
         Item {
             id: keyboardCatcher
 
@@ -899,7 +837,6 @@ Scope {
 
             Keys.onPressed:
                 function(event) {
-
                     if (
                         event.key
                         === Qt.Key_Escape

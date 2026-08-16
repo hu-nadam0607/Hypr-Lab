@@ -53,10 +53,6 @@ PanelWindow {
 
     updatesEnabled: true
 
-    // ============================================================
-    // CURRENT WALLPAPER
-    // ============================================================
-
     Image {
     id: backImage
 
@@ -82,10 +78,6 @@ PanelWindow {
             }
         }
     }
-
-    // ============================================================
-    // NEXT WALLPAPER
-    // ============================================================
 
     Image {
         id: frontImage
@@ -122,10 +114,6 @@ PanelWindow {
         }
     }
 
-    // ============================================================
-    // PREPARE NORMAL EFFECT
-    // ============================================================
-
     function prepareNormalTransition(): void {
         normalTransition.stop()
         horizontalSlideTransition.stop()
@@ -141,22 +129,18 @@ PanelWindow {
         slideDirectionY = 0
 
         switch (requestedEffect) {
-
         case 0:
-            // FADE
 
             frontImage.opacity = 0
             break
 
         case 1:
-            // ZOOM
 
             frontImage.opacity = 0
             frontImage.scale = 1.14
             break
 
         case 2:
-            // FROM RIGHT
 
             frontImage.opacity = 1
             frontImage.x = root.width
@@ -165,7 +149,6 @@ PanelWindow {
             break
 
         case 3:
-            // FROM LEFT
 
             frontImage.opacity = 1
             frontImage.x = -root.width
@@ -174,7 +157,6 @@ PanelWindow {
             break
 
         case 4:
-            // FROM BOTTOM
 
             frontImage.opacity = 1
             frontImage.y = root.height
@@ -183,7 +165,6 @@ PanelWindow {
             break
 
         case 5:
-            // FROM TOP
 
             frontImage.opacity = 1
             frontImage.y = -root.height
@@ -192,10 +173,6 @@ PanelWindow {
             break
         }
     }
-
-    // ============================================================
-    // START TRANSITION
-    // ============================================================
 
     function startTransition(): void {
         transitionPending = false
@@ -244,10 +221,6 @@ PanelWindow {
         normalTransition.restart()
     }
 
-    // ============================================================
-    // STOP EFFECTS
-    // ============================================================
-
     function stopAllEffects(): void {
         normalTransition.stop()
         horizontalSlideTransition.stop()
@@ -263,10 +236,6 @@ PanelWindow {
         spiralLayer.visible = false
         waveLayer.visible = false
     }
-
-    // ============================================================
-    // FINISH TRANSITION
-    // ============================================================
 
     function finishTransition(): void {
         backImage.source =
@@ -288,10 +257,6 @@ PanelWindow {
         updatesEnabled = false
     }
 
-    // ============================================================
-    // APPLY WALLPAPER
-    // ============================================================
-
     function applyRequestedWallpaper(): void {
         if (
             !requestedSource
@@ -299,16 +264,6 @@ PanelWindow {
         ) {
             return
         }
-
-        // --------------------------------------------------------
-        // FIRST LOAD
-        // --------------------------------------------------------
-        //
-        // Friss Quickshell/session induláskor nincs szükség
-        // transitionre.
-        //
-        // Azonnal a backImage-re tesszük a képet.
-        // --------------------------------------------------------
 
         if (
             !backImage.source
@@ -319,9 +274,6 @@ PanelWindow {
             transitionPending = false
             initialWallpaperPending = true
 
-            // FONTOS:
-            // az ablaknak frissítenie kell addig,
-            // amíg az aszinkron Image ténylegesen betölt.
             updatesEnabled = true
 
             backImage.source =
@@ -345,20 +297,12 @@ PanelWindow {
             return
         }
 
-        // --------------------------------------------------------
-        // SAME WALLPAPER
-        // --------------------------------------------------------
-
         if (
             backImage.source.toString()
             === requestedSource.toString()
         ) {
             return
         }
-
-        // --------------------------------------------------------
-        // NORMAL WALLPAPER CHANGE
-        // --------------------------------------------------------
 
         stopAllEffects()
 
@@ -379,28 +323,9 @@ PanelWindow {
         }
     }
 
-    // ============================================================
-    // WALLPAPER CHANGE
-    // ============================================================
-
     onRequestedSourceChanged: {
         applyRequestedWallpaper()
     }
-
-    // ============================================================
-    // INITIAL SURFACE LOAD
-    // ============================================================
-    //
-    // Ez hiányzott eddig.
-    //
-    // Ha a WallpaperManager már azelőtt megadta
-    // a requestedSource értékét, hogy ez a surface
-    // teljesen elkészült volna, nem várunk egy újabb
-    // sourceChanged eseményre.
-    //
-    // A surface létrejöttekor explicit alkalmazzuk
-    // a már meglévő requestedSource-ot.
-    // ============================================================
 
     Component.onCompleted: {
         applyRequestedWallpaper()
@@ -421,10 +346,6 @@ PanelWindow {
             }
         }
     }
-
-    // ============================================================
-    // FADE / ZOOM
-    // ============================================================
 
     ParallelAnimation {
         id: normalTransition
@@ -457,15 +378,9 @@ PanelWindow {
             root.finishTransition()
     }
 
-    // ============================================================
-    // HORIZONTAL SLIDE
-    // DECAYING PING-PONG BOUNCE
-    // ============================================================
-
     SequentialAnimation {
         id: horizontalSlideTransition
 
-        // Nagy becsúszás majdnem a véghelyzetig.
         NumberAnimation {
             target: frontImage
 
@@ -480,7 +395,6 @@ PanelWindow {
                 Easing.OutCubic
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -495,7 +409,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -510,7 +423,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -525,7 +437,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -540,7 +451,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -555,7 +465,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -570,7 +479,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // p
         NumberAnimation {
             target: frontImage
 
@@ -588,15 +496,9 @@ PanelWindow {
             root.finishTransition()
     }
 
-    // ============================================================
-    // VERTICAL SLIDE
-    // DECAYING PING-PONG BOUNCE
-    // ============================================================
-
     SequentialAnimation {
         id: verticalSlideTransition
 
-        // Nagy becsúszás majdnem a véghelyzetig.
         NumberAnimation {
             target: frontImage
 
@@ -611,7 +513,6 @@ PanelWindow {
                 Easing.OutCubic
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -626,7 +527,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -641,7 +541,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -656,7 +555,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -671,7 +569,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -686,7 +583,6 @@ PanelWindow {
                 Easing.InOutQuad
         }
 
-        // pam
         NumberAnimation {
             target: frontImage
 
@@ -717,10 +613,6 @@ PanelWindow {
         onFinished:
             root.finishTransition()
     }
-
-    // ============================================================
-    // BRUSH EFFECT
-    // ============================================================
 
     function startBrushTransition(): void {
         brushMode =
@@ -892,10 +784,6 @@ PanelWindow {
         onTriggered:
             root.finishTransition()
     }
-
-    // ============================================================
-    // FALLING TILES
-    // ============================================================
 
     function startFallingTiles(): void {
         fallingTileLayer.visible = true
@@ -1094,10 +982,6 @@ PanelWindow {
         onTriggered:
             root.finishTransition()
     }
-
-    // ============================================================
-    // SOFT SPIRAL
-    // ============================================================
 
     function startSpiralTransition(): void {
         spiralLayer.visible = true
@@ -1328,10 +1212,6 @@ PanelWindow {
         onTriggered:
             root.finishTransition()
     }
-
-    // ============================================================
-    // SILK WAVE
-    // ============================================================
 
     function startWaveTransition(): void {
         waveLayer.visible = true
