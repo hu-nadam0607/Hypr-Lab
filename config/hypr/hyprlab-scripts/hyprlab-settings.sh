@@ -89,8 +89,6 @@ apply_one() {
 }
 
 monitor_snapshot() {
-    # Raw Hyprland JSON. "all" includes all detected outputs, independent
-    # of DP / HDMI / eDP / USB-C connector type.
     hyprctl monitors all -j
 }
 
