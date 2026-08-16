@@ -476,7 +476,9 @@ Scope {
                     clip: true
 
                     model:
-                        root.wallpaperModel
+                        root.windowVisible
+                        ? root.wallpaperModel
+                        : null
 
                     cellWidth:
                         root.cellWidth
@@ -591,7 +593,15 @@ Scope {
                                         parent
 
                                     source:
-                                        delegateRoot.fileUrl
+                                        root.windowVisible
+                                        ? delegateRoot.fileUrl
+                                        : ""
+
+                                    sourceSize.width:
+                                        Math.ceil(width * 2)
+
+                                    sourceSize.height:
+                                        Math.ceil(height * 2)
 
                                     fillMode:
                                         Image.PreserveAspectCrop
@@ -600,13 +610,13 @@ Scope {
                                         true
 
                                     cache:
-                                        true
+                                        false
 
                                     smooth:
                                         true
 
                                     mipmap:
-                                        true
+                                        false
 
                                     visible:
                                         false

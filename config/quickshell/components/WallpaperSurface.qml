@@ -729,9 +729,7 @@ PanelWindow {
                         y:
                             -stripRoot.y
 
-                        source:
-                            root.requestedSource
-
+                        source: brushLayer.visible ? root.requestedSource : ""
                         fillMode:
                             Image.PreserveAspectCrop
 
@@ -899,9 +897,7 @@ PanelWindow {
                         -fallingTile.row
                         * fallingTile.tileHeight
 
-                    source:
-                        root.requestedSource
-
+                    source: fallingTileLayer.visible ? root.requestedSource : ""
                     fillMode:
                         Image.PreserveAspectCrop
 
@@ -1125,9 +1121,7 @@ PanelWindow {
                         -spiralTile.row
                         * spiralTile.tileHeight
 
-                    source:
-                        root.requestedSource
-
+                    source: spiralLayer.visible ? root.requestedSource : ""
                     fillMode:
                         Image.PreserveAspectCrop
 
@@ -1303,9 +1297,7 @@ PanelWindow {
                     y:
                         -waveStrip.waveOffset
 
-                    source:
-                        root.requestedSource
-
+                    source: waveLayer.visible ? root.requestedSource : ""
                     fillMode:
                         Image.PreserveAspectCrop
 
