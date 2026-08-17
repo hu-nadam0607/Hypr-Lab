@@ -285,6 +285,10 @@ Scope {
     }
 
     Process {
+        id: borderColorProcess
+    }
+
+    Process {
         id: wallpaperStateReader
 
         command: [
@@ -323,6 +327,15 @@ Scope {
             && currentWallpaper.toString() !== ""
         ) {
             persistCurrentWallpaper()
+
+            borderColorProcess.running = false
+            borderColorProcess.command = [
+                "bash",
+                Quickshell.env("HOME")
+                    + "/.config/hypr/hyprlab-scripts/wallpaper-border-color.sh",
+                localPath(currentWallpaper)
+            ]
+            borderColorProcess.running = true
         }
     }
 

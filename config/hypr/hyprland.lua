@@ -5,43 +5,12 @@ hl.monitor({
     scale    = 1,
 })
 
-local borderGlowOn = false
-
-local function set_border_glow(enabled)
-    if enabled then
-        hl.config({
-            general = {
-                col = {
-                    active_border = {
-                        colors = {
-                            "rgba(00ffffff)",
-                            "rgba(044440ff)"
-                        },
-                        angle = 45,
-                    },
-                },
-            },
-        })
-    else
-        hl.config({
-            general = {
-                col = {
-                    active_border = "rgba(0ee3d8ff)",
-                },
-            },
-        })
-    end
-end
-
 hl.on("hyprland.start", function()
     hl.exec_cmd("~/.config/hypr/hyprlab-scripts/hyprlab-xdg.sh")
 
     hl.exec_cmd("quickshell")
 
     hl.exec_cmd("bash ~/.config/hypr/hyprlab-scripts/hyprlab-settings.sh apply")
-
-    borderGlowOn = true
-    set_border_glow(borderGlowOn)
 
     hl.exec_cmd("hypridle")
     hl.exec_cmd("hyprpolkitagent")
@@ -302,23 +271,6 @@ hl.bind(mainMod .. " + K", hl.dsp.layout("swapsplit"), {
     }
 )
 
-hl.bind(
-    "SUPER + ALT + A",
-    function()
-
-        borderGlowOn =
-            not borderGlowOn
-
-        set_border_glow(
-            borderGlowOn
-        )
-
-    end,
-    {
-        description = "Turn on/off the border glow animation."
-    }
-)
-
 hl.layer_rule({
     name = "hypr-lab-topbar-blur",
 
@@ -416,9 +368,8 @@ hl.config({
         border_size = 2,
 
         col = {
-            active_border = "rgba(0ee3d8ff)",
-
-            inactive_border = "rgba(044440ff)",
+            active_border = "rgba(68787Ddd)",
+            inactive_border = "rgba(68787D44)",
         },
     },
 
@@ -432,9 +383,9 @@ hl.config({
         shadow = {
             enabled = true,
             range = 20,
-            render_power = 10,
+            render_power = 2,
 
-            color = "rgba(044440ff)",
+            color = "rgba(000000ee)",
         },
 
         blur = {
@@ -491,17 +442,6 @@ hl.curve(
     }
 )
 
-hl.curve(
-    "glowSpring",
-    {
-        type = "spring",
-
-        mass = 5,
-        stiffness = 100,
-        dampening = 100
-    }
-)
-
 hl.animation({
     leaf = "windows",
     enabled = true,
@@ -529,14 +469,6 @@ hl.animation({
     speed = 5,
     bezier = "extremeOvershoot",
     style = "slidefade 20%"
-})
-
-hl.animation({
-    leaf = "borderangle",
-    enabled = true,
-    speed = 8,
-    spring = "glowSpring",
-    style = "loop"
 })
 
 hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("qs ipc call controlcenter main"), {
