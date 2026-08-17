@@ -8,6 +8,42 @@
 
 ---
 
+## 🚧 Hypr-Lab 1.5 — Active Development / Aktív fejlesztés
+
+> **Hypr-Lab 1.0 is the current stable release.**
+>
+> Development of **Hypr-Lab 1.5** is actively underway on the `develop-v1.5` branch.
+>
+> **Current development milestone: v1.5 Beta 2**
+
+### v1.5 Beta 2 Preview
+
+![Hypr-Lab v1.5 Beta 2](docs/screenshots/HL_Beta2.png)
+
+### What's coming in 1.5
+
+* native Frosted Glass 3D design;
+* adaptive window borders that automatically derive their accent color from the current wallpaper;
+* reduced wallpaper memory usage;
+* cleaner and more maintainable Quickshell sources;
+* cleaned-up Hyprland Lua configuration and helper scripts;
+* continued visual and performance refinements.
+
+### Mi érkezik az 1.5-ben
+
+* natív Frosted Glass 3D megjelenés;
+* a jelenlegi háttérkép színvilágához automatikusan alkalmazkodó ablakkeretek;
+* csökkentett memóriahasználat a háttérképkezelésben;
+* tisztább és könnyebben karbantartható Quickshell forrás;
+* megtisztított Hyprland Lua konfiguráció és helper scriptek;
+* további vizuális és teljesítménybeli finomítások.
+
+> The `develop-v1.5` branch is a development branch and may contain unfinished or experimental changes.
+>
+> A `develop-v1.5` fejlesztői ág, ezért befejezetlen vagy kísérleti módosításokat is tartalmazhat.
+
+---
+
 ## Features / Funkciók
 
 ### English
