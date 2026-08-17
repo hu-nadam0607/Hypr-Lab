@@ -22,13 +22,13 @@ Item {
     property int gapsOut: 10
 
     function setValue(key, value) {
-        Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-settings.sh", "set", key, String(value)])
+        Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-settings.sh", "set", key, String(value)])
     }
     function clamp(v,a,b){ return Math.max(a,Math.min(b,v)) }
 
     Process {
         id: loadProc
-        command: [Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-settings.sh", "dump"]
+        command: ["bash", Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-settings.sh", "dump"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const lines = text.trim().split("\n")

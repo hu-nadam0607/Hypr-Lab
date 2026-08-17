@@ -17,18 +17,7 @@ Item {
         capsuleWidth: leftBarRoot.barWidth
         capsuleHeight: leftBarRoot.barHeight
     }
-
-    Shadow {
-        sourceItem: capsule
-        z: -2
-    }
-
-    Glow {
-        sourceItem: capsule
-        z: -1
-    }
-
-    Row {
+Row {
         id: contentRow
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left

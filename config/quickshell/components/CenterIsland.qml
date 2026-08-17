@@ -666,18 +666,7 @@ Item {
             ? 20
             : capsuleHeight / 2
     }
-
-    Shadow {
-        sourceItem: capsule
-        z: -2
-    }
-
-    Glow {
-        sourceItem: capsule
-        z: -1
-    }
-
-    Item {
+Item {
         id: contentViewport
 
         anchors.centerIn: parent

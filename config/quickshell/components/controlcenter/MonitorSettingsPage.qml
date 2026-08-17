@@ -102,6 +102,7 @@ Item {
             + String(Number(current.y || 0))
 
         Quickshell.execDetached([
+            "bash",
             script(),
             "monitor-mode",
             String(current.name),
@@ -118,6 +119,7 @@ Item {
             return
 
         Quickshell.execDetached([
+            "bash",
             script(),
             "monitor-scale",
             String(current.name),
@@ -129,7 +131,7 @@ Item {
 
     Process {
         id: monitorProc
-        command: [root.script(), "monitors"]
+        command: ["bash", root.script(), "monitors"]
 
         stdout: StdioCollector {
             onStreamFinished: {

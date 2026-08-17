@@ -38,7 +38,7 @@ hl.on("hyprland.start", function()
 
     hl.exec_cmd("quickshell")
 
-    hl.exec_cmd("~/.config/hypr/hyprlab-scripts/hyprlab-settings.sh apply")
+    hl.exec_cmd("bash ~/.config/hypr/hyprlab-scripts/hyprlab-settings.sh apply")
 
     borderGlowOn = true
     set_border_glow(borderGlowOn)
@@ -318,6 +318,18 @@ hl.bind(
         description = "Turn on/off the border glow animation."
     }
 )
+
+hl.layer_rule({
+    name = "hypr-lab-topbar-blur",
+
+    match = {
+        namespace = "hypr-lab-shell"
+    },
+
+    blur = true,
+    ignore_alpha = 0.055,
+    xray = false,
+})
 
 hl.layer_rule({
     name = "hypr-lab-wallpaper-picker-blur",

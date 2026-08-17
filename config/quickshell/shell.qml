@@ -15,6 +15,8 @@ PanelWindow {
 
     color: "transparent"
 
+    WlrLayershell.namespace: "hypr-lab-shell"
+
     implicitHeight: 500
 
     exclusiveZone: 73

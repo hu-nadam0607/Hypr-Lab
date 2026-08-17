@@ -8,10 +8,10 @@ Rectangle {
 
     property int capsuleRadius: capsuleHeight / 2
 
-    property color capsuleColor: Qt.rgba(15 / 255, 20 / 255, 28 / 255, 0.45)
+    property color capsuleColor: Qt.rgba(7 / 255, 12 / 255, 18 / 255, 0.20)
 
-    property color borderColor: Qt.rgba(55 / 255, 245 / 255, 235 / 255, 0.50)
-    property int borderWidth: 2
+    property color borderColor: Qt.rgba(1, 1, 1, 0.12)
+    property int borderWidth: 1
 
     width: capsuleWidth
     height: capsuleHeight
@@ -21,6 +21,20 @@ Rectangle {
 
     border.width: borderWidth
     border.color: borderColor
+
+    Rectangle {
+        anchors.fill: parent
+        radius: capsule.radius
+        color: "transparent"
+
+        gradient: Gradient {
+            GradientStop { position: 0.00; color: Qt.rgba(1, 1, 1, 0.20) }
+            GradientStop { position: 0.12; color: Qt.rgba(1, 1, 1, 0.070) }
+            GradientStop { position: 0.42; color: "transparent" }
+            GradientStop { position: 0.78; color: "transparent" }
+            GradientStop { position: 1.00; color: Qt.rgba(0, 0, 0, 0.20) }
+        }
+    }
 
     Behavior on radius {
         SpringAnimation {

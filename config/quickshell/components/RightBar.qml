@@ -30,18 +30,7 @@ Item {
         capsuleWidth: rightBarRoot.barWidth
         capsuleHeight: rightBarRoot.barHeight
     }
-
-    Shadow {
-        sourceItem: capsule
-        z: -2
-    }
-
-    Glow {
-        sourceItem: capsule
-        z: -1
-    }
-
-    Process {
+Process {
         id: lockStateProcess
         command: [
             "sh", "-c",
