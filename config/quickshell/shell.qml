@@ -19,7 +19,7 @@ PanelWindow {
 
     implicitHeight: 500
 
-    exclusiveZone: 73
+    exclusiveZone: 40
 
     mask: Region {
         Region {
@@ -33,6 +33,10 @@ PanelWindow {
         Region {
             item: rightBar
         }
+    }
+
+    AdaptiveAccent {
+        id: adaptiveAccent
     }
 
     WallpaperManager {
@@ -51,18 +55,6 @@ PanelWindow {
         id: globalWelcome
     }
 
-    ControlCenter {
-        id: globalControlCenter
-        notificationHost: centerIsland
-
-        onWallpaperRequested: {
-            globalWallpaperManager.togglePicker()
-        }
-
-        onPowerRequested: {
-            globalPowerMenu.toggle()
-        }
-    }
 
     LeftBar {
         id: leftBar
@@ -71,13 +63,15 @@ PanelWindow {
             parent.left
 
         anchors.leftMargin:
-            16
+            8
 
         anchors.top:
             parent.top
 
         anchors.topMargin:
-            8
+            0
+
+        accentColor: adaptiveAccent.accentColor
 
         onOpenAppLauncher:
             globalAppLauncher.toggle()
@@ -89,11 +83,16 @@ PanelWindow {
         anchors.horizontalCenter:
             parent.horizontalCenter
 
+        anchors.horizontalCenterOffset:
+            centerIsland.visualCenterCompensation
+
         anchors.top:
             parent.top
 
         anchors.topMargin:
-            8
+            0
+
+        accentColor: adaptiveAccent.accentColor
     }
 
     PanelWindow {
@@ -172,13 +171,16 @@ PanelWindow {
             parent.right
 
         anchors.rightMargin:
-            16
+            8
 
         anchors.top:
             parent.top
 
         anchors.topMargin:
-            8
+            0
+
+        accentColor: adaptiveAccent.accentColor
+        notificationHost: centerIsland
 
         usbAvailable: globalUsbManager.hasDevices
 
@@ -186,12 +188,8 @@ PanelWindow {
             globalUsbManager.toggle(anchorItem)
         }
 
-        onOpenControlCenter: {
-            if (globalControlCenter.isOpen)
-                globalControlCenter.close()
-            else
-                globalControlCenter.open()
-        }
+        onWallpaperRequested:
+            globalWallpaperManager.togglePicker()
 
         onOpenPowerMenu:
             globalPowerMenu.toggle()

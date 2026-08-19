@@ -1,12 +1,12 @@
 import QtQuick
-
 import Quickshell.Hyprland
 import Quickshell.Io
 
-Rectangle {
+Item {
     id: wsBtn
 
     property int workspaceId: 1
+    property color accentColor: "#68787D"
 
     property bool isActive:
         Hyprland.focusedWorkspace
@@ -25,122 +25,48 @@ Rectangle {
         return false
     }
 
-    width:
-        isActive
-        ? 28
-        : 18
+    width: 22
+    height: 24
 
-    height: 18
-
-    radius:
-        height / 2
-
-    color:
-        isActive
-        ? Qt.rgba(
-              55 / 255,
-              245 / 255,
-              235 / 255,
-              0.9
-          )
-        : (
-              mouseArea.containsMouse
-              ? Qt.rgba(
-                    55 / 255,
-                    245 / 255,
-                    235 / 255,
-                    0.18
-                )
-              : (
-                    isOccupied
-                    ? Qt.rgba(
-                          1,
-                          1,
-                          1,
-                          0.35
-                      )
-                    : Qt.rgba(
-                          1,
-                          1,
-                          1,
-                          0.12
-                      )
-                )
-          )
-
-    Behavior on width {
-        SpringAnimation {
-            spring: 4
-            damping: 0.3
-        }
-    }
-
-    Behavior on color {
-        ColorAnimation {
-            duration: 150
-        }
-    }
-
-    Process {
-        id: workspaceSwitchProcess
-    }
+    Process { id: workspaceSwitchProcess }
 
     function switchWorkspace() {
         workspaceSwitchProcess.command = [
-            "hyprctl",
-            "dispatch",
-            'hl.dsp.focus({ workspace = "' +
-                wsBtn.workspaceId +
-                '" })'
+            "hyprctl", "dispatch",
+            'hl.dsp.focus({ workspace = "' + wsBtn.workspaceId + '" })'
         ]
-
         workspaceSwitchProcess.running = true
     }
 
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: 2
+        radius: 1
+        color: Qt.rgba(1, 1, 1, 0.06)
+        opacity: mouseArea.containsMouse && !wsBtn.isActive ? 1.0 : 0.0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 100 }
+        }
+    }
+
     Text {
-        anchors.centerIn:
-            parent
-
-        text:
-            wsBtn.workspaceId.toString()
-
-        color:
-            wsBtn.isActive
-            ? "black"
-            : "white"
-
-        font.family:
-            "Inter"
-
-        font.pixelSize:
-            10
-
-        font.bold:
-            wsBtn.isActive
-
-        opacity:
-            wsBtn.isActive || wsBtn.isOccupied
-            ? 1.0
-            : 0.5
+        anchors.centerIn: parent
+        text: wsBtn.workspaceId.toString()
+        color: wsBtn.isActive ? Qt.rgba(0.02, 0.03, 0.04, 0.96) : "white"
+        font.family: "Inter"
+        font.pixelSize: 10
+        font.bold: wsBtn.isActive
+        font.italic: true
+        opacity: wsBtn.isActive || wsBtn.isOccupied ? 0.95 : 0.42
     }
 
     MouseArea {
         id: mouseArea
-
-        anchors.fill:
-            parent
-
-        hoverEnabled:
-            true
-
-        cursorShape:
-            Qt.PointingHandCursor
-
-        acceptedButtons:
-            Qt.LeftButton
-
-        onClicked: {
-            wsBtn.switchWorkspace()
-        }
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        acceptedButtons: Qt.LeftButton
+        onClicked: wsBtn.switchWorkspace()
     }
 }

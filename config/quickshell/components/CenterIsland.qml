@@ -3,127 +3,91 @@ import QtMultimedia
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
-import Quickshell.Services.Mpris
 import Quickshell.Services.Notifications
+import Quickshell.Services.Mpris
+import "controlcenter" as CC
 
 Item {
     id: root
 
+    property color accentColor: "#68787D"
     property bool doNotDisturb: false
-
+    property bool notificationCenterOpen: false
+    property real visualCenterCompensation: 0
     property int unreadNotificationCount: 0
 
-    property bool notificationSoundReady: false
-    property bool notificationSoundWarmupRunning: false
-    property bool notificationSoundPending: false
-    property bool notificationSoundReloadPending: false
+    // Feature switches kept deliberately. Volume is re-enabled now; CAVA and
+    // notification-summary stay in the source as the next restore points.
+    property bool enableVolumeTransient: true
+    property bool enableCavaFace: true
+    property bool enableNotificationSummary: false
 
-    readonly property url notificationSoundUrl:
-        Qt.resolvedUrl("../assets/sounds/notification-pop.wav")
+    readonly property var notificationModel: notificationServer.trackedNotifications
+    readonly property int notificationCount: notificationServer.trackedNotifications.values.length
+    readonly property bool hasNotifications: notificationCount > 0
+
+    property var sink: Pipewire.defaultAudioSink
+    readonly property var sinkAudio: sink ? sink.audio : null
+    readonly property real volumeLevel: sinkAudio ? sinkAudio.volume : 0.0
+    readonly property bool muted: sinkAudio ? sinkAudio.muted : true
+    property bool audioInitialized: false
+
+    // Minimal CenterIsland CAVA: only alive while an MPRIS player is actually playing.
+    property var mediaPlayer: null
+    property var mediaPlayers: Mpris.players.values
+    readonly property bool musicPlaying: mediaPlayer !== null && mediaPlayer.isPlaying
+
+    function selectPlayingPlayer() {
+        const list = Mpris.players.values
+        let selected = null
+        for (let i = 0; i < list.length; ++i) {
+            if (list[i] && list[i].isPlaying) {
+                selected = list[i]
+                break
+            }
+        }
+        mediaPlayer = selected
+    }
+
+    onMediaPlayersChanged: selectPlayingPlayer()
+
+    Timer {
+        interval: 500
+        repeat: true
+        running: true
+        onTriggered: root.selectPlayingPlayer()
+    }
+
+    // Reserved transient kinds: "volume" is active now; "notification" stays
+    // wired in code but intentionally dormant until we restore that layer.
+    property string transientKind: ""
+    property bool transientShown: false
+
+    width: 240
+    height: 36
+    implicitWidth: width
+    implicitHeight: height
+    clip: true
+
+    PwObjectTracker {
+        objects: [root.sink]
+    }
+
+    readonly property url notificationSoundUrl: Qt.resolvedUrl("../assets/sounds/notification-pop.wav")
 
     SoundEffect {
         id: notificationPopSound
-
         source: root.notificationSoundUrl
-        volume: root.notificationSoundReady ? 1.0 : 0.0
+        volume: 1.0
         loops: 1
-
-        onStatusChanged: {
-            root.ensureNotificationSound()
-        }
     }
 
-    Timer {
-        id: notificationSoundInitTimer
-
-        interval: 500
-        repeat: true
-        running: !root.notificationSoundReady
-
-        onTriggered: {
-            root.ensureNotificationSound()
-        }
+    function isDndStatusNotification(notification) {
+        return notification
+            && notification.appName === "Hypr-Lab"
+            && (notification.summary === "Ne zavarjanak bekapcsolva."
+                || notification.summary === "Ne zavarjanak kikapcsolva.")
     }
-
-    Timer {
-        id: notificationSoundWarmupTimer
-
-        interval: 850
-        repeat: false
-
-        onTriggered: {
-            notificationPopSound.stop()
-
-            root.notificationSoundWarmupRunning = false
-            root.notificationSoundReady = true
-
-            if (root.notificationSoundPending && !root.doNotDisturb) {
-                root.notificationSoundPending = false
-
-                Qt.callLater(() => {
-                    notificationPopSound.stop()
-                    notificationPopSound.play()
-                })
-            } else {
-                root.notificationSoundPending = false
-            }
-        }
-    }
-
-    Timer {
-        id: notificationSoundReloadTimer
-
-        interval: 350
-        repeat: false
-
-        onTriggered: {
-            root.notificationSoundReloadPending = false
-            notificationPopSound.source = root.notificationSoundUrl
-        }
-    }
-
-    function ensureNotificationSound() {
-        if (root.notificationSoundReady || root.notificationSoundWarmupRunning)
-            return
-
-        if (!root.sink)
-            return
-
-        if (notificationPopSound.status === SoundEffect.Error) {
-            if (!root.notificationSoundReloadPending) {
-                root.notificationSoundReloadPending = true
-                notificationPopSound.source = ""
-                notificationSoundReloadTimer.restart()
-            }
-
-            return
-        }
-
-        if (notificationPopSound.status !== SoundEffect.Ready)
-            return
-
-        root.notificationSoundWarmupRunning = true
-
-        notificationPopSound.stop()
-        notificationPopSound.play()
-        notificationSoundWarmupTimer.restart()
-    }
-
-    function playNotificationSound() {
-        if (root.doNotDisturb)
-            return
-
-        if (!root.notificationSoundReady) {
-            root.notificationSoundPending = true
-            root.ensureNotificationSound()
-            return
-        }
-
-        notificationPopSound.stop()
-        notificationPopSound.play()
-    }
-
-    readonly property bool hasUnreadNotifications: unreadNotificationCount > 0
 
     function announceDndState() {
         Quickshell.execDetached([
@@ -147,197 +111,36 @@ Item {
         setDnd(!doNotDisturb)
     }
 
-    function isDndStatusNotification(notification) {
-        if (!notification)
-            return false
+    function openNotificationCenter() {}
+    function closeNotificationCenter() { notificationCenterOpen = false }
 
-        return notification.appName === "Hypr-Lab"
-            && (
-                notification.summary === "Ne zavarjanak bekapcsolva."
-                || notification.summary === "Ne zavarjanak kikapcsolva."
-            )
-    }
+    function clearAllNotifications() {
+        const values = [...notificationServer.trackedNotifications.values]
 
-    property bool isHovered: hoverHandler.hovered
-
-    property bool showVolume: false
-    property bool showMediaEvent: false
-
-    property bool showNotificationPreview: false
-    property bool notificationCenterOpen: false
-
-    property var sink: Pipewire.defaultAudioSink
-    property var audio: sink ? sink.audio : null
-
-    property real lastVolume:
-        audio ? audio.volume : 0.0
-
-    property bool isMuted:
-        audio ? audio.muted : false
-
-    property bool audioInitialized: false
-
-    PwObjectTracker {
-        objects: [root.sink]
-    }
-
-    property var activePlayer: null
-
-    property bool mediaInitialized: false
-    property bool wasPlaying: false
-    property int lastTrackId: -1
-
-    property var latestNotification: null
-
-    property int notificationCount:
-        notificationServer
-            .trackedNotifications
-            .values
-            .length
-
-    property bool hasNotifications:
-        notificationCount > 0
-
-    property bool hoverMediaVisible:
-        root.isHovered
-        && root.activePlayer !== null
-        && !root.notificationCenterOpen
-
-    property bool hoverNotificationVisible:
-        root.isHovered
-        && root.hasNotifications
-        && root.latestNotification !== null
-        && !root.notificationCenterOpen
-
-    property bool notificationCardVisible:
-        root.showNotificationPreview
-        || root.hoverNotificationVisible
-
-    property bool expandedContent:
-        root.isHovered
-        || root.showNotificationPreview
-        || root.notificationCenterOpen
-
-    property int topPadding: 8
-    property int bottomPadding: 14
-
-    property int timeSlotHeight:
-        root.expandedContent ? 65 : 40
-
-    property int mediaSlotHeight:
-        (
-            (
-                root.hoverMediaVisible
-                || root.showNotificationPreview
-                || root.notificationCenterOpen
-            )
-            && root.activePlayer !== null
-        )
-        ? 36
-        : 0
-
-    property int previewSlotHeight:
-        (
-            root.notificationCardVisible
-            && !root.notificationCenterOpen
-        )
-        ? 68
-        : 0
-
-    property int notificationItemHeight: 68
-    property int notificationItemSpacing: 6
-    property int notificationCenterMaxHeight: 460
-
-    property int notificationListContentHeight:
-        root.notificationCount > 0
-        ? (
-            root.notificationCount * root.notificationItemHeight
-            + (root.notificationCount - 1) * root.notificationItemSpacing
-        )
-        : 0
-
-    property int centerSlotDesiredHeight:
-        root.notificationCount === 0
-        ? 66
-        : 20 + root.notificationListContentHeight
-
-    property int centerSlotAvailableHeight:
-        Math.max(
-            66,
-            root.notificationCenterMaxHeight
-            - root.topPadding
-            - root.timeSlotHeight
-            - root.mediaSlotHeight
-            - root.bottomPadding
-        )
-
-    property int centerSlotHeight:
-        root.notificationCenterOpen
-        ? Math.min(
-            root.centerSlotDesiredHeight,
-            root.centerSlotAvailableHeight
-        )
-        : 0
-
-    property int expandedTargetHeight:
-        root.topPadding
-        + root.timeSlotHeight
-        + root.mediaSlotHeight
-        + root.previewSlotHeight
-        + root.centerSlotHeight
-        + root.bottomPadding
-
-    property int targetWidth:
-        root.notificationCenterOpen ? 360 :
-        root.notificationCardVisible ? 360 :
-        root.showVolume ? 260 :
-        root.showMediaEvent ? 330 :
-        root.isHovered ? 330 :
-        240
-
-    property int targetHeight:
-        root.notificationCenterOpen
-        ? root.expandedTargetHeight
-        :
-        root.showNotificationPreview
-        ? root.expandedTargetHeight
-        :
-        root.showVolume
-        ? 48
-        :
-        root.showMediaEvent
-        ? 52
-        :
-        root.isHovered
-        ? (
-            (
-                root.activePlayer !== null
-                || root.hoverNotificationVisible
-            )
-            ? root.expandedTargetHeight
-            : 65
-        )
-        :
-        40
-
-    property int currentWidth: targetWidth
-    property int currentHeight: targetHeight
-
-    width: currentWidth
-    height: currentHeight
-
-    Behavior on currentWidth {
-        SpringAnimation {
-            spring: 3.5
-            damping: 0.28
+        for (let i = values.length - 1; i >= 0; --i) {
+            if (values[i])
+                values[i].dismiss()
         }
+
+        unreadNotificationCount = 0
     }
 
-    Behavior on currentHeight {
-        SpringAnimation {
-            spring: 3.5
-            damping: 0.28
-        }
+    function showTransient(kind) {
+        transientKind = kind
+        transientShown = true
+        transientHideTimer.restart()
+    }
+
+    function showVolumeTransient() {
+        if (enableVolumeTransient)
+            showTransient("volume")
+    }
+
+    // Kept for the next step. It is intentionally not called by the
+    // NotificationServer while enableNotificationSummary is false.
+    function showNotificationTransient() {
+        if (enableNotificationSummary)
+            showTransient("notification")
     }
 
     NotificationServer {
@@ -347,669 +150,220 @@ Item {
         bodyMarkupSupported: true
         bodyImagesSupported: true
         imageSupported: true
-
         actionsSupported: true
         inlineReplySupported: true
-
         persistenceSupported: true
-
+        keepOnReload: false
         extraHints: [
             "synchronous",
             "private-synchronous",
             "x-canonical-private-synchronous"
         ]
 
-        keepOnReload: false
-
         onNotification: notification => {
             notification.tracked = true
 
-            root.latestNotification = notification
-            root.unreadNotificationCount += 1
-
             const dndStatus = root.isDndStatusNotification(notification)
 
+            if (!dndStatus)
+                root.unreadNotificationCount += 1
+
             if (!root.doNotDisturb && !dndStatus) {
-                root.playNotificationSound()
+                notificationPopSound.stop()
+                notificationPopSound.play()
             }
 
-            if (
-                !root.notificationCenterOpen
-                && (
-                    !root.doNotDisturb
-                    || dndStatus
-                )
-            ) {
-                root.showNotificationPreview = true
-
-                root.showVolume = false
-                root.showMediaEvent = false
-
-                volumeHideTimer.stop()
-                mediaHideTimer.stop()
-
-                notificationPreviewTimer.restart()
-            }
+            if (!dndStatus)
+                root.showNotificationTransient()
         }
-    }
-
-    function openNotificationCenter() {
-        if (root.notificationCenterOpen)
-            return
-
-        root.notificationCenterOpen = true
-        root.showNotificationPreview = false
-        root.showVolume = false
-        root.showMediaEvent = false
-
-        root.unreadNotificationCount = 0
-
-        notificationPreviewTimer.stop()
-        volumeHideTimer.stop()
-        mediaHideTimer.stop()
-    }
-
-    function closeNotificationCenter() {
-        if (!root.notificationCenterOpen)
-            return
-
-        root.notificationCenterOpen = false
     }
 
     IpcHandler {
         target: "notifications"
 
-        function toggle(): void {
-            if (root.notificationCenterOpen)
-                root.closeNotificationCenter()
-            else
-                root.openNotificationCenter()
-        }
-
-        function dnd(): void {
-            root.toggleDnd()
-        }
-
-        function dndOn(): void {
-            root.setDnd(true)
-        }
-
-        function dndOff(): void {
-            root.setDnd(false)
-        }
+        function toggle(): void {}
+        function dnd(): void { root.toggleDnd() }
+        function dndOn(): void { root.setDnd(true) }
+        function dndOff(): void { root.setDnd(false) }
     }
 
-    Timer {
-        id: notificationPreviewTimer
-
-        interval: 5000
-        repeat: false
-
-        onTriggered: {
-            root.showNotificationPreview = false
-        }
+    SystemClock {
+        id: systemClock
+        precision: SystemClock.Seconds
     }
 
-    onLastVolumeChanged: {
+    onVolumeLevelChanged: {
         if (!audioInitialized) {
             audioInitialized = true
             return
         }
-
-        root.triggerVolumePop()
+        showVolumeTransient()
     }
 
-    onIsMutedChanged: {
+    onMutedChanged: {
         if (!audioInitialized) {
             audioInitialized = true
             return
         }
-
-        root.triggerVolumePop()
-    }
-
-    function triggerVolumePop() {
-        root.notificationCenterOpen = false
-        root.showNotificationPreview = false
-        root.showMediaEvent = false
-
-        notificationPreviewTimer.stop()
-        mediaHideTimer.stop()
-
-        root.showVolume = true
-        volumeHideTimer.restart()
+        showVolumeTransient()
     }
 
     Timer {
-        id: volumeHideTimer
-
+        id: transientHideTimer
         interval: 2000
         repeat: false
-
-        onTriggered: {
-            root.showVolume = false
-        }
-    }
-
-    Timer {
-        id: mediaWatcher
-
-        interval: 300
-        running: true
-        repeat: true
-
-        onTriggered: {
-            let players = Mpris.players.values
-            let foundPlayer = null
-
-            for (let i = 0; i < players.length; i++) {
-                if (players[i].isPlaying) {
-                    foundPlayer = players[i]
-                    break
-                }
-            }
-
-            if (!foundPlayer && root.activePlayer) {
-                for (let i = 0; i < players.length; i++) {
-                    if (
-                        players[i]
-                        === root.activePlayer
-                    ) {
-                        foundPlayer = players[i]
-                        break
-                    }
-                }
-            }
-
-            if (!foundPlayer) {
-                for (let i = 0; i < players.length; i++) {
-                    if (players[i].canControl) {
-                        foundPlayer = players[i]
-                        break
-                    }
-                }
-            }
-
-            if (
-                foundPlayer
-                !== root.activePlayer
-            ) {
-                root.activePlayer = foundPlayer
-
-                if (foundPlayer) {
-                    root.wasPlaying =
-                        foundPlayer.isPlaying
-
-                    root.lastTrackId =
-                        foundPlayer.uniqueId
-
-                    if (
-                        root.mediaInitialized
-                        && foundPlayer.isPlaying
-                    ) {
-                        root.triggerMediaPop()
-                    }
-                } else {
-                    root.wasPlaying = false
-                    root.lastTrackId = -1
-                }
-
-                root.mediaInitialized = true
-                return
-            }
-
-            if (!foundPlayer)
-                return
-
-            if (
-                foundPlayer.isPlaying
-                !== root.wasPlaying
-            ) {
-                root.wasPlaying =
-                    foundPlayer.isPlaying
-
-                if (root.mediaInitialized)
-                    root.triggerMediaPop()
-            }
-
-            if (
-                foundPlayer.uniqueId
-                !== root.lastTrackId
-            ) {
-                root.lastTrackId =
-                    foundPlayer.uniqueId
-
-                if (root.mediaInitialized)
-                    root.triggerMediaPop()
-            }
-        }
-    }
-
-    Connections {
-        target: root.activePlayer
-
-        function onTrackChanged() {
-            if (!root.activePlayer)
-                return
-
-            root.lastTrackId =
-                root.activePlayer.uniqueId
-
-            if (root.mediaInitialized)
-                root.triggerMediaPop()
-        }
-    }
-
-    function triggerMediaPop() {
-        if (
-            root.notificationCenterOpen
-            || root.showNotificationPreview
-        ) {
-            return
-        }
-
-        if (
-            root.isHovered
-            && root.activePlayer !== null
-        ) {
-            root.showMediaEvent = false
-            mediaHideTimer.stop()
-            return
-        }
-
-        root.showVolume = false
-        root.showMediaEvent = true
-
-        volumeHideTimer.stop()
-        mediaHideTimer.restart()
-    }
-
-    Timer {
-        id: mediaHideTimer
-
-        interval: 2000
-        repeat: false
-
-        onTriggered: {
-            root.showMediaEvent = false
-        }
-    }
-
-    function dismissNotification(notification) {
-        if (!notification)
-            return
-
-        if (
-            root.latestNotification
-            === notification
-        ) {
-            root.latestNotification = null
-            root.showNotificationPreview = false
-        }
-
-        if (root.unreadNotificationCount > 0)
-            root.unreadNotificationCount -= 1
-
-        notification.dismiss()
+        onTriggered: root.transientShown = false
     }
 
     Capsule {
-        id: capsule
-
-        anchors.centerIn: parent
-
-        capsuleWidth: root.currentWidth
-        capsuleHeight: root.currentHeight
-
-        capsuleRadius:
-            root.notificationCenterOpen
-            ? 20
-            : capsuleHeight / 2
+        anchors.fill: parent
+        capsuleWidth: root.width
+        capsuleHeight: root.height
+        borderWidth: 2
+        borderColor: Qt.rgba(
+            root.accentColor.r,
+            root.accentColor.g,
+            root.accentColor.b,
+            0.90
+        )
+        shadowStrength: 0.38
     }
-Item {
-        id: contentViewport
 
+    // Stable base face: tiny 5-bar CAVA + clock / date. The colon blinks on system seconds.
+    Row {
+        id: baseFace
         anchors.centerIn: parent
+        spacing: root.musicPlaying ? 8 : 0
+        opacity: root.transientShown ? 0.0 : 1.0
+        visible: opacity > 0.001
 
-        width: root.currentWidth
-        height: root.currentHeight
+        CC.CavaVisualizer {
+            id: miniCava
+            width: root.musicPlaying ? 20 : 0
+            height: 10
+            barCount: 5
+            active: root.enableCavaFace && root.musicPlaying
+            visible: root.enableCavaFace && root.musicPlaying
+            barSpacing: 1
+            barColor: root.accentColor
+            anchors.verticalCenter: parent.verticalCenter
 
+            Behavior on width {
+                NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+            }
+        }
+
+        Text {
+            text: Qt.formatDateTime(systemClock.date, "HH")
+                  + ((systemClock.seconds % 2) === 0 ? ":" : " ")
+                  + Qt.formatDateTime(systemClock.date, "mm")
+                  + "  /  "
+                  + Qt.formatDateTime(systemClock.date, "yyyy. MM. dd.")
+            color: "white"
+            font.family: "Inter"
+            font.pixelSize: 12
+            font.bold: true
+            font.italic: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Behavior on opacity {
+            NumberAnimation { duration: 110; easing.type: Easing.OutCubic }
+        }
+    }
+
+    // Transient viewport: deliberately inset from BOTH slanted edges.
+    // The moving face is clipped here, so it never becomes visible outside
+    // the CenterIsland border while entering/exiting from the right.
+    Item {
+        id: transientViewport
+        x: 20
+        y: 2
+        width: root.width - 40
+        height: root.height - 4
         clip: true
+        z: 10
 
-        visible:
-            root.expandedContent
-            && !root.showVolume
-            && !root.showMediaEvent
+        // Volume strip: slides only INSIDE the CenterIsland, follows volume
+        // changes fluidly, waits two seconds, then exits inside to the right.
+        Item {
+            id: transientFace
+            width: transientViewport.width
+            height: transientViewport.height
+            x: root.transientShown ? 0 : transientViewport.width + 8
 
-        z: 3
-
-        Column {
-            id: contentColumn
-
-            width:
-                Math.max(
-                    0,
-                    root.currentWidth - 32
-                )
-
-            anchors.horizontalCenter:
-                parent.horizontalCenter
-
-            anchors.top:
-                parent.top
-
-            anchors.topMargin:
-                root.topPadding
-
-            spacing: 0
-
-            Item {
-                id: timeSlot
-
-                width:
-                    contentColumn.width
-
-                height:
-                    root.timeSlotHeight
-
-                TimeBlock {
-                    id: expandedTimeBlock
-
-                    anchors.centerIn:
-                        parent
-
-                    expanded: true
+            Behavior on x {
+                SpringAnimation {
+                    spring: 5.5
+                    damping: 0.38
+                    epsilon: 0.25
                 }
             }
 
-            Item {
-                id: mediaSlot
+            Row {
+                anchors.centerIn: parent
+                spacing: 9
+                visible: root.transientKind === "volume"
 
-                width:
-                    contentColumn.width
-
-                height:
-                    root.mediaSlotHeight
-
-                clip: true
-
-                MediaBlock {
-                    anchors.horizontalCenter:
-                        parent.horizontalCenter
-
-                    anchors.verticalCenter:
-                        parent.verticalCenter
-
-                    active:
-                        root.mediaSlotHeight > 0
-
-                    player:
-                        root.activePlayer
-
-                    onInteraction: {
-                        root.triggerMediaPop()
-                    }
-                }
+            Text {
+                text: root.muted ? "󰖁" : "󰕾"
+                color: root.accentColor
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: 14
+                anchors.verticalCenter: parent.verticalCenter
             }
 
             Item {
-                id: previewSlot
-
-                width:
-                    contentColumn.width
-
-                height:
-                    root.previewSlotHeight
-
-                clip: true
-
-                NotificationItem {
-                    id: notificationPreview
-
-                    width:
-                        Math.min(
-                            parent.width,
-                            320
-                        )
-
-                    anchors.centerIn:
-                        parent
-
-                    notification:
-                        root.latestNotification
-
-                    visible:
-                        root.notificationCardVisible
-                        && !root.notificationCenterOpen
-
-                    onDismissRequested: {
-                        root.dismissNotification(
-                            root.latestNotification
-                        )
-                    }
-                }
-            }
-
-            Item {
-                id: notificationCenterSlot
-
-                width:
-                    contentColumn.width
-
-                height:
-                    root.centerSlotHeight
-
-                clip: true
-
-                visible:
-                    root.notificationCenterOpen
+                width: 150
+                height: 14
+                anchors.verticalCenter: parent.verticalCenter
 
                 Rectangle {
-                    id: notificationSeparator
-
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-
-                    anchors.topMargin: 6
-
-                    height: 1
-
-                    color: Qt.rgba(
-                        1,
-                        1,
-                        1,
-                        0.08
-                    )
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width
+                    height: 4
+                    radius: 2
+                    color: Qt.rgba(1,1,1,0.14)
                 }
 
-                Text {
-                    anchors.horizontalCenter:
-                        parent.horizontalCenter
-
-                    anchors.top:
-                        notificationSeparator.bottom
-
-                    anchors.topMargin: 20
-
-                    visible:
-                        root.notificationCenterOpen
-                        && root.notificationCount === 0
-
-                    text:
-                        "Nincsenek értesítések"
-
-                    color: Qt.rgba(
-                        1,
-                        1,
-                        1,
-                        0.42
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.max(
+                        0,
+                        Math.min(
+                            parent.width,
+                            (root.muted ? 0 : root.volumeLevel) * parent.width
+                        )
                     )
+                    height: 4
+                    radius: 2
+                    color: root.accentColor
 
-                    font.family: "Inter"
-                    font.pixelSize: 11
-                }
-
-                ListView {
-                    id: notificationList
-
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: notificationSeparator.bottom
-                    anchors.bottom: parent.bottom
-
-                    anchors.topMargin: 7
-                    anchors.leftMargin: 2
-                    anchors.rightMargin: 2
-                    anchors.bottomMargin: 4
-
-                    visible:
-                        root.notificationCenterOpen
-                        && root.notificationCount > 0
-
-                    spacing: root.notificationItemSpacing
-                    clip: true
-
-                    model:
-                        notificationServer
-                            .trackedNotifications
-
-                    delegate: Item {
-                        width:
-                            notificationList.width
-
-                        height: root.notificationItemHeight
-
-                        NotificationItem {
-                            width:
-                                Math.min(
-                                    parent.width,
-                                    320
-                                )
-
-                            anchors.centerIn:
-                                parent
-
-                            notification:
-                                modelData
-
-                            onDismissRequested: {
-                                root.dismissNotification(
-                                    modelData
-                                )
-                            }
+                    Behavior on width {
+                        SpringAnimation {
+                            spring: 6
+                            damping: 0.46
+                            epsilon: 0.2
                         }
                     }
                 }
             }
         }
-    }
 
-    TimeBlock {
-        id: idleTimeBlock
-
-        anchors.centerIn: parent
-
-        anchors.horizontalCenterOffset:
-            root.doNotDisturb
-            ? (root.hasUnreadNotifications ? -15 : -11)
-            : (root.hasUnreadNotifications ? -5 : 0)
-
-        expanded: false
-
-        visible:
-            !root.expandedContent
-            && !root.showVolume
-            && !root.showMediaEvent
-
-        z: 5
-    }
-
-    Text {
-        id: dndIdleIndicator
-
-        text: "Zz"
-        color: "#37f5eb"
-
-        font.family: "Inter"
-        font.pixelSize: 10
-        font.bold: true
-        font.letterSpacing: 0.2
-
-        visible:
-            root.doNotDisturb
-            && !root.expandedContent
-            && !root.showVolume
-            && !root.showMediaEvent
-
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.horizontalCenterOffset: 43
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: -1
-
-        opacity: 0.82
-        z: 6
-    }
-
-    Rectangle {
-        id: idleDot
-
-        width: 7
-        height: 7
-
-        radius: width / 2
-
-        color: "#ff4d5a"
-
-        visible:
-            root.hasUnreadNotifications
-            && !root.expandedContent
-            && !root.showVolume
-            && !root.showMediaEvent
-
-        anchors.horizontalCenter:
-            parent.horizontalCenter
-
-        anchors.horizontalCenterOffset:
-            root.doNotDisturb ? 67 : 40
-
-        anchors.verticalCenter:
-            parent.verticalCenter
-
-        z: 6
-    }
-
-    VolumeBlock {
-        anchors.centerIn: parent
-
-        active:
-            root.showVolume
-
-        z: 7
-    }
-
-    MediaBlock {
-        id: eventMediaBlock
-
-        anchors.centerIn: parent
-
-        active:
-            root.showMediaEvent
-            && !root.showVolume
-            && !root.notificationCenterOpen
-            && !root.showNotificationPreview
-
-        player:
-            root.activePlayer
-
-        z: 7
-
-        onInteraction: {
-            root.triggerMediaPop()
+        // Notification summary stays in code for the next restore step.
+            Text {
+                anchors.centerIn: parent
+                visible: root.transientKind === "notification"
+                text: "Új értesítés: " + root.unreadNotificationCount + " db"
+                color: "white"
+                font.family: "Inter"
+                font.pixelSize: 11
+                font.bold: true
+                font.italic: true
+            }
         }
     }
 
-    HoverHandler {
-        id: hoverHandler
-    }
 }

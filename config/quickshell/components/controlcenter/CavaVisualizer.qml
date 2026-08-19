@@ -8,6 +8,8 @@ Item {
     property int barCount: 24
     property var levels: []
     property bool cavaAvailable: true
+    property real barSpacing: 3
+    property color barColor: Qt.rgba(55/255, 245/255, 235/255, 0.62)
 
     implicitHeight: 25
     visible: active && cavaAvailable
@@ -78,13 +80,13 @@ Item {
 
     Row {
         anchors.fill: parent
-        spacing: 3
+        spacing: root.barSpacing
 
         Repeater {
             model: root.barCount
 
             Item {
-                width: (root.width - (root.barCount - 1) * 3) / root.barCount
+                width: (root.width - (root.barCount - 1) * root.barSpacing) / root.barCount
                 height: root.height
 
                 Rectangle {
@@ -93,7 +95,7 @@ Item {
                     width: Math.max(2, parent.width)
                     height: Math.max(2, parent.height * (root.levels.length > index ? root.levels[index] : 0.0))
                     radius: width / 2
-                    color: Qt.rgba(55/255, 245/255, 235/255, 0.62)
+                    color: root.barColor
 
                     Behavior on height {
                         NumberAnimation { duration: 55; easing.type: Easing.OutQuad }

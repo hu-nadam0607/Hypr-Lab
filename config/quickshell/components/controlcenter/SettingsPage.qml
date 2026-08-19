@@ -4,9 +4,16 @@ import Quickshell.Io
 
 Item {
     id: root
+
     signal backRequested()
     signal closeRequested()
     signal monitorRequested()
+
+    property color accentColor: "#68787D"
+    property real slope: 14 / 36
+    property real corridorWidth: 360
+    property real corridorTopLeft: 0
+    property bool showHeader: true
 
     property int borderSize: 2
     property int rounding: 17
@@ -22,87 +29,192 @@ Item {
     property int gapsOut: 10
 
     function setValue(key, value) {
-        Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-settings.sh", "set", key, String(value)])
+        Quickshell.execDetached([
+            "bash",
+            Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-settings.sh",
+            "set",
+            key,
+            String(value)
+        ])
     }
-    function clamp(v,a,b){ return Math.max(a,Math.min(b,v)) }
+
+    function clamp(v, a, b) {
+        return Math.max(a, Math.min(b, v))
+    }
+
+    function rowX(viewY) {
+        return corridorTopLeft - slope * Math.max(0, viewY)
+    }
 
     Process {
         id: loadProc
-        command: ["bash", Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-settings.sh", "dump"]
+
+        command: [
+            "bash",
+            Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-settings.sh",
+            "dump"
+        ]
+
         stdout: StdioCollector {
             onStreamFinished: {
                 const lines = text.trim().split("\n")
+
                 for (let line of lines) {
-                    const p=line.split("="); if(p.length<2) continue
-                    const k=p[0], v=p.slice(1).join("=")
-                    if(k==="BORDER_SIZE") root.borderSize=parseInt(v)
-                    else if(k==="ROUNDING") root.rounding=parseInt(v)
-                    else if(k==="ACTIVE_OPACITY") root.activeOpacity=parseFloat(v)
-                    else if(k==="INACTIVE_OPACITY") root.inactiveOpacity=parseFloat(v)
-                    else if(k==="SHADOW") root.shadowEnabled=v==="1"
-                    else if(k==="BLUR") root.blurEnabled=v==="1"
-                    else if(k==="BLUR_SIZE") root.blurSize=parseInt(v)
-                    else if(k==="BLUR_PASSES") root.blurPasses=parseInt(v)
-                    else if(k==="XRAY") root.xrayEnabled=v==="1"
-                    else if(k==="ANIMATIONS") root.animationsEnabled=v==="1"
-                    else if(k==="GAPS_IN") root.gapsIn=parseInt(v)
-                    else if(k==="GAPS_OUT") root.gapsOut=parseInt(v)
+                    const p = line.split("=")
+                    if (p.length < 2)
+                        continue
+
+                    const k = p[0]
+                    const v = p.slice(1).join("=")
+
+                    if (k === "BORDER_SIZE")
+                        root.borderSize = parseInt(v)
+                    else if (k === "ROUNDING")
+                        root.rounding = parseInt(v)
+                    else if (k === "ACTIVE_OPACITY")
+                        root.activeOpacity = parseFloat(v)
+                    else if (k === "INACTIVE_OPACITY")
+                        root.inactiveOpacity = parseFloat(v)
+                    else if (k === "SHADOW")
+                        root.shadowEnabled = v === "1"
+                    else if (k === "BLUR")
+                        root.blurEnabled = v === "1"
+                    else if (k === "BLUR_SIZE")
+                        root.blurSize = parseInt(v)
+                    else if (k === "BLUR_PASSES")
+                        root.blurPasses = parseInt(v)
+                    else if (k === "XRAY")
+                        root.xrayEnabled = v === "1"
+                    else if (k === "ANIMATIONS")
+                        root.animationsEnabled = v === "1"
+                    else if (k === "GAPS_IN")
+                        root.gapsIn = parseInt(v)
+                    else if (k === "GAPS_OUT")
+                        root.gapsOut = parseInt(v)
                 }
             }
         }
     }
-    Component.onCompleted: loadProc.running=true
 
-    SettingsHeader {
-        id: header; anchors.left:parent.left; anchors.right:parent.right; anchors.top:parent.top
-        title:"SETTINGS"; subtitle:"Hyprland + Hypr-Lab"
-        onBackRequested:root.backRequested(); onCloseRequested:root.closeRequested()
-    }
+    Component.onCompleted: loadProc.running = true
 
     Flickable {
-        anchors.left:parent.left; anchors.right:parent.right; anchors.top:header.bottom; anchors.bottom:parent.bottom
-        anchors.topMargin:8; contentWidth:width; contentHeight:content.implicitHeight+12
-        clip:true; boundsBehavior:Flickable.StopAtBounds
+        id: flick
+        anchors.fill: parent
+        contentWidth: width
+        contentHeight: content.implicitHeight + 16
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        flickDeceleration: 1900
 
         Column {
-            id:content; width:parent.width; spacing:8
-            Text { text:"DISPLAY"; color:Qt.rgba(190/255,205/255,210/255,0.52); font.family:"Inter"; font.pixelSize:9; font.bold:true; font.letterSpacing:1.6 }
-            Rectangle {
-                width:parent.width; height:64; radius:18
-                color:monitorMouse.containsMouse?Qt.rgba(55/255,245/255,235/255,0.10):Qt.rgba(1,1,1,0.035)
-                border.width:1; border.color:monitorMouse.containsMouse?Qt.rgba(55/255,245/255,235/255,0.38):Qt.rgba(1,1,1,0.06)
+            id: content
+            width: flick.width
+            spacing: 0
+
+            Text {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                height: 26
+                text: "DISPLAY"
+                color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.78)
+                font.family: "Inter"
+                font.pixelSize: 8
+                font.bold: true
+                font.italic: true
+                font.letterSpacing: 1.3
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            Item {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                height: 52
+
                 Row {
-                    anchors.fill:parent; anchors.margins:13; spacing:11
-                    Text { anchors.verticalCenter:parent.verticalCenter; text:"󰍹"; color:"#37f5eb"; font.family:"JetBrainsMono Nerd Font"; font.pixelSize:20 }
-                    Column { anchors.verticalCenter:parent.verticalCenter; width:parent.width-70
-                        Text{text:"Monitor & Display";color:"#e7f1f2";font.family:"Inter";font.pixelSize:11;font.bold:true}
-                        Text{text:"Resolution · refresh rate · scale";color:Qt.rgba(1,1,1,0.42);font.family:"Inter";font.pixelSize:9}
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 9
+
+                    Text {
+                        text: "󰍹"
+                        color: root.accentColor
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 15
                     }
-                    Text { anchors.verticalCenter:parent.verticalCenter; text:"󰅂"; color:Qt.rgba(1,1,1,0.48); font.family:"JetBrainsMono Nerd Font"; font.pixelSize:16 }
+
+                    Column {
+                        spacing: 1
+
+                        Text {
+                            text: "Monitor & Display"
+                            color: Qt.rgba(1, 1, 1, 0.82)
+                            font.family: "Inter"
+                            font.pixelSize: 10
+                            font.bold: true
+                            font.italic: true
+                        }
+
+                        Text {
+                            text: "Resolution · refresh rate · scale"
+                            color: Qt.rgba(1, 1, 1, 0.38)
+                            font.family: "Inter"
+                            font.pixelSize: 8
+                            font.italic: true
+                        }
+                    }
                 }
-                MouseArea{id:monitorMouse;anchors.fill:parent;hoverEnabled:true;cursorShape:Qt.PointingHandCursor;onClicked:root.monitorRequested()}
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "›"
+                    color: Qt.rgba(1, 1, 1, 0.45)
+                    font.family: "Inter"
+                    font.pixelSize: 15
+                }
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: 1
+                    color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.16)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.monitorRequested()
+                }
             }
 
             Text {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                height: 32
                 text: "APPEARANCE"
-                topPadding: 6
-                color: Qt.rgba(190/255,205/255,210/255,0.52)
+                color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.78)
                 font.family: "Inter"
-                font.pixelSize: 9
+                font.pixelSize: 8
                 font.bold: true
-                font.letterSpacing: 1.6
+                font.italic: true
+                font.letterSpacing: 1.3
+                verticalAlignment: Text.AlignVCenter
             }
 
             SettingStepper {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Border size"
                 subtitle: "Active window border"
                 valueText: root.borderSize + " px"
-
                 onDecrease: {
                     root.borderSize = root.clamp(root.borderSize - 1, 0, 8)
                     root.setValue("BORDER_SIZE", root.borderSize)
                 }
-
                 onIncrease: {
                     root.borderSize = root.clamp(root.borderSize + 1, 0, 8)
                     root.setValue("BORDER_SIZE", root.borderSize)
@@ -110,15 +222,16 @@ Item {
             }
 
             SettingStepper {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Corner radius"
                 subtitle: "Window rounding"
                 valueText: String(root.rounding)
-
                 onDecrease: {
                     root.rounding = root.clamp(root.rounding - 1, 0, 40)
                     root.setValue("ROUNDING", root.rounding)
                 }
-
                 onIncrease: {
                     root.rounding = root.clamp(root.rounding + 1, 0, 40)
                     root.setValue("ROUNDING", root.rounding)
@@ -126,148 +239,136 @@ Item {
             }
 
             SettingStepper {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Active opacity"
                 subtitle: "Focused windows"
                 valueText: Math.round(root.activeOpacity * 100) + "%"
-
                 onDecrease: {
-                    root.activeOpacity = root.clamp(
-                        Math.round((root.activeOpacity - 0.05) * 100) / 100,
-                        0.25,
-                        1.0
-                    )
+                    root.activeOpacity = root.clamp(Math.round((root.activeOpacity - 0.05) * 100) / 100, 0.25, 1)
                     root.setValue("ACTIVE_OPACITY", root.activeOpacity.toFixed(2))
                 }
-
                 onIncrease: {
-                    root.activeOpacity = root.clamp(
-                        Math.round((root.activeOpacity + 0.05) * 100) / 100,
-                        0.25,
-                        1.0
-                    )
+                    root.activeOpacity = root.clamp(Math.round((root.activeOpacity + 0.05) * 100) / 100, 0.25, 1)
                     root.setValue("ACTIVE_OPACITY", root.activeOpacity.toFixed(2))
                 }
             }
 
             SettingStepper {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Inactive opacity"
                 subtitle: "Background windows"
                 valueText: Math.round(root.inactiveOpacity * 100) + "%"
-
                 onDecrease: {
-                    root.inactiveOpacity = root.clamp(
-                        Math.round((root.inactiveOpacity - 0.05) * 100) / 100,
-                        0.20,
-                        1.0
-                    )
+                    root.inactiveOpacity = root.clamp(Math.round((root.inactiveOpacity - 0.05) * 100) / 100, 0.20, 1)
                     root.setValue("INACTIVE_OPACITY", root.inactiveOpacity.toFixed(2))
                 }
-
                 onIncrease: {
-                    root.inactiveOpacity = root.clamp(
-                        Math.round((root.inactiveOpacity + 0.05) * 100) / 100,
-                        0.20,
-                        1.0
-                    )
+                    root.inactiveOpacity = root.clamp(Math.round((root.inactiveOpacity + 0.05) * 100) / 100, 0.20, 1)
                     root.setValue("INACTIVE_OPACITY", root.inactiveOpacity.toFixed(2))
                 }
             }
 
             SettingToggle {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Shadow"
                 subtitle: "Hyprland window shadows"
                 checked: root.shadowEnabled
-
-                onToggled: function(value) {
-                    root.shadowEnabled = value
-                    root.setValue("SHADOW", value ? 1 : 0)
+                onToggled: function(v) {
+                    root.shadowEnabled = v
+                    root.setValue("SHADOW", v ? 1 : 0)
                 }
             }
 
             SettingToggle {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Blur"
                 subtitle: "Background blur"
                 checked: root.blurEnabled
-
-                onToggled: function(value) {
-                    root.blurEnabled = value
-                    root.setValue("BLUR", value ? 1 : 0)
+                onToggled: function(v) {
+                    root.blurEnabled = v
+                    root.setValue("BLUR", v ? 1 : 0)
                 }
             }
 
             SettingStepper {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Blur size"
                 subtitle: "Blur radius"
                 valueText: String(root.blurSize)
-
                 onDecrease: {
-                    root.blurSize = root.clamp(root.blurSize - 1, 1, 12)
+                    root.blurSize = root.clamp(root.blurSize - 1, 1, 20)
                     root.setValue("BLUR_SIZE", root.blurSize)
                 }
-
                 onIncrease: {
-                    root.blurSize = root.clamp(root.blurSize + 1, 1, 12)
+                    root.blurSize = root.clamp(root.blurSize + 1, 1, 20)
                     root.setValue("BLUR_SIZE", root.blurSize)
                 }
             }
 
             SettingStepper {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Blur passes"
                 subtitle: "Quality / GPU cost"
                 valueText: String(root.blurPasses)
-
                 onDecrease: {
-                    root.blurPasses = root.clamp(root.blurPasses - 1, 1, 6)
+                    root.blurPasses = root.clamp(root.blurPasses - 1, 1, 8)
                     root.setValue("BLUR_PASSES", root.blurPasses)
                 }
-
                 onIncrease: {
-                    root.blurPasses = root.clamp(root.blurPasses + 1, 1, 6)
+                    root.blurPasses = root.clamp(root.blurPasses + 1, 1, 8)
                     root.setValue("BLUR_PASSES", root.blurPasses)
                 }
             }
 
             SettingToggle {
-                subtitle: "Blur through opaque surfaces"
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
+                title: "XRAY"
+                subtitle: "Blur through opaque layers"
                 checked: root.xrayEnabled
-
-                onToggled: function(value) {
-                    root.xrayEnabled = value
-                    root.setValue("XRAY", value ? 1 : 0)
+                onToggled: function(v) {
+                    root.xrayEnabled = v
+                    root.setValue("XRAY", v ? 1 : 0)
                 }
             }
 
-            Text {
-                text: "LAYOUT & MOTION"
-                topPadding: 6
-                color: Qt.rgba(190/255,205/255,210/255,0.52)
-                font.family: "Inter"
-                font.pixelSize: 9
-                font.bold: true
-                font.letterSpacing: 1.6
-            }
-
             SettingToggle {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Animations"
                 subtitle: "Hyprland animations"
                 checked: root.animationsEnabled
-
-                onToggled: function(value) {
-                    root.animationsEnabled = value
-                    root.setValue("ANIMATIONS", value ? 1 : 0)
+                onToggled: function(v) {
+                    root.animationsEnabled = v
+                    root.setValue("ANIMATIONS", v ? 1 : 0)
                 }
             }
 
             SettingStepper {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Inner gaps"
                 subtitle: "Space between windows"
-                valueText: root.gapsIn + " px"
-
+                valueText: String(root.gapsIn)
                 onDecrease: {
                     root.gapsIn = root.clamp(root.gapsIn - 1, 0, 30)
                     root.setValue("GAPS_IN", root.gapsIn)
                 }
-
                 onIncrease: {
                     root.gapsIn = root.clamp(root.gapsIn + 1, 0, 30)
                     root.setValue("GAPS_IN", root.gapsIn)
@@ -275,22 +376,26 @@ Item {
             }
 
             SettingStepper {
+                x: root.rowX(y - flick.contentY)
+                width: root.corridorWidth
+                accentColor: root.accentColor
                 title: "Outer gaps"
                 subtitle: "Space around workspace"
-                valueText: root.gapsOut + " px"
-
+                valueText: String(root.gapsOut)
                 onDecrease: {
-                    root.gapsOut = root.clamp(root.gapsOut - 1, 0, 40)
+                    root.gapsOut = root.clamp(root.gapsOut - 1, 0, 50)
                     root.setValue("GAPS_OUT", root.gapsOut)
                 }
-
                 onIncrease: {
-                    root.gapsOut = root.clamp(root.gapsOut + 1, 0, 40)
+                    root.gapsOut = root.clamp(root.gapsOut + 1, 0, 50)
                     root.setValue("GAPS_OUT", root.gapsOut)
                 }
             }
 
-            Item { width:1; height:4 }
+            Item {
+                width: 1
+                height: 18
+            }
         }
     }
 }

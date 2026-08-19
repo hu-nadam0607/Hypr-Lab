@@ -1,36 +1,41 @@
 import QtQuick
-Rectangle {
+
+Item {
     id: root
     property string title: ""
     property string subtitle: ""
     property string valueText: ""
+    property color accentColor: "#68787D"
     signal decrease()
     signal increase()
     width: parent ? parent.width : 380
-    height: 62; radius: 17
-    color: Qt.rgba(1,1,1,0.035)
-    border.width: 1; border.color: Qt.rgba(1,1,1,0.055)
+    height: 52
+
     Column {
-        anchors.left: parent.left; anchors.leftMargin:14; anchors.verticalCenter:parent.verticalCenter
-        width: parent.width - 145; spacing:2
-        Text { width:parent.width; text:root.title; color:"#e7f1f2"; font.family:"Inter"; font.pixelSize:11; font.bold:true; elide:Text.ElideRight }
-        Text { width:parent.width; text:root.subtitle; color:Qt.rgba(1,1,1,0.40); font.family:"Inter"; font.pixelSize:9; elide:Text.ElideRight }
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width - 150
+        spacing: 2
+        Text { width: parent.width; text: root.title; color: Qt.rgba(1,1,1,0.82); font.family:"Inter"; font.pixelSize:10; font.bold:true; font.italic:true; elide:Text.ElideRight }
+        Text { width: parent.width; text: root.subtitle; color: Qt.rgba(1,1,1,0.38); font.family:"Inter"; font.pixelSize:8; font.italic:true; elide:Text.ElideRight }
     }
+
     Row {
-        anchors.right:parent.right; anchors.rightMargin:10; anchors.verticalCenter:parent.verticalCenter; spacing:6
-        Repeater {
-            model: [{t:"−",a:"dec"},{t:root.valueText,a:"val"},{t:"+",a:"inc"}]
-            Rectangle {
-                required property var modelData
-                width: modelData.a === "val" ? 54 : 30; height:30; radius:15
-                color: modelData.a === "val" ? Qt.rgba(55/255,245/255,235/255,0.10) : Qt.rgba(1,1,1,0.06)
-                border.width:1; border.color: modelData.a === "val" ? Qt.rgba(55/255,245/255,235/255,0.28) : Qt.rgba(1,1,1,0.08)
-                Text { anchors.centerIn:parent; text:modelData.t; color:modelData.a==="val" ? "#37f5eb" : "#dbe7e8"; font.family:"Inter"; font.pixelSize:10; font.bold:true }
-                MouseArea {
-                    anchors.fill:parent; enabled:modelData.a!=="val"; hoverEnabled:true; cursorShape:enabled?Qt.PointingHandCursor:Qt.ArrowCursor
-                    onClicked: { if(modelData.a==="dec") root.decrease(); else if(modelData.a==="inc") root.increase() }
-                }
-            }
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 8
+        Text {
+            text: "−"; color: decMouse.containsMouse ? root.accentColor : Qt.rgba(1,1,1,0.58)
+            font.family:"Inter"; font.pixelSize:16; font.bold:true
+            MouseArea { id:decMouse; anchors.fill:parent; anchors.margins:-8; hoverEnabled:true; cursorShape:Qt.PointingHandCursor; onClicked:root.decrease() }
+        }
+        Text { text: root.valueText; color: root.accentColor; font.family:"Inter"; font.pixelSize:10; font.bold:true; font.italic:true; width:58; horizontalAlignment:Text.AlignHCenter }
+        Text {
+            text: "+"; color: incMouse.containsMouse ? root.accentColor : Qt.rgba(1,1,1,0.58)
+            font.family:"Inter"; font.pixelSize:16; font.bold:true
+            MouseArea { id:incMouse; anchors.fill:parent; anchors.margins:-8; hoverEnabled:true; cursorShape:Qt.PointingHandCursor; onClicked:root.increase() }
         }
     }
+
+    Rectangle { anchors.left:parent.left; anchors.right:parent.right; anchors.bottom:parent.bottom; height:1; color:Qt.rgba(root.accentColor.r,root.accentColor.g,root.accentColor.b,0.16) }
 }

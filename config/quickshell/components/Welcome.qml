@@ -708,8 +708,8 @@ Scope {
 
                             model: [
                                 { groupHu:"HYPR-LAB", groupEn:"HYPR-LAB", key:"SUPER + SPACE", hu:"Alkalmazásindító megnyitása / bezárása", en:"Open / close the App Launcher" },
-                                { groupHu:"HYPR-LAB", groupEn:"HYPR-LAB", key:"SUPER + SHIFT + C", hu:"Control Center megnyitása; Audio oldalról vissza a főoldalra", en:"Open Control Center; return to the main page from Audio" },
-                                { groupHu:"HYPR-LAB", groupEn:"HYPR-LAB", key:"SUPER + SHIFT + V", hu:"Control Center megnyitása közvetlenül az Audio panelen", en:"Open Control Center directly on the Audio page" },
+                                { groupHu:"HYPR-LAB", groupEn:"HYPR-LAB", key:"SUPER + SHIFT + C", hu:"Új Control Center megnyitása / bezárása", en:"Open / close the new Control Center" },
+                                { groupHu:"HYPR-LAB", groupEn:"HYPR-LAB", key:"SUPER + SHIFT + V", hu:"Új Audio Control panel megnyitása közvetlenül", en:"Open the new Audio Control panel directly" },
                                 { groupHu:"HYPR-LAB", groupEn:"HYPR-LAB", key:"SUPER + SHIFT + N", hu:"Értesítési központ megnyitása / bezárása", en:"Open / close the Notification Center" },
                                 { groupHu:"HYPR-LAB", groupEn:"HYPR-LAB", key:"SUPER + SHIFT + D", hu:"Ne zavarjanak mód be- / kikapcsolása", en:"Toggle Do Not Disturb" },
                                 { groupHu:"HYPR-LAB", groupEn:"HYPR-LAB", key:"SUPER + W", hu:"Véletlen háttérkép véletlen átmenettel", en:"Random wallpaper with a random transition" },

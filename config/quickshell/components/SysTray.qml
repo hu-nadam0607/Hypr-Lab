@@ -6,6 +6,8 @@ Item {
 
     property bool expanded: false
 
+    property color accentColor: "#68787D"
+
     property int activePopupCount: 0
 
     readonly property bool popupActive:
@@ -208,16 +210,16 @@ Item {
     color:
         sysTrayRoot.expanded
         ? Qt.rgba(
-              55 / 255,
-              245 / 255,
-              235 / 255,
+              sysTrayRoot.accentColor.r,
+              sysTrayRoot.accentColor.g,
+              sysTrayRoot.accentColor.b,
               0.12
           )
         : drawerMouse.containsMouse
           ? Qt.rgba(
-                55 / 255,
-                245 / 255,
-                235 / 255,
+                sysTrayRoot.accentColor.r,
+                sysTrayRoot.accentColor.g,
+                sysTrayRoot.accentColor.b,
                 0.08
             )
           : "transparent"
@@ -232,15 +234,15 @@ Item {
     border.color:
         sysTrayRoot.expanded
         ? Qt.rgba(
-              55 / 255,
-              245 / 255,
-              235 / 255,
+              sysTrayRoot.accentColor.r,
+              sysTrayRoot.accentColor.g,
+              sysTrayRoot.accentColor.b,
               0.45
           )
         : Qt.rgba(
-              55 / 255,
-              245 / 255,
-              235 / 255,
+              sysTrayRoot.accentColor.r,
+              sysTrayRoot.accentColor.g,
+              sysTrayRoot.accentColor.b,
               0.20
           )
 
@@ -273,16 +275,16 @@ Item {
                 color:
                     sysTrayRoot.expanded
                     ? Qt.rgba(
-                          55 / 255,
-                          245 / 255,
-                          235 / 255,
+                          sysTrayRoot.accentColor.r,
+                          sysTrayRoot.accentColor.g,
+                          sysTrayRoot.accentColor.b,
                           0.95
                       )
                     : drawerMouse.containsMouse
                       ? Qt.rgba(
-                            55 / 255,
-                            245 / 255,
-                            235 / 255,
+                            sysTrayRoot.accentColor.r,
+                            sysTrayRoot.accentColor.g,
+                            sysTrayRoot.accentColor.b,
                             0.85
                         )
                       : Qt.rgba(
