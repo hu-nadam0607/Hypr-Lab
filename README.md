@@ -14,19 +14,29 @@
 >
 > Development of **Hypr-Lab 1.5** is actively underway on the `develop-v1.5` branch.
 >
-> **Current development milestone: v1.5 Beta 3**
+> **Current development milestone: v1.5 RC2**
 
-### v1.5 Beta 3 Preview
+### v1.5 RC2 Preview
 
-![Hypr-Lab v1.5 Beta 3](docs/screenshots/HL_Beta3.png)
+![Hypr-Lab v1.5 RC2](docs/screenshots/HL_Beta3.png)
+
+### RC2 App Launcher
+
+![Hypr-Lab v1.5 RC2 App Launcher](docs/screenshots/HL_APPL.png)
+
+### RC2 Power Menu
+
+![Hypr-Lab v1.5 RC2 Power Menu](docs/screenshots/HL_PM.png)
 
 ### What's coming in 1.5
 
-* redesigned Hypr-Lab shell with a new angled Frosted Glass 3D visual language;
+* redesigned Hypr-Lab shell with a sharp, angled Frosted Glass 3D visual language;
 * adaptive window and shell accents that automatically derive their color from the current wallpaper;
+* redesigned 4×4 App Launcher with angled geometry, fast transitions, search and full keyboard navigation;
+* redesigned Power Menu with four animated Lock, Logout, Reboot and Shutdown controls;
 * redesigned Control Center with integrated Theme, Tools, Media and system controls;
 * redesigned Audio Control and Notification panels with animated expandable geometry;
-* Center Island with clock, date, volume feedback and compact audio visualization;
+* Center Island with clock, date, synchronized notification feedback, volume feedback, media information and compact audio visualization;
 * improved monitor and display controls integrated into the new Control Center design;
 * reduced wallpaper memory usage;
 * cleaner and more maintainable Quickshell source structure;
@@ -35,11 +45,13 @@
 
 ### Mi érkezik az 1.5-ben
 
-* teljesen átdolgozott Hypr-Lab shell új, ferde Frosted Glass 3D formavilággal;
+* teljesen átdolgozott Hypr-Lab shell éles, ferde Frosted Glass 3D formavilággal;
 * a háttérkép színvilágához automatikusan alkalmazkodó ablak- és shell-accentek;
+* újratervezett 4×4-es App Launcher ferde geometriával, gyors animációkkal, kereséssel és teljes billentyűzetes navigációval;
+* újratervezett Power Menu négy animált Lock, Logout, Reboot és Shutdown vezérlővel;
 * újratervezett Control Center integrált Theme, Tools, Media és rendszervezérlő funkciókkal;
 * új Audio Control és Notification panelek animált, kinyúló geometriával;
-* Center Island órával, dátummal, hangerő-visszajelzéssel és kompakt audio-vizualizációval;
+* Center Island órával, dátummal, szinkronizált értesítés-visszajelzéssel, hangerő-visszajelzéssel, médiainformációval és kompakt audio-vizualizációval;
 * továbbfejlesztett monitor- és kijelzőbeállítások az új Control Center felületbe integrálva;
 * csökkentett memóriahasználat a háttérképkezelésben;
 * tisztább és könnyebben karbantartható Quickshell forrásstruktúra;
@@ -148,7 +160,11 @@ Főbb funkciói:
 
 ### App Launcher
 
-![Hypr-Lab App Launcher](docs/screenshots/HL_appL.png)
+![Hypr-Lab App Launcher](docs/screenshots/HL_APPL.png)
+
+### Power Menu
+
+![Hypr-Lab Power Menu](docs/screenshots/HL_PM.png)
 
 ### Control Center
 
