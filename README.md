@@ -18,7 +18,7 @@
 
 ### v1.5 RC2 Preview
 
-![Hypr-Lab v1.5 RC2](docs/screenshots/HL_Beta3.png)
+![Hypr-Lab v1.5 RC2](docs/screenshots/HL_Beta4.png)
 
 ### RC2 App Launcher
 
@@ -31,6 +31,7 @@
 ### What's coming in 1.5
 
 * redesigned Hypr-Lab shell with a sharp, angled Frosted Glass 3D visual language;
+* unified Top Bar that merges workspaces, Center Island and system controls into one continuous frosted surface, with angled ends and a wallpaper-adaptive 2 px bottom accent border;
 * adaptive window and shell accents that automatically derive their color from the current wallpaper;
 * redesigned 4×4 App Launcher with angled geometry, fast transitions, search and full keyboard navigation;
 * redesigned Power Menu with four animated Lock, Logout, Reboot and Shutdown controls;
@@ -46,6 +47,7 @@
 ### Mi érkezik az 1.5-ben
 
 * teljesen átdolgozott Hypr-Lab shell éles, ferde Frosted Glass 3D formavilággal;
+* egységes Top Bar, amely a workspace-eket, a Center Islandet és a rendszervezérlőket egyetlen összefüggő frosted felületté egyesíti, ferde végekkel és a háttérkép színét követő 2 px-es alsó accent borderrel;
 * a háttérkép színvilágához automatikusan alkalmazkodó ablak- és shell-accentek;
 * újratervezett 4×4-es App Launcher ferde geometriával, gyors animációkkal, kereséssel és teljes billentyűzetes navigációval;
 * újratervezett Power Menu négy animált Lock, Logout, Reboot és Shutdown vezérlővel;
@@ -72,7 +74,7 @@ Hypr-Lab provides an integrated desktop experience built around Hyprland and Qui
 
 Main features include:
 
-* custom Hypr-Lab Top Bar with workspaces, Center Island and system controls;
+* unified Hypr-Lab Top Bar with workspaces, Center Island and system controls;
 
 * App Launcher with search and keyboard navigation;
 
@@ -116,7 +118,7 @@ A Hypr-Lab egy Hyprlandre és Quickshellre épülő, egységes asztali környeze
 
 Főbb funkciói:
 
-* egyedi Hypr-Lab felső sáv munkaterületekkel, Center Islanddel és rendszervezérlőkkel;
+* egységes Hypr-Lab felső sáv munkaterületekkel, Center Islanddel és rendszervezérlőkkel;
 
 * keresést és billentyűzetes navigációt támogató App Launcher;
 

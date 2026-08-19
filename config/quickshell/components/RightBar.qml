@@ -222,6 +222,7 @@ Item {
             : rightBarRoot.volumeReveal
         borderWidth: 2
         borderColor: Qt.rgba(rightBarRoot.accentColor.r, rightBarRoot.accentColor.g, rightBarRoot.accentColor.b, 0.86)
+        unifiedTopBarMode: true
     }
 
     Connections {

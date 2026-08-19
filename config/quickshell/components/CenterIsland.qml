@@ -224,19 +224,8 @@ Item {
         onTriggered: root.transientShown = false
     }
 
-    Capsule {
-        anchors.fill: parent
-        capsuleWidth: root.width
-        capsuleHeight: root.height
-        borderWidth: 2
-        borderColor: Qt.rgba(
-            root.accentColor.r,
-            root.accentColor.g,
-            root.accentColor.b,
-            0.90
-        )
-        shadowStrength: 0.38
-    }
+    // Unified TopBar owns the shared glass/background and the single bottom border.
+    // CenterIsland remains a fixed, clipped interaction/transient viewport.
 
     // Stable base face: tiny 5-bar CAVA + clock / date.
     // The colon only changes opacity, never width, so the surrounding content

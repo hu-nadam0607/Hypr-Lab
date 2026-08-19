@@ -56,6 +56,16 @@ PanelWindow {
     }
 
 
+    UnifiedTopBar {
+        id: unifiedTopBar
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        barHeight: 36
+        accentColor: adaptiveAccent.accentColor
+        z: -10
+    }
+
     LeftBar {
         id: leftBar
 

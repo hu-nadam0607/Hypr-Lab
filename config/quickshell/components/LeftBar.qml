@@ -22,13 +22,8 @@ Item {
     implicitWidth: barWidth
     implicitHeight: barHeight
 
-    Capsule {
-        id: capsule
-        anchors.fill: parent
-        capsuleWidth: leftBarRoot.barWidth
-        capsuleHeight: leftBarRoot.barHeight
-        borderColor: Qt.rgba(leftBarRoot.accentColor.r, leftBarRoot.accentColor.g, leftBarRoot.accentColor.b, 0.82)
-    }
+    // Unified TopBar: background/border is rendered once by UnifiedTopBar.qml.
+    // LeftBar keeps only its original controls and interaction logic.
 
     function updateIndicator(animate) {
         const index = Math.max(0, Math.min(9, leftBarRoot.activeWorkspaceId - 1))

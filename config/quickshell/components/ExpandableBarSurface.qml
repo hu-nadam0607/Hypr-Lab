@@ -16,6 +16,9 @@ Item {
     property real slant: 14
     property real shadowDepth: 8
     property real shadowStrength: 0.40
+    // When embedded in the unified Hypr-Lab TopBar, the closed 36px bar face
+    // is supplied by UnifiedTopBar. The expandable sheet remains unchanged.
+    property bool unifiedTopBarMode: false
 
     readonly property real clampedReveal: Math.max(0, Math.min(1.08, reveal))
     readonly property real bodyHeight: barHeight + extensionHeight * clampedReveal
@@ -85,16 +88,41 @@ Item {
 
             ctx.clearRect(0, 0, width, height)
 
+            if (surface.unifiedTopBarMode) {
+                if (surface.clampedReveal <= 0.001)
+                    return
+                // Keep the Noctalia-inspired expandable geometry exactly as-is,
+                // but never repaint the shared closed TopBar face above it.
+                ctx.save()
+                ctx.beginPath()
+                ctx.rect(0, surface.barHeight, width, height - surface.barHeight)
+                ctx.clip()
+            }
+
+            // Fade the expandable-sheet shadow out *before* the spring reaches
+            // the closed position. Without this, the material itself is already
+            // clipped back into the unified TopBar while the positive shadow
+            // offsets are still visible below barHeight, which looks like a
+            // second RightBar layer "bouncing" on close.
+            //
+            // Keep the full shadow for normal/open states, but smoothly remove
+            // it over the final ~14% of the closing travel.
+            const shadowReveal = surface.unifiedTopBarMode
+                ? Math.max(0.0, Math.min(1.0, surface.clampedReveal / 0.14))
+                : 1.0
+
             const shadowSteps = [
-                [2, surface.shadowStrength * 0.34],
-                [4, surface.shadowStrength * 0.20],
-                [7, surface.shadowStrength * 0.10]
+                [2, surface.shadowStrength * 0.34 * shadowReveal],
+                [4, surface.shadowStrength * 0.20 * shadowReveal],
+                [7, surface.shadowStrength * 0.10 * shadowReveal]
             ]
 
-            for (let i = 0; i < shadowSteps.length; ++i) {
-                outerPath(ctx, shadowSteps[i][0])
-                ctx.fillStyle = Qt.rgba(0, 0, 0, shadowSteps[i][1])
-                ctx.fill()
+            if (shadowReveal > 0.001) {
+                for (let i = 0; i < shadowSteps.length; ++i) {
+                    outerPath(ctx, shadowSteps[i][0])
+                    ctx.fillStyle = Qt.rgba(0, 0, 0, shadowSteps[i][1])
+                    ctx.fill()
+                }
             }
 
             outerPath(ctx, 0)
@@ -112,18 +140,58 @@ Item {
             ctx.fillStyle = material
             ctx.fill()
 
-            outerPath(ctx, 0.5)
-            ctx.lineWidth = surface.borderWidth
-            ctx.strokeStyle = surface.borderColor
-            ctx.stroke()
+            // Border handling differs in unified TopBar mode.
+            //
+            // The closed TopBar already owns the single 2px bottom accent line.
+            // Stroking outerPath() here would repaint the long horizontal
+            // barHeight segment (extensionTopLeft -> 0), which visually doubles
+            // the TopBar border and makes the whole RightBar appear to shift
+            // whenever Audio / Notifications / Control Center opens.
+            //
+            // In unified mode we therefore draw ONLY the three exposed edges of
+            // the drop-down sheet: left slant, bottom edge and right slant.
+            if (surface.unifiedTopBarMode) {
+                const w = surface.surfaceWidth
+                const bh = surface.barHeight
+                const h = surface.bodyHeight
+                const s = Math.min(surface.slant, Math.max(1, w / 5))
+                const ex = surface.extensionLeft
+                const r = surface.clampedReveal
+                const drop = surface.extensionHeight * r
+                const slope = s / Math.max(1, bh)
+                const shift = slope * drop
 
-            // Top glass highlight remains fixed while the lower material stretches.
-            ctx.beginPath()
-            ctx.moveTo(surface.slant + 1, 1)
-            ctx.lineTo(surface.surfaceWidth - 1, 1)
-            ctx.lineWidth = 0.75
-            ctx.strokeStyle = Qt.rgba(1, 1, 1, 0.22)
-            ctx.stroke()
+                const topLeft = ex + s
+                const bottomLeft = topLeft - shift
+                const topRight = w - s
+                const bottomRight = topRight - shift
+
+                ctx.beginPath()
+                ctx.moveTo(topLeft, bh + 0.5)
+                ctx.lineTo(bottomLeft, h - 0.5)
+                ctx.lineTo(bottomRight, h - 0.5)
+                ctx.lineTo(topRight, bh + 0.5)
+
+                ctx.lineWidth = surface.borderWidth
+                ctx.strokeStyle = surface.borderColor
+                ctx.stroke()
+            } else {
+                outerPath(ctx, 0.5)
+                ctx.lineWidth = surface.borderWidth
+                ctx.strokeStyle = surface.borderColor
+                ctx.stroke()
+
+                // Legacy standalone bar highlight.
+                ctx.beginPath()
+                ctx.moveTo(surface.slant + 1, 1)
+                ctx.lineTo(surface.surfaceWidth - 1, 1)
+                ctx.lineWidth = 0.75
+                ctx.strokeStyle = Qt.rgba(1, 1, 1, 0.22)
+                ctx.stroke()
+            }
+
+            if (surface.unifiedTopBarMode)
+                ctx.restore()
         }
     }
 }
