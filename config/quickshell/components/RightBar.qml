@@ -1067,7 +1067,25 @@ Item {
                         Text { text:rightBarRoot.player&&rightBarRoot.player.isPlaying?"󰏤":"󰐊"; color:rightBarRoot.accentColor; font.family:"JetBrainsMono Nerd Font"; font.pixelSize:12; MouseArea{anchors.fill:parent;anchors.margins:-5;enabled:!!rightBarRoot.player;cursorShape:Qt.PointingHandCursor;onClicked:if(rightBarRoot.player)rightBarRoot.player.togglePlaying()} }
                         Text { text:"󰒭"; color:Qt.rgba(1,1,1,0.62); font.family:"JetBrainsMono Nerd Font"; font.pixelSize:12; MouseArea{anchors.fill:parent;anchors.margins:-5;enabled:!!rightBarRoot.player;cursorShape:Qt.PointingHandCursor;onClicked:if(rightBarRoot.player)rightBarRoot.player.next()} }
                     }
-                    CC.CavaVisualizer { anchors.left:parent.left; anchors.right:parent.right; anchors.bottom:parent.bottom; height:32; active:rightBarRoot.player!==null && rightBarRoot.player.isPlaying; barCount:24; barSpacing:3; barColor:Qt.rgba(rightBarRoot.accentColor.r,rightBarRoot.accentColor.g,rightBarRoot.accentColor.b,0.72) }
+                    CC.CavaVisualizer {
+                        id: ccCava
+                        width: rightBarRoot.extensionSafeWidth
+                        height: 32
+                        anchors.bottom: parent.bottom
+                        // Center the visualizer on the slanted content corridor at
+                        // the visualizer's own Y position, not at ccMedia's midpoint.
+                        // This keeps CAVA aligned with the rest of the Control Center.
+                        x: rightBarRoot.extensionLeftFor(
+                               ccMedia.y + y + height / 2,
+                               width
+                           ) - ccMedia.x
+                        active: rightBarRoot.player !== null && rightBarRoot.player.isPlaying
+                        barCount: 24
+                        barSpacing: 3
+                        barColor: Qt.rgba(rightBarRoot.accentColor.r,
+                                          rightBarRoot.accentColor.g,
+                                          rightBarRoot.accentColor.b, 0.72)
+                    }
                 }
 
                 Text { y: 430; width: rightBarRoot.extensionSafeWidth; height: 18; x: rightBarRoot.extensionLeftFor(y+height/2,width); text:"CPU "+rightBarRoot.cpu+"   /   RAM "+rightBarRoot.ram+"   /   UP "+rightBarRoot.uptime; color:Qt.rgba(1,1,1,0.43); font.family:"Inter"; font.pixelSize:8; font.bold:true; font.italic:true }

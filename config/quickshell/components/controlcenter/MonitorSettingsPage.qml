@@ -459,12 +459,21 @@ Item {
                         width: modeList.width
                         height: 34
 
+                        // Use the row's top edge as the geometry reference.
+                        // This keeps the first visible entry exactly on the
+                        // parent panel's left border instead of starting a few
+                        // pixels outside it, while lower rows still follow the
+                        // same slanted corridor during scrolling.
                         readonly property real viewportY:
-                            y - modeList.contentY + height / 2
+                            y - modeList.contentY
 
                         Item {
                             id: slantedModeRow
-                            x: root.slope * modeDropdown.height
+                            // Anchor rows to the dropdown's *target* slanted envelope,
+                            // not its currently animated height.  Using modeDropdown.height
+                            // made the whole list travel in from left of the panel border
+                            // while the dropdown height was springing/opening.
+                            x: root.slope * modeDropdown.visibleHeight
                                 - root.slope * modeDelegate.viewportY
                             width: root.corridorWidth
                             height: parent.height

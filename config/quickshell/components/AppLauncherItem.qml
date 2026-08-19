@@ -8,104 +8,85 @@ Rectangle {
     required property var app
     required property int itemIndex
     property bool selected: false
+    property color accentColor: "#68787D"
+
+    // Grid geometry supplied by AppLauncher.qml. The visual translation does not
+    // interfere with GridView's own layout, but makes every row track the panel slant.
+    property real gridCellWidth: 160
+    property real gridCellHeight: 98
+    property int gridColumns: 4
+    property real panelHeight: 585
+    property real panelSlant: 36
+    property real gridTopInPanel: 97
+    property real gridCenterInPanel: 292
+
+    // GridView delegates live in content coordinates. During scrolling, using the
+    // model row would leave the old X offset behind and the item could cross the
+    // slanted panel edge. Convert the delegate center to the *visible viewport Y*
+    // and derive the slant from that live position instead.
+    readonly property real viewportContentY: GridView.view ? GridView.view.contentY : 0
+    readonly property real visibleCenterY: root.gridTopInPanel + root.y - root.viewportContentY + root.height / 2
+    // The GridView itself is centered on the parent panel at its own vertical
+    // midpoint. Each visible row only needs the *difference* from that center.
+    // This prevents the whole grid from drifting left while still following
+    // the exact parent slant during scrolling.
+    readonly property real rowSlantShift: -root.panelSlant * (root.visibleCenterY - root.gridCenterInPanel) / Math.max(1, root.panelHeight)
 
     signal activated()
 
-    width: ListView.view ? ListView.view.width : 672
-    height: 66
-    radius: 17
+    width: Math.max(120, root.gridCellWidth - 12)
+    height: 92
 
-    color: selected
-        ? Qt.rgba(18 / 255, 62 / 255, 68 / 255, 0.64)
+    transform: Translate {
+        x: root.rowSlantShift
+    }
+    radius: 0
+
+    color: root.selected
+        ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.115)
         : mouseArea.containsMouse
-            ? Qt.rgba(20 / 255, 31 / 255, 40 / 255, 0.64)
-            : Qt.rgba(14 / 255, 20 / 255, 28 / 255, 0.30)
+            ? Qt.rgba(1, 1, 1, 0.050)
+            : Qt.rgba(1, 1, 1, 0.018)
 
-    border.width: selected ? 1 : 0
-    border.color: Qt.rgba(55 / 255, 245 / 255, 235 / 255, selected ? 0.42 : 0.0)
+    border.width: root.selected ? 1 : 0
+    border.color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.55)
 
-    scale: selected ? 1.0 : 0.985
-
-    Behavior on color {
-        ColorAnimation { duration: 120 }
-    }
-
-    Behavior on scale {
-        NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
-        }
-    }
+    Behavior on color { ColorAnimation { duration: 85 } }
 
     Rectangle {
-        id: selectionGlow
-        anchors.fill: parent
-        anchors.margins: -2
-        radius: root.radius + 2
-        color: "transparent"
-        border.width: root.selected ? 1 : 0
-        border.color: Qt.rgba(55 / 255, 245 / 255, 235 / 255, root.selected ? 0.18 : 0.0)
-        opacity: root.selected ? 1.0 : 0.0
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: root.selected ? 2 : 0
+        color: root.accentColor
+        opacity: root.selected ? 0.95 : 0
 
-        Behavior on opacity {
-            NumberAnimation { duration: 160 }
-        }
+        Behavior on height { NumberAnimation { duration: 80; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: 80 } }
     }
 
-    Row {
-        anchors.fill: parent
-        anchors.leftMargin: 16
-        anchors.rightMargin: 18
-        spacing: 16
+    Column {
+        anchors.centerIn: parent
+        width: parent.width - 18
+        spacing: 7
 
-        Item {
-            width: 42
-            height: parent.height
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: 40
-                height: 40
-                radius: 13
-                color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.055)
-                border.width: 1
-                border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06)
-
-                IconImage {
-                    anchors.centerIn: parent
-                    implicitSize: 27
-                    source: Quickshell.iconPath(root.app.icon, "application-x-executable")
-                    asynchronous: true
-                }
-            }
+        IconImage {
+            anchors.horizontalCenter: parent.horizontalCenter
+            implicitSize: 35
+            source: Quickshell.iconPath(root.app.icon, "application-x-executable")
+            asynchronous: true
         }
 
-        Column {
-            width: parent.width - 42 - parent.spacing
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 3
-
-            Text {
-                width: parent.width
-                text: root.app.name
-                color: root.selected ? "#f5ffff" : "#e0e0e0"
-                font.family: "Inter"
-                font.pixelSize: 14
-                font.weight: root.selected ? Font.DemiBold : Font.Medium
-                elide: Text.ElideRight
-            }
-
-            Text {
-                width: parent.width
-                text: root.app.genericName !== ""
-                    ? root.app.genericName
-                    : root.app.comment
-                visible: text !== ""
-                color: Qt.rgba(210 / 255, 225 / 255, 230 / 255, root.selected ? 0.72 : 0.48)
-                font.family: "Inter"
-                font.pixelSize: 11
-                elide: Text.ElideRight
-            }
+        Text {
+            width: parent.width
+            text: root.app.name
+            color: root.selected ? "#ffffff" : Qt.rgba(0.94, 0.96, 0.97, 0.86)
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+            font.family: "Inter"
+            font.pixelSize: 12
+            font.italic: true
+            font.weight: root.selected ? Font.DemiBold : Font.Medium
         }
     }
 
@@ -116,8 +97,8 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
 
         onEntered: {
-            if (ListView.view)
-                ListView.view.currentIndex = root.itemIndex
+            if (GridView.view)
+                GridView.view.currentIndex = root.itemIndex
         }
 
         onClicked: root.activated()

@@ -1,498 +1,141 @@
 import QtQuick
-
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 
 Scope {
-    id: powerMenuScope
+    id: root
 
     property bool isOpen: false
-
     property bool windowVisible: false
+    property bool cardsShown: false
 
-    property bool glassVisible: false
-    property bool borderVisible: false
-    property bool contentVisible: false
+    AdaptiveAccent { id: adaptiveAccent }
+    readonly property color accent: adaptiveAccent.accentColor
 
-    function open() {
-        closeGlassTimer.stop()
-        closeWindowTimer.stop()
-
-        borderOpenTimer.stop()
-        contentOpenTimer.stop()
-
-        isOpen = true
+    function open(): void {
+        closeTimer.stop()
+        if (windowVisible && isOpen) return
         windowVisible = true
-
-        glassVisible = true
-
-        borderOpenTimer.restart()
-        contentOpenTimer.restart()
+        isOpen = true
+        cardsShown = false
+        revealTimer.restart()
     }
 
-    function close() {
-        if (!windowVisible)
-            return
-
-        borderOpenTimer.stop()
-        contentOpenTimer.stop()
-
+    function close(): void {
+        if (!windowVisible || !isOpen) return
+        revealTimer.stop()
         isOpen = false
-
-        contentVisible = false
-
-        borderVisible = false
-
-        closeGlassTimer.restart()
-
-        closeWindowTimer.restart()
+        cardsShown = false
+        closeTimer.restart()
     }
 
-    function toggle() {
-        if (isOpen)
-            close()
-        else
-            open()
-    }
+    function toggle(): void { isOpen ? close() : open() }
 
     IpcHandler {
         target: "powermenu"
-
-        function toggle() {
-            powerMenuScope.toggle()
-        }
-
-        function open() {
-            powerMenuScope.open()
-        }
-
-        function close() {
-            powerMenuScope.close()
-        }
+        function toggle() { root.toggle() }
+        function open() { root.open() }
+        function close() { root.close() }
     }
 
     Timer {
-        id: borderOpenTimer
-
-        interval: 130
+        id: revealTimer
+        interval: 12
         repeat: false
-
-        onTriggered: {
-            if (powerMenuScope.isOpen)
-                powerMenuScope.borderVisible = true
-        }
+        onTriggered: if (root.isOpen) root.cardsShown = true
     }
 
     Timer {
-        id: contentOpenTimer
-
-        interval: 210
+        id: closeTimer
+        // Last card starts after 105 ms and needs 205 ms to leave.
+        interval: 330
         repeat: false
-
-        onTriggered: {
-            if (powerMenuScope.isOpen)
-                powerMenuScope.contentVisible = true
-        }
-    }
-
-    Timer {
-        id: closeGlassTimer
-
-        interval: 125
-        repeat: false
-
-        onTriggered: {
-            if (!powerMenuScope.isOpen)
-                powerMenuScope.glassVisible = false
-        }
-    }
-
-    Timer {
-        id: closeWindowTimer
-
-        interval: 310
-        repeat: false
-
-        onTriggered: {
-            if (!powerMenuScope.isOpen)
-                powerMenuScope.windowVisible = false
-        }
+        onTriggered: if (!root.isOpen) root.windowVisible = false
     }
 
     PanelWindow {
-        id: menuWindow
+        id: window
+        visible: root.windowVisible
+        anchors { top: true; bottom: true; left: true; right: true }
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        focusable: true
+        aboveWindows: true
 
-        visible:
-            powerMenuScope.windowVisible
-
-        anchors {
-            top: true
-            bottom: true
-            left: true
-            right: true
-        }
-
-        color:
-            "transparent"
-
-        exclusionMode:
-            ExclusionMode.Ignore
-
-        focusable:
-            true
-
-        aboveWindows:
-            true
-
-        WlrLayershell.namespace:
-            "hypr-lab-power-menu"
-
-        WlrLayershell.layer:
-            WlrLayer.Overlay
-
-        WlrLayershell.keyboardFocus:
-            WlrKeyboardFocus.Exclusive
+        WlrLayershell.namespace: "hypr-lab-power-menu"
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
         FocusScope {
-            anchors.fill:
-                parent
+            anchors.fill: parent
+            focus: window.visible
+            Keys.onEscapePressed: root.close()
 
-            focus:
-                menuWindow.visible
-
-            Keys.onEscapePressed: {
-                powerMenuScope.close()
+            // Intentionally transparent: no fullscreen dimming and no fullscreen blur.
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.close()
             }
 
-            Rectangle {
-                id: backdrop
+            Item {
+                id: stage
+                anchors.centerIn: parent
+                width: Math.min(window.width - 160, 1060)
+                height: 340
 
-                anchors.fill:
-                    parent
+                Row {
+                    id: cards
+                    anchors.centerIn: parent
+                    spacing: 28
 
-                color:
-                    Qt.rgba(
-                        5 / 255,
-                        8 / 255,
-                        12 / 255,
-                        0.30
-                    )
-
-                opacity:
-                    powerMenuScope.glassVisible
-                    ? 1.0
-                    : 0.0
-
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 220
-                        easing.type: Easing.OutCubic
-                    }
-                }
-
-                MouseArea {
-                    anchors.fill:
-                        parent
-
-                    onClicked: {
-                        powerMenuScope.close()
-                    }
-                }
-
-                Item {
-                    id: capsuleWrapper
-
-                    anchors.centerIn:
-                        parent
-
-                    width: 500
-                    height: 92
-
-                    opacity:
-                        powerMenuScope.glassVisible
-                        ? 1.0
-                        : 0.0
-
-                    scale:
-                        powerMenuScope.glassVisible
-                        ? 1.0
-                        : 0.94
-
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: 210
-                            easing.type: Easing.OutCubic
-                        }
+                    // Clicking a card is accepted by its own MouseArea, so the
+                    // fullscreen close area underneath only handles empty space.
+                    PowerMenuOption {
+                        iconText: "󰌾"
+                        labelText: "Lock"
+                        accentColor: root.accent
+                        shown: root.cardsShown
+                        revealDelay: 0
+                        closeDelay: 105
+                        actionCommand: ["quickshell", "-p", Quickshell.env("HOME") + "/.config/quickshell/lock/shell.qml"]
+                        onTriggered: root.close()
                     }
 
-                    Behavior on scale {
-                        NumberAnimation {
-                            duration: 280
-                            easing.type: Easing.OutBack
-                        }
+                    PowerMenuOption {
+                        iconText: "󰍃"
+                        labelText: "Logout"
+                        accentColor: Qt.lighter(root.accent, 1.18)
+                        shown: root.cardsShown
+                        revealDelay: 42
+                        closeDelay: 70
+                        // Same Hyprland session-exit action as the SUPER + M bind.
+                        // Hyprland 0.56.x Lua config: use the same session-exit path
+                        // recommended by Hyprland's own example config.
+                        actionCommand: ["sh", "-lc", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"]
+                        onTriggered: root.close()
                     }
 
-                    Rectangle {
-                        anchors.centerIn:
-                            parent
-
-                        width:
-                            parent.width + 10
-
-                        height:
-                            parent.height + 10
-
-                        radius:
-                            height / 2
-
-                        color:
-                            "transparent"
-
-                        border.width:
-                            1
-
-                        border.color:
-                            Qt.rgba(
-                                55 / 255,
-                                245 / 255,
-                                235 / 255,
-                                0.12
-                            )
-
-                        opacity:
-                            powerMenuScope.borderVisible
-                            ? 1.0
-                            : 0.0
-
-                        scale:
-                            powerMenuScope.borderVisible
-                            ? 1.0
-                            : 0.97
-
-                        Behavior on opacity {
-                            NumberAnimation {
-                                duration: 200
-                                easing.type: Easing.OutCubic
-                            }
-                        }
-
-                        Behavior on scale {
-                            NumberAnimation {
-                                duration: 220
-                                easing.type: Easing.OutCubic
-                            }
-                        }
+                    PowerMenuOption {
+                        iconText: "󰑓"
+                        labelText: "Reboot"
+                        accentColor: Qt.tint(root.accent, Qt.rgba(0.38, 0.18, 0.90, 0.42))
+                        shown: root.cardsShown
+                        revealDelay: 84
+                        closeDelay: 35
+                        actionCommand: ["systemctl", "reboot"]
+                        onTriggered: root.close()
                     }
 
-                    Rectangle {
-                        id: glassCapsule
-
-                        anchors.fill:
-                            parent
-
-                        radius:
-                            height / 2
-
-                        color:
-                            Qt.rgba(
-                                10 / 255,
-                                14 / 255,
-                                21 / 255,
-                                0.68
-                            )
-
-                        antialiasing:
-                            true
-
-                        clip:
-                            true
-
-                        Rectangle {
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                                top: parent.top
-
-                                leftMargin: 20
-                                rightMargin: 20
-                                topMargin: 1
-                            }
-
-                            height:
-                                1
-
-                            color:
-                                Qt.rgba(
-                                    1,
-                                    1,
-                                    1,
-                                    0.12
-                                )
-                        }
-
-                        MouseArea {
-                            anchors.fill:
-                                parent
-
-                            onClicked:
-                                function(mouse) {
-                                    mouse.accepted = true
-                                }
-                        }
-
-                        Row {
-                            id: optionRow
-
-                            anchors.centerIn:
-                                parent
-
-                            spacing:
-                                22
-
-                            PowerMenuOption {
-                                iconText:
-                                    "󰌾"
-
-                                labelText:
-                                    "Lock"
-
-                                shown:
-                                    powerMenuScope.contentVisible
-
-                                revealDelay:
-                                    0
-
-                                actionCommand: [
-                                    "quickshell",
-                                    "-p",
-                                    Quickshell.env("HOME") + "/.config/quickshell/lock/shell.qml"
-                                ]
-
-                                onTriggered: {
-                                    powerMenuScope.close()
-                                }
-                            }
-
-                            PowerMenuOption {
-                                iconText:
-                                    "󰍃"
-
-                                labelText:
-                                    "Logout"
-
-                                shown:
-                                    powerMenuScope.contentVisible
-
-                                revealDelay:
-                                    45
-
-                                actionCommand: [
-                                    "hyprctl",
-                                    "dispatch",
-                                    "exit"
-                                ]
-
-                                onTriggered: {
-                                    powerMenuScope.close()
-                                }
-                            }
-
-                            PowerMenuOption {
-                                iconText:
-                                    "󰜉"
-
-                                labelText:
-                                    "Reboot"
-
-                                shown:
-                                    powerMenuScope.contentVisible
-
-                                revealDelay:
-                                    90
-
-                                actionCommand: [
-                                    "systemctl",
-                                    "reboot"
-                                ]
-
-                                onTriggered: {
-                                    powerMenuScope.close()
-                                }
-                            }
-
-                            PowerMenuOption {
-                                iconText:
-                                    "⏻"
-
-                                labelText:
-                                    "Shutdown"
-
-                                danger:
-                                    true
-
-                                shown:
-                                    powerMenuScope.contentVisible
-
-                                revealDelay:
-                                    135
-
-                                actionCommand: [
-                                    "systemctl",
-                                    "poweroff"
-                                ]
-
-                                onTriggered: {
-                                    powerMenuScope.close()
-                                }
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        anchors.fill:
-                            parent
-
-                        radius:
-                            height / 2
-
-                        color:
-                            "transparent"
-
-                        border.width:
-                            1
-
-                        border.color:
-                            Qt.rgba(
-                                55 / 255,
-                                245 / 255,
-                                235 / 255,
-                                0.72
-                            )
-
-                        opacity:
-                            powerMenuScope.borderVisible
-                            ? 1.0
-                            : 0.0
-
-                        scale:
-                            powerMenuScope.borderVisible
-                            ? 1.0
-                            : 0.965
-
-                        Behavior on opacity {
-                            NumberAnimation {
-                                duration: 190
-                                easing.type: Easing.OutCubic
-                            }
-                        }
-
-                        Behavior on scale {
-                            NumberAnimation {
-                                duration: 220
-                                easing.type: Easing.OutCubic
-                            }
-                        }
+                    PowerMenuOption {
+                        iconText: "󰐥"
+                        labelText: "Shutdown"
+                        accentColor: "#ef6657"
+                        shown: root.cardsShown
+                        revealDelay: 126
+                        closeDelay: 0
+                        actionCommand: ["systemctl", "poweroff"]
+                        onTriggered: root.close()
                     }
                 }
             }

@@ -78,8 +78,8 @@ hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ to
     }
 )
 
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("qs ipc call controlcenter audio"), {
-        description = "Open Hypr-Lab Control Center directly on the Audio page"
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("qs ipc call topbarAudio toggle"), {
+        description = "Toggle Hypr-Lab angled Audio Control panel"
     }
 )
 
@@ -283,6 +283,19 @@ hl.layer_rule({
     xray = false,
 })
 
+
+hl.layer_rule({
+    name = "hypr-lab-control-center-blur",
+
+    match = {
+        namespace = "hypr-lab-control-center-v4"
+    },
+
+    blur = true,
+    ignore_alpha = 0.055,
+    xray = false,
+})
+
 hl.layer_rule({
     name = "hypr-lab-wallpaper-picker-blur",
 
@@ -297,6 +310,9 @@ hl.layer_rule({
     xray = true,
 })
 
+-- Hyprland 0.56.x: the launcher is a layer-shell surface. Layer rules expose
+-- blur/animation/order effects, but no per-layer shadow effect. Keep the
+-- compositor-side frosted blur here; the broken QML shadow was removed.
 hl.layer_rule({
     name = "hypr-lab-launcher-blur",
 
@@ -362,7 +378,7 @@ hl.config({
 
 hl.config({
     general = {
-        gaps_in = 5,
+        gaps_in = 10,
         gaps_out = 10,
 
         border_size = 2,
@@ -374,7 +390,7 @@ hl.config({
     },
 
     decoration = {
-        rounding = 17,
+        rounding = 2,
 
         active_opacity = 0.80,
         inactive_opacity = 0.70,
@@ -382,7 +398,7 @@ hl.config({
 
         shadow = {
             enabled = true,
-            range = 20,
+            range = 18,
             render_power = 2,
 
             color = "rgba(000000ee)",
@@ -450,13 +466,22 @@ hl.animation({
 })
 
 hl.animation({
-    leaf = "windowsOut",
+    leaf = "windowsIn",
     enabled = true,
-    speed = 7,
-    bezier = "default"
+    speed = 10,
+    bezier = "default",
+    style = "slide"
 })
 
 hl.animation({
+    leaf = "windowsOut",
+    enabled = true,
+    speed = 10,
+    bezier = "default",
+    style = "slide"
+})
+
+ hl.animation({
     leaf = "fade",
     enabled = true,
     speed = 7,

@@ -16,15 +16,20 @@ Item {
     property real visualCenterCompensation: 0
     property int unreadNotificationCount: 0
 
-    // Feature switches kept deliberately. Volume is re-enabled now; CAVA and
-    // notification-summary stay in the source as the next restore points.
+    // CenterIsland transient layers. Volume, notification summary and the
+    // compact CAVA/media views all share the same fixed island surface.
     property bool enableVolumeTransient: true
     property bool enableCavaFace: true
-    property bool enableNotificationSummary: false
+    property bool enableNotificationSummary: true
 
     readonly property var notificationModel: notificationServer.trackedNotifications
     readonly property int notificationCount: notificationServer.trackedNotifications.values.length
     readonly property bool hasNotifications: notificationCount > 0
+    // Always mirror the exact amount shown by the RightBar notification panel.
+    // This deliberately does not use unreadNotificationCount, because opening
+    // the panel may reset that transient counter while tracked notifications
+    // are still present.
+    readonly property int notificationSummaryCount: notificationCount
 
     property var sink: Pipewire.defaultAudioSink
     readonly property var sinkAudio: sink ? sink.audio : null
@@ -58,8 +63,7 @@ Item {
         onTriggered: root.selectPlayingPlayer()
     }
 
-    // Reserved transient kinds: "volume" is active now; "notification" stays
-    // wired in code but intentionally dormant until we restore that layer.
+    // Transient kinds: "volume", "notification" and "media".
     property string transientKind: ""
     property bool transientShown: false
 
@@ -125,22 +129,27 @@ Item {
         unreadNotificationCount = 0
     }
 
-    function showTransient(kind) {
+    function showTransient(kind, durationMs) {
         transientKind = kind
+        transientHideTimer.interval = durationMs
         transientShown = true
         transientHideTimer.restart()
     }
 
     function showVolumeTransient() {
         if (enableVolumeTransient)
-            showTransient("volume")
+            showTransient("volume", 2000)
     }
 
-    // Kept for the next step. It is intentionally not called by the
-    // NotificationServer while enableNotificationSummary is false.
-    function showNotificationTransient() {
+    function showNotificationTransient(durationMs) {
         if (enableNotificationSummary)
-            showTransient("notification")
+            showTransient("notification", durationMs || 2000)
+    }
+
+    function showMediaTransient() {
+        selectPlayingPlayer()
+        if (mediaPlayer)
+            showTransient("media", 5000)
     }
 
     NotificationServer {
@@ -174,7 +183,7 @@ Item {
             }
 
             if (!dndStatus)
-                root.showNotificationTransient()
+                root.showNotificationTransient(2000)
         }
     }
 
@@ -229,7 +238,9 @@ Item {
         shadowStrength: 0.38
     }
 
-    // Stable base face: tiny 5-bar CAVA + clock / date. The colon blinks on system seconds.
+    // Stable base face: tiny 5-bar CAVA + clock / date.
+    // The colon only changes opacity, never width, so the surrounding content
+    // stays completely still while it blinks once per second.
     Row {
         id: baseFace
         anchors.centerIn: parent
@@ -253,30 +264,74 @@ Item {
             }
         }
 
-        Text {
-            text: Qt.formatDateTime(systemClock.date, "HH")
-                  + ((systemClock.seconds % 2) === 0 ? ":" : " ")
-                  + Qt.formatDateTime(systemClock.date, "mm")
-                  + "  /  "
-                  + Qt.formatDateTime(systemClock.date, "yyyy. MM. dd.")
-            color: "white"
-            font.family: "Inter"
-            font.pixelSize: 12
-            font.bold: true
-            font.italic: true
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+        Row {
             anchors.verticalCenter: parent.verticalCenter
+            spacing: 4
+
+            Text {
+                text: Qt.formatDateTime(systemClock.date, "HH")
+                color: "white"
+                font.family: "Inter"
+                font.pixelSize: 12
+                font.bold: true
+                font.italic: true
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Text {
+                text: ":"
+                opacity: (systemClock.seconds % 2) === 0 ? 1.0 : 0.16
+                color: "white"
+                font.family: "Inter"
+                font.pixelSize: 12
+                font.bold: true
+                font.italic: true
+                anchors.verticalCenter: parent.verticalCenter
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 120; easing.type: Easing.InOutSine }
+                }
+            }
+
+            Text {
+                text: Qt.formatDateTime(systemClock.date, "mm")
+                color: "white"
+                font.family: "Inter"
+                font.pixelSize: 12
+                font.bold: true
+                font.italic: true
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Text {
+                text: "/"
+                color: Qt.rgba(1,1,1,0.52)
+                font.family: "Inter"
+                font.pixelSize: 11
+                font.bold: true
+                font.italic: true
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Text {
+                text: Qt.formatDateTime(systemClock.date, "yyyy. MM. dd.")
+                color: "white"
+                font.family: "Inter"
+                font.pixelSize: 12
+                font.bold: true
+                font.italic: true
+                anchors.verticalCenter: parent.verticalCenter
+            }
         }
 
         Behavior on opacity {
-            NumberAnimation { duration: 110; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: 170; easing.type: Easing.InOutCubic }
         }
     }
 
-    // Transient viewport: deliberately inset from BOTH slanted edges.
-    // The moving face is clipped here, so it never becomes visible outside
-    // the CenterIsland border while entering/exiting from the right.
+    // All transient content is clipped inside the CenterIsland. Volume keeps
+    // its existing right-to-left spring motion, while notification/media use a
+    // calm cross-fade so the island itself never jumps or changes size.
     Item {
         id: transientViewport
         x: 20
@@ -286,13 +341,13 @@ Item {
         clip: true
         z: 10
 
-        // Volume strip: slides only INSIDE the CenterIsland, follows volume
-        // changes fluidly, waits two seconds, then exits inside to the right.
         Item {
-            id: transientFace
+            id: volumeFace
             width: transientViewport.width
             height: transientViewport.height
-            x: root.transientShown ? 0 : transientViewport.width + 8
+            x: root.transientShown && root.transientKind === "volume"
+               ? 0
+               : transientViewport.width + 8
 
             Behavior on x {
                 SpringAnimation {
@@ -305,63 +360,116 @@ Item {
             Row {
                 anchors.centerIn: parent
                 spacing: 9
-                visible: root.transientKind === "volume"
 
-            Text {
-                text: root.muted ? "󰖁" : "󰕾"
-                color: root.accentColor
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 14
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Item {
-                width: 150
-                height: 14
-                anchors.verticalCenter: parent.verticalCenter
-
-                Rectangle {
+                Text {
+                    text: root.muted ? "󰖁" : "󰕾"
+                    color: root.accentColor
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 14
                     anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width
-                    height: 4
-                    radius: 2
-                    color: Qt.rgba(1,1,1,0.14)
                 }
 
-                Rectangle {
+                Item {
+                    width: 150
+                    height: 14
                     anchors.verticalCenter: parent.verticalCenter
-                    width: Math.max(
-                        0,
-                        Math.min(
-                            parent.width,
-                            (root.muted ? 0 : root.volumeLevel) * parent.width
-                        )
-                    )
-                    height: 4
-                    radius: 2
-                    color: root.accentColor
 
-                    Behavior on width {
-                        SpringAnimation {
-                            spring: 6
-                            damping: 0.46
-                            epsilon: 0.2
+                    Rectangle {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                        height: 4
+                        radius: 2
+                        color: Qt.rgba(1,1,1,0.14)
+                    }
+
+                    Rectangle {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: Math.max(
+                            0,
+                            Math.min(
+                                parent.width,
+                                (root.muted ? 0 : root.volumeLevel) * parent.width
+                            )
+                        )
+                        height: 4
+                        radius: 2
+                        color: root.accentColor
+
+                        Behavior on width {
+                            SpringAnimation {
+                                spring: 6
+                                damping: 0.46
+                                epsilon: 0.2
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Notification summary stays in code for the next restore step.
-            Text {
-                anchors.centerIn: parent
-                visible: root.transientKind === "notification"
-                text: "Új értesítés: " + root.unreadNotificationCount + " db"
-                color: "white"
-                font.family: "Inter"
-                font.pixelSize: 11
-                font.bold: true
-                font.italic: true
+        Text {
+            id: notificationFace
+            anchors.centerIn: parent
+            width: parent.width
+            opacity: root.transientShown && root.transientKind === "notification" ? 1.0 : 0.0
+            visible: opacity > 0.001
+            text: "Értesítés: " + root.notificationSummaryCount + " db"
+            color: "white"
+            font.family: "Inter"
+            font.pixelSize: 11
+            font.bold: true
+            font.italic: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+
+            Behavior on opacity {
+                NumberAnimation { duration: 180; easing.type: Easing.InOutCubic }
+            }
+        }
+
+        Text {
+            id: mediaFace
+            anchors.centerIn: parent
+            width: parent.width
+            opacity: root.transientShown && root.transientKind === "media" ? 1.0 : 0.0
+            visible: opacity > 0.001
+            text: root.mediaPlayer
+                  ? ((root.mediaPlayer.trackArtist || "Ismeretlen előadó")
+                     + "  /  "
+                     + (root.mediaPlayer.trackTitle || "Ismeretlen szám"))
+                  : ""
+            color: "white"
+            font.family: "Inter"
+            font.pixelSize: 11
+            font.bold: true
+            font.italic: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+
+            Behavior on opacity {
+                NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+            }
+        }
+    }
+
+    // Wheel gestures are intentionally local to the CenterIsland:
+    //   down -> unread notification summary for 3 s
+    //   up   -> current artist/title for 5 s
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.NoButton
+        hoverEnabled: false
+        z: 50
+
+        onWheel: function(wheel) {
+            if (wheel.angleDelta.y < 0) {
+                root.showNotificationTransient(3000)
+                wheel.accepted = true
+            } else if (wheel.angleDelta.y > 0) {
+                root.showMediaTransient()
+                wheel.accepted = true
             }
         }
     }
