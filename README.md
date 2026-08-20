@@ -39,6 +39,8 @@
 * redesigned Audio Control and Notification panels with animated expandable geometry;
 * Center Island with clock, date, synchronized notification feedback, volume feedback, media information and compact audio visualization;
 * improved monitor and display controls integrated into the new Control Center design;
+* redesigned horizontal Wallpaper Picker with angled thumbnail cards, wallpaper-adaptive accents, hover filename feedback, keyboard navigation and smooth edge-hover scrolling;
+* redesigned Lock Screen with wallpaper-adaptive angled login geometry, fixed system controls and an optional MPRIS/CAVA media dock;
 * reduced wallpaper memory usage;
 * cleaner and more maintainable Quickshell source structure;
 * cleaned-up Hyprland Lua configuration and helper scripts;
@@ -55,6 +57,8 @@
 * új Audio Control és Notification panelek animált, kinyúló geometriával;
 * Center Island órával, dátummal, szinkronizált értesítés-visszajelzéssel, hangerő-visszajelzéssel, médiainformációval és kompakt audio-vizualizációval;
 * továbbfejlesztett monitor- és kijelzőbeállítások az új Control Center felületbe integrálva;
+* újratervezett vízszintes Wallpaper Picker ferde előnézeti kártyákkal, háttérkép-adaptív accentekkel, hover fájlnév-kijelzéssel, billentyűzetes navigációval és finom szélső hover-görgetéssel;
+* újratervezett Lock Screen háttérkép-adaptív ferde login geometriával, fix rendszervezérőkkel és opcionális MPRIS/CAVA media dockkal;
 * csökkentett memóriahasználat a háttérképkezelésben;
 * tisztább és könnyebben karbantartható Quickshell forrásstruktúra;
 * megtisztított Hyprland Lua konfiguráció és helper scriptek;
@@ -92,9 +96,9 @@ Main features include:
 
 * Wallpaper Manager with animated transitions;
 
-* wallpaper picker;
+* horizontal angled Wallpaper Picker with animated transitions and hover/keyboard navigation;
 
-* custom Lock Screen;
+* custom Lock Screen with wallpaper-adaptive login panel and optional media/CAVA controls;
 
 * Welcome Screen;
 
@@ -136,9 +140,9 @@ Főbb funkciói:
 
 * animált átmeneteket használó Wallpaper Manager;
 
-* háttérképválasztó;
+* vízszintes, ferde Wallpaper Picker animált átmenetekkel, hover- és billentyűzetes navigációval;
 
-* egyedi Lock Screen;
+* egyedi Lock Screen háttérkép-adaptív login panellel és opcionális media/CAVA vezérléssel;
 
 * Welcome Screen;
 

@@ -12,6 +12,7 @@ Scope {
 
     property url currentWallpaper: ""
     property int transitionEffect: 0
+    property color accentColor: "#37f5eb"
 
     readonly property string wallpaperStateDirectory:
         Quickshell.env("HOME") + "/.cache/hypr-lab"
@@ -50,8 +51,13 @@ Scope {
         showOnlyReadable:
             true
 
+        // Deterministic ascending order: left -> right.
+        // HL_WP1.png ... HL_WP14.png when filenames use the same numeric scheme.
         sortField:
             FolderListModel.Name
+
+        sortReversed:
+            false
     }
 
     function wallpaperCount(): int {
@@ -409,6 +415,9 @@ Scope {
 
         currentWallpaper:
             root.currentWallpaper
+
+        accentColor:
+            root.accentColor
 
         onWallpaperChosen:
             function(source) {

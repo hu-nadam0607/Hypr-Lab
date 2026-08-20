@@ -9,27 +9,85 @@ Scope {
     id: root
 
     property var wallpaperModel: null
-
     property url currentWallpaper: ""
+    property color accentColor: "#37f5eb"
 
     property bool isOpen: false
-
     property bool windowVisible: false
-
     property real openProgress: 0.0
+    property real exitProgress: 0.0
+    property url pendingWallpaper: ""
+    property string hoveredFileName: ""
+    property int edgeScrollDirection: 0
 
     signal wallpaperChosen(url source)
 
-    readonly property int columns: 4
+    Timer {
+        id: edgeScrollTimer
+        interval: 16
+        repeat: true
 
-    readonly property int cellWidth: 230
+        onTriggered: {
+            if (root.edgeScrollDirection === 0)
+                return
 
-    readonly property int cellHeight: 150
+            const maxX =
+                Math.max(
+                    0,
+                    ribbonView.contentWidth
+                    - ribbonView.width
+                )
+
+            const nextX =
+                Math.max(
+                    0,
+                    Math.min(
+                        maxX,
+                        ribbonView.contentX
+                        + root.edgeScrollDirection * 4.4
+                    )
+                )
+
+            ribbonView.contentX = nextX
+
+            if (
+                nextX <= 0
+                || nextX >= maxX
+            ) {
+                stop()
+                root.edgeScrollDirection = 0
+            }
+        }
+    }
+
+    readonly property real topBarHeight: 36
+    readonly property int cardWidth: 230
+    readonly property int cardHeight: 142
+    readonly property int cardSpacing: 12
+
+    readonly property string selectedFileName: {
+        if (
+            !wallpaperModel
+            || ribbonView.currentIndex < 0
+            || ribbonView.currentIndex >= wallpaperModel.count
+        ) {
+            return ""
+        }
+
+        return wallpaperModel.get(
+            ribbonView.currentIndex,
+            "fileName"
+        )
+    }
 
     function open(): void {
         if (isOpen)
             return
 
+        pendingWallpaper = ""
+        hoveredFileName = ""
+        exitProgress = 0.0
+        openProgress = 0.0
         windowVisible = true
         isOpen = true
 
@@ -42,11 +100,14 @@ Scope {
             return
 
         isOpen = false
-
+        hoveredFileName = ""
+        edgeScrollDirection = 0
+        edgeScrollTimer.stop()
         openDelay.stop()
+        applyDelay.stop()
+        applyFadeDelay.stop()
 
         openProgress = 0.0
-
         hideDelay.restart()
     }
 
@@ -74,8 +135,7 @@ Scope {
 
             if (
                 source.toString()
-                ===
-                currentWallpaper.toString()
+                === currentWallpaper.toString()
             ) {
                 return i
             }
@@ -89,78 +149,101 @@ Scope {
             !wallpaperModel
             || wallpaperModel.count <= 0
         ) {
-            wallpaperGrid.currentIndex =
-                -1
-
+            ribbonView.currentIndex = -1
             return
         }
 
-        const index =
-            currentWallpaperIndex()
+        const index = currentWallpaperIndex()
 
-        wallpaperGrid.currentIndex =
+        ribbonView.currentIndex =
             index >= 0 ? index : 0
 
-        wallpaperGrid.positionViewAtIndex(
-            wallpaperGrid.currentIndex,
-            GridView.Contain
+        Qt.callLater(
+            function() {
+                ribbonView.positionViewAtIndex(
+                    ribbonView.currentIndex,
+                    ListView.Center
+                )
+            }
         )
     }
 
-    function moveHorizontal(
-        delta: int
-    ): void {
-        if (wallpaperGrid.count <= 0)
+    function moveSelection(delta: int): void {
+        if (ribbonView.count <= 0)
             return
 
-        wallpaperGrid.currentIndex =
+        ribbonView.currentIndex =
             Math.max(
                 0,
                 Math.min(
-                    wallpaperGrid.currentIndex
-                    + delta,
-
-                    wallpaperGrid.count - 1
+                    ribbonView.currentIndex + delta,
+                    ribbonView.count - 1
                 )
             )
 
-        wallpaperGrid.positionViewAtIndex(
-            wallpaperGrid.currentIndex,
-            GridView.Contain
+        ribbonView.positionViewAtIndex(
+            ribbonView.currentIndex,
+            ListView.Center
         )
     }
 
-    function moveVertical(
-        deltaRows: int
-    ): void {
-        moveHorizontal(
-            deltaRows * columns
-        )
+    function startEdgeScroll(direction: int): void {
+        if (ribbonView.count <= 0)
+            return
+
+        edgeScrollDirection = direction
+        edgeScrollTimer.start()
+    }
+
+    function stopEdgeScroll(direction: int): void {
+        if (edgeScrollDirection === direction) {
+            edgeScrollDirection = 0
+            edgeScrollTimer.stop()
+        }
+    }
+
+    function beginApply(source: url): void {
+        if (
+            !source
+            || source.toString() === ""
+            || pendingWallpaper.toString() !== ""
+        ) {
+            return
+        }
+
+        pendingWallpaper = source
+        isOpen = false
+
+        // The cards first fall out of the ribbon.
+        exitProgress = 1.0
+
+        // Then the remaining title/footer material fades away.
+        applyFadeDelay.restart()
+
+        // Only after the picker is visually gone does WallpaperManager receive
+        // the selected source, so its existing random transition stays clean.
+        applyDelay.restart()
     }
 
     function chooseSelected(): void {
         if (
             !wallpaperModel
-            || wallpaperGrid.currentIndex < 0
+            || ribbonView.currentIndex < 0
         ) {
             return
         }
 
-        const source =
+        beginApply(
             wallpaperModel.get(
-                wallpaperGrid.currentIndex,
+                ribbonView.currentIndex,
                 "fileUrl"
             )
-
-        if (source)
-            wallpaperChosen(source)
+        )
     }
 
     Timer {
         id: openDelay
-
-        interval: 15
-
+        interval: 18
         repeat: false
 
         onTriggered:
@@ -169,44 +252,71 @@ Scope {
 
     Timer {
         id: focusDelay
-
-        interval: 70
-
+        interval: 75
         repeat: false
 
         onTriggered: {
             root.restoreSelection()
+            keyboardCatcher.forceActiveFocus()
+        }
+    }
 
-            keyboardCatcher
-                .forceActiveFocus()
+    Timer {
+        id: applyFadeDelay
+        interval: 170
+        repeat: false
+
+        onTriggered:
+            root.openProgress = 0.0
+    }
+
+    Timer {
+        id: applyDelay
+        interval: 360
+        repeat: false
+
+        onTriggered: {
+            const source = root.pendingWallpaper
+
+            if (
+                source
+                && source.toString() !== ""
+            ) {
+                root.wallpaperChosen(source)
+            }
         }
     }
 
     Timer {
         id: hideDelay
-
         interval: 300
-
         repeat: false
 
-        onTriggered:
+        onTriggered: {
             root.windowVisible = false
+            root.exitProgress = 0.0
+            root.pendingWallpaper = ""
+        }
     }
 
     Behavior on openProgress {
         NumberAnimation {
-            duration: 280
+            duration: 220
+            easing.type: Easing.OutCubic
+        }
+    }
 
-            easing.type:
-                Easing.OutCubic
+    Behavior on exitProgress {
+        NumberAnimation {
+            duration: 260
+            easing.type: Easing.InCubic
         }
     }
 
     PanelWindow {
         id: pickerWindow
 
-        visible:
-            root.windowVisible
+        visible: root.windowVisible
 
         anchors {
             top: true
@@ -216,10 +326,7 @@ Scope {
         }
 
         color: "transparent"
-
-        exclusionMode:
-            ExclusionMode.Ignore
-
+        exclusionMode: ExclusionMode.Ignore
         focusable: true
         aboveWindows: true
 
@@ -232,16 +339,24 @@ Scope {
         WlrLayershell.keyboardFocus:
             WlrKeyboardFocus.Exclusive
 
+        // Keep the unified TopBar visually untouched. Everything under it gets
+        // only a restrained dim layer; compositor blur is still provided by the
+        // existing Hyprland layer rule for this namespace.
         Rectangle {
-            anchors.fill: parent
+            anchors {
+                top: parent.top
+                topMargin: root.topBarHeight
+                bottom: parent.bottom
+                left: parent.left
+                right: parent.right
+            }
 
             color:
                 Qt.rgba(
-                    4 / 255,
-                    7 / 255,
-                    11 / 255,
-                    0.28
-                    * root.openProgress
+                    2 / 255,
+                    5 / 255,
+                    8 / 255,
+                    0.24 * root.openProgress
                 )
 
             MouseArea {
@@ -253,671 +368,713 @@ Scope {
         }
 
         Item {
-            id: pickerContainer
+            id: titleBlock
 
-            anchors.centerIn: parent
+            anchors.horizontalCenter: parent.horizontalCenter
 
-            width: 1000
+            y: Math.max(
+                root.topBarHeight + 78,
+                parent.height * 0.25
+            )
 
-            height:
-                Math.min(
-                    690,
-                    Math.max(
-                        390,
+            width: 620
+            height: 58
+            opacity: root.openProgress
 
-                        wallpaperGrid
-                            .contentHeight
-                        + 150
-                    )
-                )
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
 
-            opacity:
-                root.openProgress
+                text: "VÁLASSZ EGY KÉPERNYŐHÁTTERET"
 
-            scale:
-                0.94
-                +
-                (
-                    0.06
-                    * root.openProgress
-                )
-
-            transformOrigin:
-                Item.Center
-
-            Rectangle {
-                anchors.fill:
-                    pickerCard
-
-                anchors.margins: -7
-
-                radius:
-                    pickerCard.radius + 7
-
-                color:
-                    "transparent"
-
-                border.width: 1
-
-                border.color:
-                    Qt.rgba(
-                        55 / 255,
-                        245 / 255,
-                        235 / 255,
-
-                        0.20
-                        * root.openProgress
-                    )
-
-                opacity:
-                    root.openProgress
+                color: Qt.rgba(1, 1, 1, 0.94)
+                font.family: "Inter"
+                font.pixelSize: 19
+                font.weight: Font.DemiBold
+                font.letterSpacing: 1.1
             }
 
-            Rectangle {
-                id: pickerCard
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 29
+
+                text:
+                    root.wallpaperModel
+                    ?
+                    root.wallpaperModel.count
+                    + " háttérkép  •  ← → navigáció  •  Enter alkalmazás  •  Esc bezárás"
+                    :
+                    ""
+
+                color: Qt.rgba(1, 1, 1, 0.46)
+                font.family: "Inter"
+                font.pixelSize: 11
+            }
+        }
+
+        Item {
+            id: ribbonHost
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+
+            anchors.leftMargin: 110
+            anchors.rightMargin: 110
+
+            height: 205
+
+            opacity:
+                root.openProgress > 0
+                || root.exitProgress > 0
+                ? 1
+                : 0
+
+            Canvas {
+                id: ribbonSurface
 
                 anchors.fill: parent
-
-                radius: 28
-
-                color:
-                    Qt.rgba(
-                        10 / 255,
-                        14 / 255,
-                        20 / 255,
-                        0.94
-                    )
-
-                border.width: 2
-
-                border.color:
-                    Qt.rgba(
-                        55 / 255,
-                        245 / 255,
-                        235 / 255,
-                        0.78
-                    )
-
                 antialiasing: true
+                opacity: 0.94 * root.openProgress
 
-                MouseArea {
-                    anchors.fill: parent
+                onPaint: {
+                    const ctx = getContext("2d")
+                    const w = width
+                    const h = height
+                    const sl = 32
 
-                    onClicked:
-                        function(mouse) {
-                            mouse.accepted = true
-                        }
+                    ctx.clearRect(0, 0, w, h)
+
+                    ctx.beginPath()
+                    ctx.moveTo(sl, 12)
+                    ctx.lineTo(w - 8, 12)
+                    ctx.lineTo(w - sl, h - 12)
+                    ctx.lineTo(8, h - 12)
+                    ctx.closePath()
+
+                    ctx.fillStyle =
+                        Qt.rgba(
+                            6 / 255,
+                            10 / 255,
+                            14 / 255,
+                            0.34
+                        )
+                    ctx.fill()
+
+                    // Wallpaper-adaptive 2px bottom border only.
+                    ctx.beginPath()
+                    ctx.moveTo(8, h - 12.5)
+                    ctx.lineTo(w - sl, h - 12.5)
+                    ctx.lineWidth = 2
+                    ctx.strokeStyle =
+                        Qt.rgba(
+                            root.accentColor.r,
+                            root.accentColor.g,
+                            root.accentColor.b,
+                            0.88
+                        )
+                    ctx.stroke()
                 }
 
-                Item {
-                    id: header
+                Connections {
+                    target: root
 
-                    anchors.top:
-                        parent.top
-
-                    anchors.left:
-                        parent.left
-
-                    anchors.right:
-                        parent.right
-
-                    height: 92
-
-                    Text {
-                        anchors.left:
-                            parent.left
-
-                        anchors.leftMargin:
-                            28
-
-                        anchors.top:
-                            parent.top
-
-                        anchors.topMargin:
-                            20
-
-                        text:
-                            "HYPR-LAB WALLPAPERS"
-
-                        color:
-                            "#efffff"
-
-                        font.family:
-                            "Inter"
-
-                        font.pixelSize:
-                            18
-
-                        font.weight:
-                            Font.DemiBold
-
-                        font.letterSpacing:
-                            1.4
+                    function onAccentColorChanged(): void {
+                        ribbonSurface.requestPaint()
                     }
 
-                    Text {
-                        anchors.left:
-                            parent.left
+                    function onOpenProgressChanged(): void {
+                        ribbonSurface.requestPaint()
+                    }
+                }
+            }
 
-                        anchors.leftMargin:
-                            28
+            ListView {
+                id: ribbonView
 
-                        anchors.top:
-                            parent.top
+                anchors.fill: parent
+                anchors.leftMargin: 34
+                anchors.rightMargin: 34
+                anchors.topMargin: 22
+                anchors.bottomMargin: 22
 
-                        anchors.topMargin:
-                            52
+                orientation: ListView.Horizontal
+                spacing: root.cardSpacing
+                clip: true
 
-                        text:
-                            root.wallpaperModel
+                model:
+                    root.windowVisible
+                    ? root.wallpaperModel
+                    : null
+
+                boundsBehavior: Flickable.StopAtBounds
+                flickDeceleration: 2700
+                maximumFlickVelocity: 2200
+
+                currentIndex: -1
+                highlightFollowsCurrentItem: false
+
+                delegate: Item {
+                    id: delegateRoot
+
+                    required property int index
+                    required property url fileUrl
+                    required property string fileName
+
+                    width: root.cardWidth
+                    height: ribbonView.height
+
+                    readonly property bool selected:
+                        ribbonView.currentIndex === index
+
+                    readonly property bool activeWallpaper:
+                        root.currentWallpaper.toString()
+                        === fileUrl.toString()
+
+                    property bool entered: false
+
+                    Timer {
+                        id: entryTimer
+
+                        interval:
+                            35
+                            + Math.min(
+                                delegateRoot.index,
+                                16
+                            ) * 26
+
+                        repeat: false
+
+                        onTriggered:
+                            delegateRoot.entered = true
+                    }
+
+                    Component.onCompleted:
+                        entryTimer.start()
+
+                    Item {
+                        id: cardVisual
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                        width: root.cardWidth
+                        height: root.cardHeight
+
+                        y:
+                            delegateRoot.entered
                             ?
-                            root.wallpaperModel.count
-                            +
-                            " wallpaper  •  "
-                            +
-                            "← ↑ ↓ →  Enter  Esc"
+                            (
+                                8
+                                + root.exitProgress * 205
+                            )
                             :
-                            "Nincs wallpaper model"
+                            -190
 
-                        color:
-                            Qt.rgba(
-                                200 / 255,
-                                220 / 255,
-                                225 / 255,
-                                0.55
+                        opacity:
+                            delegateRoot.entered
+                            ?
+                            (
+                                (1.0 - root.exitProgress)
+                                * Math.max(
+                                    root.openProgress,
+                                    0.001
+                                )
                             )
+                            :
+                            0
 
-                        font.family:
-                            "Inter"
+                        scale:
+                            cardMouse.containsMouse
+                            ? 1.055
+                            : 1.0
 
-                        font.pixelSize:
-                            13
-                    }
+                        z:
+                            cardMouse.containsMouse
+                            || delegateRoot.selected
+                            ? 10
+                            : 1
 
-                    Rectangle {
-                        anchors.left:
-                            parent.left
+                        Behavior on y {
+                            NumberAnimation {
+                                duration: 330
+                                easing.type: Easing.OutBack
+                                easing.overshoot: 0.85
+                            }
+                        }
 
-                        anchors.right:
-                            parent.right
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: 180
+                                easing.type: Easing.OutCubic
+                            }
+                        }
 
-                        anchors.bottom:
-                            parent.bottom
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: 115
+                                easing.type: Easing.OutCubic
+                            }
+                        }
 
-                        height: 1
+                        Image {
+                            id: wallpaperImage
 
-                        color:
-                            Qt.rgba(
-                                55 / 255,
-                                245 / 255,
-                                235 / 255,
-                                0.20
-                            )
-                    }
-                }
+                            anchors.fill: parent
 
-                GridView {
-                    id: wallpaperGrid
+                            source:
+                                root.windowVisible
+                                ? delegateRoot.fileUrl
+                                : ""
 
-                    anchors.top:
-                        header.bottom
+                            sourceSize.width:
+                                Math.ceil(width * 1.5)
 
-                    anchors.left:
-                        parent.left
+                            sourceSize.height:
+                                Math.ceil(height * 1.5)
 
-                    anchors.right:
-                        parent.right
-
-                    anchors.bottom:
-                        parent.bottom
-
-                    anchors.margins: 20
-
-                    clip: true
-
-                    model:
-                        root.windowVisible
-                        ? root.wallpaperModel
-                        : null
-
-                    cellWidth:
-                        root.cellWidth
-
-                    cellHeight:
-                        root.cellHeight
-
-                    boundsBehavior:
-                        Flickable.StopAtBounds
-
-                    highlightFollowsCurrentItem:
-                        true
-
-                    ScrollBar.vertical:
-                        ScrollBar {}
-
-                    delegate: Item {
-                        id: delegateRoot
-
-                        required property int index
-
-                        required property url fileUrl
-
-                        required property string fileName
-
-                        width:
-                            wallpaperGrid.cellWidth
-
-                        height:
-                            wallpaperGrid.cellHeight
-
-                        readonly property bool selected:
-                            wallpaperGrid.currentIndex
-                            === index
-
-                        readonly property bool activeWallpaper:
-                            root.currentWallpaper
-                                .toString()
-                            ===
-                            fileUrl.toString()
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                            cache: false
+                            smooth: true
+                            visible: false
+                        }
 
                         Item {
-                            anchors.fill:
-                                parent
+                            id: angledMask
 
-                            anchors.margins:
-                                7
+                            anchors.fill: parent
+                            visible: false
+                            layer.enabled: true
 
-                            Rectangle {
-                                anchors.fill:
-                                    parent
+                            Canvas {
+                                anchors.fill: parent
+                                antialiasing: true
 
-                                anchors.margins:
-                                    -4
+                                onPaint: {
+                                    const ctx = getContext("2d")
+                                    const w = width
+                                    const h = height
+                                    const sl = 18
 
-                                radius: 18
+                                    ctx.clearRect(0, 0, w, h)
+                                    ctx.beginPath()
+                                    ctx.moveTo(sl, 0)
+                                    ctx.lineTo(w, 0)
+                                    ctx.lineTo(w - sl, h)
+                                    ctx.lineTo(0, h)
+                                    ctx.closePath()
+                                    ctx.fillStyle = "white"
+                                    ctx.fill()
+                                }
+                            }
+                        }
 
-                                color:
-                                    "transparent"
+                        MultiEffect {
+                            anchors.fill: parent
 
-                                antialiasing:
-                                    true
+                            source: wallpaperImage
+                            maskEnabled: true
+                            maskSource: angledMask
+                            maskThresholdMin: 0.5
+                            maskSpreadAtMin: 1.0
+                        }
 
-                                border.width:
+                        Item {
+                            anchors.fill: parent
+
+                            Canvas {
+                                anchors.fill: parent
+                                antialiasing: true
+                                opacity: 0.52
+
+                                onPaint: {
+                                    const ctx = getContext("2d")
+                                    const w = width
+                                    const h = height
+                                    const sl = 18
+
+                                    ctx.clearRect(0, 0, w, h)
+
+                                    ctx.beginPath()
+                                    ctx.moveTo(sl, h * 0.58)
+                                    ctx.lineTo(w - sl * 0.42, h * 0.58)
+                                    ctx.lineTo(w - sl, h)
+                                    ctx.lineTo(0, h)
+                                    ctx.closePath()
+
+                                    const g =
+                                        ctx.createLinearGradient(
+                                            0,
+                                            h * 0.55,
+                                            0,
+                                            h
+                                        )
+
+                                    g.addColorStop(
+                                        0,
+                                        Qt.rgba(0, 0, 0, 0)
+                                    )
+
+                                    g.addColorStop(
+                                        1,
+                                        Qt.rgba(0, 0, 0, 0.78)
+                                    )
+
+                                    ctx.fillStyle = g
+                                    ctx.fill()
+                                }
+                            }
+                        }
+
+                        Canvas {
+                            id: cardBorder
+
+                            anchors.fill: parent
+                            antialiasing: true
+
+                            function redraw(): void {
+                                requestPaint()
+                            }
+
+                            onPaint: {
+                                const ctx = getContext("2d")
+                                const w = width
+                                const h = height
+                                const sl = 18
+
+                                ctx.clearRect(0, 0, w, h)
+
+                                ctx.beginPath()
+                                ctx.moveTo(sl, 1)
+                                ctx.lineTo(w - 1, 1)
+                                ctx.lineTo(w - sl - 1, h - 1)
+                                ctx.lineTo(1, h - 1)
+                                ctx.closePath()
+
+                                const emphasized =
+                                    delegateRoot.selected
+                                    || cardMouse.containsMouse
+                                    || delegateRoot.activeWallpaper
+
+                                ctx.lineWidth =
                                     delegateRoot.selected
                                     ? 2
                                     : 1
 
-                                border.color:
-                                    delegateRoot.selected
+                                ctx.strokeStyle =
+                                    emphasized
                                     ?
                                     Qt.rgba(
-                                        55 / 255,
-                                        245 / 255,
-                                        235 / 255,
-                                        0.95
+                                        root.accentColor.r,
+                                        root.accentColor.g,
+                                        root.accentColor.b,
+                                        delegateRoot.selected
+                                        ? 0.98
+                                        : 0.66
                                     )
                                     :
-                                    delegateRoot.activeWallpaper
-                                    ?
-                                    Qt.rgba(
-                                        55 / 255,
-                                        245 / 255,
-                                        235 / 255,
-                                        0.42
-                                    )
-                                    :
-                                    Qt.rgba(
-                                        1,
-                                        1,
-                                        1,
-                                        0.08
-                                    )
+                                    Qt.rgba(1, 1, 1, 0.13)
 
-                                Behavior on border.color {
-                                    ColorAnimation {
-                                        duration: 130
-                                    }
+                                ctx.stroke()
+                            }
+
+                            Connections {
+                                target: root
+
+                                function onAccentColorChanged(): void {
+                                    cardBorder.redraw()
                                 }
                             }
 
-                            Item {
-                                id: thumbnailFrame
+                            Connections {
+                                target: delegateRoot
 
-                                anchors.fill:
-                                    parent
-
-                                Image {
-                                    id: thumbnailSource
-
-                                    anchors.fill:
-                                        parent
-
-                                    source:
-                                        root.windowVisible
-                                        ? delegateRoot.fileUrl
-                                        : ""
-
-                                    sourceSize.width:
-                                        Math.ceil(width * 2)
-
-                                    sourceSize.height:
-                                        Math.ceil(height * 2)
-
-                                    fillMode:
-                                        Image.PreserveAspectCrop
-
-                                    asynchronous:
-                                        true
-
-                                    cache:
-                                        false
-
-                                    smooth:
-                                        true
-
-                                    mipmap:
-                                        false
-
-                                    visible:
-                                        false
+                                function onSelectedChanged(): void {
+                                    cardBorder.redraw()
                                 }
 
-                                Item {
-                                    id: thumbnailMask
-
-                                    anchors.fill:
-                                        parent
-
-                                    visible:
-                                        false
-
-                                    layer.enabled:
-                                        true
-
-                                    Rectangle {
-                                        anchors.fill:
-                                            parent
-
-                                        radius:
-                                            14
-
-                                        color:
-                                            "white"
-
-                                        antialiasing:
-                                            true
-                                    }
+                                function onActiveWallpaperChanged(): void {
+                                    cardBorder.redraw()
                                 }
+                            }
 
-                                MultiEffect {
-                                    anchors.fill:
-                                        parent
+                            Connections {
+                                target: cardMouse
 
-                                    source:
-                                        thumbnailSource
-
-                                    maskEnabled:
-                                        true
-
-                                    maskSource:
-                                        thumbnailMask
-
-                                    maskThresholdMin:
-                                        0.5
-
-                                    maskSpreadAtMin:
-                                        1.0
+                                function onContainsMouseChanged(): void {
+                                    cardBorder.redraw()
                                 }
+                            }
+                        }
 
-                                Rectangle {
-                                    anchors.left:
-                                        parent.left
+                        Rectangle {
+                            anchors.right: parent.right
+                            anchors.rightMargin: 15
+                            anchors.top: parent.top
+                            anchors.topMargin: 11
 
-                                    anchors.right:
-                                        parent.right
+                            width: 8
+                            height: 8
+                            radius: 4
 
-                                    anchors.bottom:
-                                        parent.bottom
+                            visible:
+                                delegateRoot.activeWallpaper
 
-                                    height: 43
+                            color: root.accentColor
+                        }
 
-                                    bottomLeftRadius:
-                                        14
+                        MouseArea {
+                            id: cardMouse
 
-                                    bottomRightRadius:
-                                        14
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
 
-                                    gradient:
-                                        Gradient {
-                                            GradientStop {
-                                                position:
-                                                    0.0
-
-                                                color:
-                                                    "#00000000"
-                                            }
-
-                                            GradientStop {
-                                                position:
-                                                    1.0
-
-                                                color:
-                                                    "#df000000"
-                                            }
-                                        }
-                                }
-
-                                Text {
-                                    anchors.left:
-                                        parent.left
-
-                                    anchors.leftMargin:
-                                        11
-
-                                    anchors.right:
-                                        activeMark.left
-
-                                    anchors.rightMargin:
-                                        8
-
-                                    anchors.bottom:
-                                        parent.bottom
-
-                                    anchors.bottomMargin:
-                                        9
-
-                                    text:
+                            onContainsMouseChanged: {
+                                if (containsMouse) {
+                                    root.hoveredFileName =
                                         delegateRoot.fileName
-
-                                    elide:
-                                        Text.ElideRight
-
-                                    color:
-                                        "#f2ffff"
-
-                                    font.family:
-                                        "Inter"
-
-                                    font.pixelSize:
-                                        12
-
-                                    font.weight:
-                                        Font.Medium
+                                } else if (
+                                    root.hoveredFileName
+                                    === delegateRoot.fileName
+                                ) {
+                                    root.hoveredFileName = ""
                                 }
+                            }
 
-                                Rectangle {
-                                    id: activeMark
+                            onClicked: {
+                                ribbonView.currentIndex =
+                                    delegateRoot.index
 
-                                    anchors.right:
-                                        parent.right
-
-                                    anchors.rightMargin:
-                                        10
-
-                                    anchors.bottom:
-                                        parent.bottom
-
-                                    anchors.bottomMargin:
-                                        10
-
-                                    width: 9
-                                    height: 9
-
-                                    radius: 5
-
-                                    visible:
-                                        delegateRoot
-                                            .activeWallpaper
-
-                                    color:
-                                        "#37f5eb"
-                                }
-
-                                Rectangle {
-                                    anchors.fill:
-                                        parent
-
-                                    radius:
-                                        14
-
-                                    color:
-                                        mouseArea
-                                            .containsMouse
-                                        ?
-                                        Qt.rgba(
-                                            55 / 255,
-                                            245 / 255,
-                                            235 / 255,
-                                            0.08
-                                        )
-                                        :
-                                        "transparent"
-
-                                    Behavior on color {
-                                        ColorAnimation {
-                                            duration:
-                                                120
-                                        }
-                                    }
-                                }
-
-                                MouseArea {
-                                    id: mouseArea
-
-                                    anchors.fill:
-                                        parent
-
-                                    hoverEnabled:
-                                        true
-
-                                    cursorShape:
-                                        Qt.PointingHandCursor
-
-                                    onEntered:
-                                        wallpaperGrid
-                                            .currentIndex
-                                        =
-                                        delegateRoot.index
-
-                                    onClicked: {
-                                        wallpaperGrid
-                                            .currentIndex
-                                        =
-                                        delegateRoot.index
-
-                                        root.wallpaperChosen(
-                                            delegateRoot.fileUrl
-                                        )
-                                    }
-                                }
+                                root.beginApply(
+                                    delegateRoot.fileUrl
+                                )
                             }
                         }
                     }
                 }
+
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse
+                    orientation: Qt.Vertical
+
+                    onWheel: function(event) {
+                        if (event.angleDelta.y < 0)
+                            root.moveSelection(1)
+                        else if (event.angleDelta.y > 0)
+                            root.moveSelection(-1)
+
+                        event.accepted = true
+                    }
+                }
+            }
+
+            // Edge hover controls. No click is required:
+            // entering the left/right zone jumps the ribbon to the first/last
+            // wallpaper while keeping keyboard and wheel navigation unchanged.
+            Item {
+                id: leftEdgeControl
+
+                anchors.right: parent.left
+                anchors.rightMargin: 24
+                anchors.verticalCenter: parent.verticalCenter
+                width: 72
+                height: 118
+                z: 30
+                opacity: root.openProgress
+
+                Text {
+                    anchors.centerIn: parent
+
+                    text: "<"
+
+                    color:
+                        leftEdgeMouse.containsMouse
+                        ? root.accentColor
+                        : Qt.rgba(1, 1, 1, 0.72)
+
+                    font.family: "Inter"
+                    font.pixelSize: 42
+                    font.weight: Font.Light
+                    font.italic: true
+
+                    Behavior on color {
+                        ColorAnimation { duration: 100 }
+                    }
+
+                    scale:
+                        leftEdgeMouse.containsMouse
+                        ? 1.12
+                        : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 110
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+
+                MouseArea {
+                    id: leftEdgeMouse
+
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    acceptedButtons: Qt.NoButton
+
+                    onEntered:
+                        root.startEdgeScroll(-1)
+
+                    onExited:
+                        root.stopEdgeScroll(-1)
+                }
+            }
+
+            Item {
+                id: rightEdgeControl
+
+                anchors.left: parent.right
+                anchors.leftMargin: 24
+                anchors.verticalCenter: parent.verticalCenter
+                width: 72
+                height: 118
+                z: 30
+                opacity: root.openProgress
+
+                Text {
+                    anchors.centerIn: parent
+
+                    text: ">"
+
+                    color:
+                        rightEdgeMouse.containsMouse
+                        ? root.accentColor
+                        : Qt.rgba(1, 1, 1, 0.72)
+
+                    font.family: "Inter"
+                    font.pixelSize: 42
+                    font.weight: Font.Light
+                    font.italic: true
+
+                    Behavior on color {
+                        ColorAnimation { duration: 100 }
+                    }
+
+                    scale:
+                        rightEdgeMouse.containsMouse
+                        ? 1.12
+                        : 1.0
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 110
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+
+                MouseArea {
+                    id: rightEdgeMouse
+
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    acceptedButtons: Qt.NoButton
+
+                    onEntered:
+                        root.startEdgeScroll(1)
+
+                    onExited:
+                        root.stopEdgeScroll(1)
+                }
+            }
+        }
+
+        Item {
+            id: selectionFooter
+
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            y:
+                ribbonHost.y
+                + ribbonHost.height
+                + 20
+
+            width: 700
+            height: 52
+            opacity: root.openProgress
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+
+                text:
+                    root.hoveredFileName !== ""
+                    ? root.hoveredFileName
+                    : root.selectedFileName
+
+                color: Qt.rgba(1, 1, 1, 0.92)
+                font.family: "Inter"
+                font.pixelSize: 14
+                font.weight: Font.DemiBold
+                font.italic: true
+            }
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 28
+
+                width: 74
+                height: 2
+
+                color: root.accentColor
+                opacity: 0.82
             }
         }
 
         Item {
             id: keyboardCatcher
 
-            anchors.fill:
-                parent
-
+            anchors.fill: parent
             focus: true
 
             Keys.onPressed:
                 function(event) {
                     if (
-                        event.key
-                        === Qt.Key_Escape
+                        event.key === Qt.Key_Escape
                     ) {
                         root.close()
-
-                        event.accepted =
-                            true
-
+                        event.accepted = true
                         return
                     }
 
                     if (
-                        event.key
-                        === Qt.Key_Left
+                        event.key === Qt.Key_Left
+                        || event.key === Qt.Key_Up
                     ) {
-                        root.moveHorizontal(-1)
-
-                        event.accepted =
-                            true
-
+                        root.moveSelection(-1)
+                        event.accepted = true
                         return
                     }
 
                     if (
-                        event.key
-                        === Qt.Key_Right
+                        event.key === Qt.Key_Right
+                        || event.key === Qt.Key_Down
                     ) {
-                        root.moveHorizontal(1)
-
-                        event.accepted =
-                            true
-
+                        root.moveSelection(1)
+                        event.accepted = true
                         return
                     }
 
                     if (
-                        event.key
-                        === Qt.Key_Up
-                    ) {
-                        root.moveVertical(-1)
-
-                        event.accepted =
-                            true
-
-                        return
-                    }
-
-                    if (
-                        event.key
-                        === Qt.Key_Down
-                    ) {
-                        root.moveVertical(1)
-
-                        event.accepted =
-                            true
-
-                        return
-                    }
-
-                    if (
-                        event.key
-                        === Qt.Key_Return
-                        ||
-                        event.key
-                        === Qt.Key_Enter
+                        event.key === Qt.Key_Return
+                        || event.key === Qt.Key_Enter
                     ) {
                         root.chooseSelected()
-
-                        event.accepted =
-                            true
+                        event.accepted = true
                     }
                 }
         }

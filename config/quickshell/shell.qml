@@ -41,6 +41,7 @@ PanelWindow {
 
     WallpaperManager {
         id: globalWallpaperManager
+        accentColor: adaptiveAccent.accentColor
     }
 
     PowerMenu {
