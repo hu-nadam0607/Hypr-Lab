@@ -194,10 +194,7 @@ PanelWindow {
         notificationHost: centerIsland
 
         usbAvailable: globalUsbManager.hasDevices
-
-        onToggleUsbManager: function(anchorItem) {
-            globalUsbManager.toggle(anchorItem)
-        }
+        usbManager: globalUsbManager
 
         onWallpaperRequested:
             globalWallpaperManager.togglePicker()

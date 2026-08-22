@@ -40,7 +40,10 @@
 * Center Island with clock, date, synchronized notification feedback, volume feedback, media information and compact audio visualization;
 * improved monitor and display controls integrated into the new Control Center design;
 * redesigned horizontal Wallpaper Picker with angled thumbnail cards, wallpaper-adaptive accents, hover filename feedback, keyboard navigation and smooth edge-hover scrolling;
-* redesigned Lock Screen with wallpaper-adaptive angled login geometry, fixed system controls and an optional MPRIS/CAVA media dock;
+* redesigned Lock Screen with wallpaper-adaptive angled login geometry, fixed system controls, animated clock and an always-visible MPRIS/CAVA media dock;
+* configurable idle handling with automatic lock, display standby and system suspend;
+* new Hypr-Lab Settings application, starting with working Lock & Power controls for lock, display standby and suspend timing;
+* rebuilt USB Manager with removable-device and partition listing, individual mount/unmount controls and safe device eject;
 * reduced wallpaper memory usage;
 * cleaner and more maintainable Quickshell source structure;
 * cleaned-up Hyprland Lua configuration and helper scripts;
@@ -58,7 +61,10 @@
 * Center Island órával, dátummal, szinkronizált értesítés-visszajelzéssel, hangerő-visszajelzéssel, médiainformációval és kompakt audio-vizualizációval;
 * továbbfejlesztett monitor- és kijelzőbeállítások az új Control Center felületbe integrálva;
 * újratervezett vízszintes Wallpaper Picker ferde előnézeti kártyákkal, háttérkép-adaptív accentekkel, hover fájlnév-kijelzéssel, billentyűzetes navigációval és finom szélső hover-görgetéssel;
-* újratervezett Lock Screen háttérkép-adaptív ferde login geometriával, fix rendszervezérőkkel és opcionális MPRIS/CAVA media dockkal;
+* újratervezett Lock Screen háttérkép-adaptív ferde login geometriával, fix rendszervezérlőkkel, animált órával és mindig látható MPRIS/CAVA media dockkal;
+* konfigurálható idle működés automatikus képernyőzárral, kijelző-készenléttel és rendszer-altatással;
+* új Hypr-Lab Settings alkalmazás, első működő Lock & Power modullal a képernyőzár, kijelző-készenlét és altatás időzítéséhez;
+* új USB Manager cserélhető eszköz- és partíciólistával, külön mount/unmount vezérléssel és biztonságos eszközleválasztással;
 * csökkentett memóriahasználat a háttérképkezelésben;
 * tisztább és könnyebben karbantartható Quickshell forrásstruktúra;
 * megtisztított Hyprland Lua konfiguráció és helper scriptek;
@@ -74,7 +80,7 @@
 
 ### English
 
-Hypr-Lab provides an integrated desktop experience built around Hyprland and Quickshell.
+Hypr-Lab brings the pieces I use around Hyprland and Quickshell together into one desktop setup.
 
 Main features include:
 
@@ -92,19 +98,21 @@ Main features include:
 
 * Do Not Disturb mode;
 
-* USB Manager;
+* USB Manager with removable-device and partition controls, mount/unmount actions and safe eject;
 
 * Wallpaper Manager with animated transitions;
 
 * horizontal angled Wallpaper Picker with animated transitions and hover/keyboard navigation;
 
-* custom Lock Screen with wallpaper-adaptive login panel and optional media/CAVA controls;
+* custom Lock Screen with wallpaper-adaptive login panel, animated clock and an always-visible media/CAVA dock;
+
+* configurable automatic lock, display standby and system suspend;
 
 * Welcome Screen;
 
 * Power Menu;
 
-* Hypr-Lab Settings;
+* Hypr-Lab Settings with working Lock & Power controls;
 
 * monitor configuration tools;
 
@@ -118,7 +126,7 @@ Main features include:
 
 ### Magyar
 
-A Hypr-Lab egy Hyprlandre és Quickshellre épülő, egységes asztali környezetet biztosít.
+A Hypr-Lab nálam abból nőtt ki, hogy a Hyprland és a Quickshell köré használt dolgokat egyetlen összefüggő desktopba akartam összerakni.
 
 Főbb funkciói:
 
@@ -136,19 +144,21 @@ Főbb funkciói:
 
 * Ne zavarjanak mód;
 
-* USB Manager;
+* USB Manager cserélhető eszköz- és partíciókezeléssel, mount/unmount műveletekkel és biztonságos leválasztással;
 
 * animált átmeneteket használó Wallpaper Manager;
 
 * vízszintes, ferde Wallpaper Picker animált átmenetekkel, hover- és billentyűzetes navigációval;
 
-* egyedi Lock Screen háttérkép-adaptív login panellel és opcionális media/CAVA vezérléssel;
+* egyedi Lock Screen háttérkép-adaptív login panellel, animált órával és mindig látható media/CAVA dockkal;
+
+* konfigurálható automatikus képernyőzár, kijelző-készenlét és rendszer-altatás;
 
 * Welcome Screen;
 
 * Power Menu;
 
-* Hypr-Lab Settings;
+* Hypr-Lab Settings működő Lock & Power vezérléssel;
 
 * monitorkonfigurációs eszközök;
 
@@ -187,6 +197,10 @@ Főbb funkciói:
 ### Lock Screen
 
 ![Hypr-Lab Lock Screen](docs/screenshots/HL_LCKSCRN.jpeg)
+
+### Settings
+
+![Hypr-Lab Settings](docs/screenshots/HL_Settings.png)
 
 ---
 
@@ -649,6 +663,8 @@ A témák telepítése ezen felül Git, Yarn/npm és pipx használatával épít
 | `SUPER + SHIFT + W`       | Wallpaper Picker / Háttérképválasztó                                    |
 
 | `SUPER + W`               | Random wallpaper / Véletlenszerű háttérkép                              |
+
+| `SUPER + I`               | Hypr-Lab Settings / Beállítások                                        |
 
 | `SUPER + L`               | Lock Screen / Képernyőzár                                               |
 

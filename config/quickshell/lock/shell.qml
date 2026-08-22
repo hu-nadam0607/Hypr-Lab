@@ -46,7 +46,7 @@ ShellRoot {
 
     Timer {
         id: unlockTimer
-        interval: 520
+        interval: 560
         repeat: false
         onTriggered: root.completeUnlock()
     }

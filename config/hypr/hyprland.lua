@@ -142,6 +142,11 @@ hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("quickshell -p ~/.config/quickshell/l
     }
 )
 
+hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("quickshell -p ~/.config/quickshell/settings"), {
+        description = "Open Hypr-Lab Settings"
+    }
+)
+
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/hyprlab-scripts/screenshot-area.sh"), {
         description = "Selected area"
     }
@@ -351,6 +356,16 @@ hl.layer_rule({
     ignore_alpha = 0.001,
 
     xray = true,
+})
+
+-- Hypr-Lab Settings is a normal floating application window.
+-- Quickshell exposes this class through the AppId pragma in settings/shell.qml.
+hl.window_rule({
+    match = {
+        class = "hypr-lab-settings"
+    },
+
+    float = true,
 })
 
 hl.window_rule({

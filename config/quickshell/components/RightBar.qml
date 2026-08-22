@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
@@ -12,17 +13,19 @@ Item {
     property int barHeight: 36
     property color accentColor: "#68787D"
     property var notificationHost: null
+    property var usbManager: null
 
     property bool capsLockActive: false
     property bool numLockActive: false
     property bool usbAvailable: false
 
     property bool volumePanelOpen: false
+    property bool usbPanelOpen: false
     property bool notificationPanelOpen: false
     property bool audioPanelFull: false
     property bool controlCenterPanelOpen: false
     property string controlCenterPage: "main" // main | settings | monitor
-    readonly property bool anyPanelOpen: volumePanelOpen || notificationPanelOpen || controlCenterPanelOpen
+    readonly property bool anyPanelOpen: volumePanelOpen || usbPanelOpen || notificationPanelOpen || controlCenterPanelOpen
     readonly property int compactPanelWidth: 360
     readonly property int compactPanelHeight: 118
     readonly property int fullPanelWidth: 520
@@ -33,13 +36,28 @@ Item {
     // Notification sheet starts at the same compact size as the volume sheet.
     // It grows one row at a time up to five visible notifications; additional
     // notifications stay available through the existing Flickable.
+    readonly property int usbPanelWidth: 460
+    readonly property int usbRowCount: usbManager ? usbManager.rowCount : 0
+    readonly property int usbPanelHeight: Math.min(430, Math.max(150, 78 + usbRowCount * 68))
     readonly property int notificationPanelWidth: compactPanelWidth
     readonly property int notificationVisibleCount: notificationHost ? Math.min(notificationHost.notificationCount, 5) : 0
     readonly property int notificationPanelHeight: notificationVisibleCount <= 0
         ? compactPanelHeight
         : 76 + notificationVisibleCount * 78
-    property int volumePanelWidth: controlCenterPanelOpen ? controlPanelWidth : (notificationPanelOpen ? notificationPanelWidth : (audioPanelFull ? fullPanelWidth : compactPanelWidth))
-    property int volumePanelHeight: controlCenterPanelOpen ? (controlCenterPage === "main" ? controlMainHeight : controlSettingsHeight) : (notificationPanelOpen ? notificationPanelHeight : (audioPanelFull ? fullPanelHeight : compactPanelHeight))
+    property int volumePanelWidth: controlCenterPanelOpen
+        ? controlPanelWidth
+        : (usbPanelOpen
+            ? usbPanelWidth
+            : (notificationPanelOpen
+                ? notificationPanelWidth
+                : (audioPanelFull ? fullPanelWidth : compactPanelWidth)))
+    property int volumePanelHeight: controlCenterPanelOpen
+        ? (controlCenterPage === "main" ? controlMainHeight : controlSettingsHeight)
+        : (usbPanelOpen
+            ? usbPanelHeight
+            : (notificationPanelOpen
+                ? notificationPanelHeight
+                : (audioPanelFull ? fullPanelHeight : compactPanelHeight)))
     property real volumeReveal: anyPanelOpen ? 1.0 : 0.0
 
     property var sink: Pipewire.defaultAudioSink
@@ -80,7 +98,6 @@ Item {
 
     signal wallpaperRequested()
     signal openPowerMenu()
-    signal toggleUsbManager(var anchorItem)
 
     implicitWidth: barWidth
     readonly property real boundedControlReveal: controlCenterPanelOpen ? Math.max(0, Math.min(1.0, volumeReveal)) : Math.max(0, Math.min(1.08, volumeReveal))
@@ -138,6 +155,7 @@ Item {
     }
 
     function toggleAudioPanel() {
+        usbPanelOpen = false
         notificationPanelOpen = false
         controlCenterPanelOpen = false
         if (!volumePanelOpen) audioPanelFull = false
@@ -145,6 +163,7 @@ Item {
     }
 
     function openFullAudioPanel() {
+        usbPanelOpen = false
         notificationPanelOpen = false
         controlCenterPanelOpen = false
         volumePanelOpen = true
@@ -152,6 +171,7 @@ Item {
     }
 
     function toggleNotificationPanel() {
+        usbPanelOpen = false
         volumePanelOpen = false
         audioPanelFull = false
         controlCenterPanelOpen = false
@@ -161,6 +181,7 @@ Item {
 
     function toggleControlCenterPanel() {
         const wasOpen = controlCenterPanelOpen
+        usbPanelOpen = false
         volumePanelOpen = false
         audioPanelFull = false
         notificationPanelOpen = false
@@ -174,6 +195,7 @@ Item {
     }
 
     function openControlSettings() {
+        usbPanelOpen = false
         volumePanelOpen = false
         audioPanelFull = false
         notificationPanelOpen = false
@@ -181,11 +203,33 @@ Item {
         controlCenterPage = "settings"
     }
 
+    function openHyprLabSettings() {
+        closePanels()
+        Quickshell.execDetached([
+            "quickshell",
+            "-p",
+            Quickshell.env("HOME") + "/.config/quickshell/settings"
+        ])
+    }
+
     function backToControlMain() {
         controlCenterPage = "main"
     }
 
+    function toggleUsbPanel() {
+        const wasOpen = usbPanelOpen
+        volumePanelOpen = false
+        audioPanelFull = false
+        notificationPanelOpen = false
+        controlCenterPanelOpen = false
+        usbPanelOpen = !wasOpen
+
+        if (usbPanelOpen && usbManager)
+            usbManager.prepare()
+    }
+
     function closePanels() {
+        usbPanelOpen = false
         notificationPanelOpen = false
         controlCenterPanelOpen = false
         audioPanelFull = false
@@ -317,7 +361,7 @@ Item {
             icon: "󰕓"
             iconSize: 15
             accentColor: rightBarRoot.accentColor
-            onClicked: rightBarRoot.toggleUsbManager(usbButton)
+            onClicked: rightBarRoot.toggleUsbPanel()
         }
 
         BarActionButton {
@@ -448,7 +492,7 @@ Item {
         // COMPACT VOLUME PANEL
         Item {
             anchors.fill: parent
-            visible: !rightBarRoot.audioPanelFull && !rightBarRoot.notificationPanelOpen && !rightBarRoot.controlCenterPanelOpen
+            visible: !rightBarRoot.usbPanelOpen && !rightBarRoot.audioPanelFull && !rightBarRoot.notificationPanelOpen && !rightBarRoot.controlCenterPanelOpen
 
             Row {
                 id: deviceRow
@@ -579,7 +623,7 @@ Item {
         // FULL AUDIO CONTROL PANEL — same glass sheet, same /______/ geometry.
         Item {
             anchors.fill: parent
-            visible: rightBarRoot.audioPanelFull && !rightBarRoot.notificationPanelOpen && !rightBarRoot.controlCenterPanelOpen
+            visible: rightBarRoot.audioPanelFull && !rightBarRoot.usbPanelOpen && !rightBarRoot.notificationPanelOpen && !rightBarRoot.controlCenterPanelOpen
 
             Item {
                 id: fullHeader
@@ -814,6 +858,585 @@ Item {
             }
         }
 
+        // USB DEVICES — same layout strategy as Notifications / Control Center.
+        // Important: rows themselves stay rectangular and are shifted on X
+        // according to their Y midpoint. This is the proven RightBar corridor
+        // model and keeps every child inside the slanted parent borders.
+        Item {
+            anchors.fill: parent
+            visible: rightBarRoot.usbPanelOpen
+
+            Item {
+                id: usbHeader
+                y: 14
+                width: rightBarRoot.extensionSafeWidth
+                height: 34
+                x: rightBarRoot.extensionLeftFor(y + height / 2, width)
+
+                Column {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 1
+
+                    Text {
+                        text: "USB DEVICES"
+                        color: "white"
+                        font.family: "Inter"
+                        font.pixelSize: 11
+                        font.bold: true
+                        font.italic: true
+                        font.letterSpacing: 1.0
+                    }
+
+                    Text {
+                        text:
+                            rightBarRoot.usbManager
+                            ? (
+                                  rightBarRoot.usbManager.deviceCount
+                                  + (
+                                      rightBarRoot.usbManager.deviceCount === 1
+                                      ? " removable device"
+                                      : " removable devices"
+                                  )
+                              )
+                            : "No removable devices"
+
+                        color: Qt.rgba(1, 1, 1, 0.38)
+                        font.family: "Inter"
+                        font.pixelSize: 8
+                        font.italic: true
+                    }
+                }
+
+                Text {
+                    text: "󰑐"
+                    anchors.right: usbClose.left
+                    anchors.rightMargin: 18
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    color:
+                        usbRefreshMouse.containsMouse
+                        ? rightBarRoot.accentColor
+                        : Qt.rgba(1, 1, 1, 0.55)
+
+                    font.family: "Symbols Nerd Font"
+                    font.pixelSize: 14
+
+                    MouseArea {
+                        id: usbRefreshMouse
+                        anchors.fill: parent
+                        anchors.margins: -8
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+
+                        onClicked:
+                            if (rightBarRoot.usbManager)
+                                rightBarRoot.usbManager.refresh()
+                    }
+                }
+
+                Text {
+                    id: usbClose
+                    text: "×"
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    color:
+                        usbCloseMouse.containsMouse
+                        ? rightBarRoot.accentColor
+                        : Qt.rgba(1, 1, 1, 0.62)
+
+                    font.family: "Inter"
+                    font.pixelSize: 17
+                    font.bold: true
+
+                    MouseArea {
+                        id: usbCloseMouse
+                        anchors.fill: parent
+                        anchors.margins: -8
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: rightBarRoot.usbPanelOpen = false
+                    }
+                }
+            }
+
+            Flickable {
+                id: usbScroller
+                y: 56
+                x: rightBarRoot.scrollerEnvelopeLeft(
+                    rightBarRoot.volumePanelHeight
+                )
+                width: rightBarRoot.scrollerEnvelopeWidth(
+                    rightBarRoot.volumePanelHeight
+                )
+                height: rightBarRoot.volumePanelHeight - 74
+
+                contentWidth: width
+                contentHeight: usbColumn.implicitHeight + 12
+
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                flickDeceleration: 1900
+
+                Column {
+                    id: usbColumn
+                    width: usbScroller.width
+                    spacing: 8
+
+                    Text {
+                        visible:
+                            !rightBarRoot.usbManager
+                            || rightBarRoot.usbManager.rowCount === 0
+
+                        width: rightBarRoot.extensionSafeWidth
+
+                        x:
+                            rightBarRoot.extensionSafeLeftAt(
+                                usbScroller.y
+                                + y
+                                - usbScroller.contentY
+                                + height / 2
+                            )
+                            - usbScroller.x
+
+                        height: 42
+                        text: "No USB storage device detected"
+
+                        color: Qt.rgba(1, 1, 1, 0.40)
+
+                        font.family: "Inter"
+                        font.pixelSize: 10
+                        font.italic: true
+
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    Repeater {
+                        model:
+                            rightBarRoot.usbManager
+                            ? rightBarRoot.usbManager.rows
+                            : null
+
+                        delegate: Item {
+                            id: usbRow
+
+                            readonly property bool deviceRow:
+                                rowType === "device"
+
+                            // Same exact geometry model as NotificationItem.
+                            // Partitions are only indented from the left; their
+                            // right edge remains in the same safe corridor.
+                            readonly property real leftIndent:
+                                deviceRow ? 0 : 18
+
+                            height:
+                                deviceRow ? 66 : 70
+
+                            width:
+                                rightBarRoot.extensionSafeWidth
+                                - leftIndent
+
+                            x:
+                                rightBarRoot.extensionSafeLeftAt(
+                                    usbScroller.y
+                                    + y
+                                    - usbScroller.contentY
+                                    + height / 2
+                                )
+                                + leftIndent
+                                - usbScroller.x
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 2
+
+                                color:
+                                    usbRowHover.hovered
+                                    ? Qt.rgba(
+                                          rightBarRoot.accentColor.r,
+                                          rightBarRoot.accentColor.g,
+                                          rightBarRoot.accentColor.b,
+                                          0.10
+                                      )
+                                    : Qt.rgba(
+                                          1,
+                                          1,
+                                          1,
+                                          usbRow.deviceRow ? 0.045 : 0.032
+                                      )
+
+                                border.width: 1
+
+                                border.color:
+                                    usbRowHover.hovered
+                                    ? Qt.rgba(
+                                          rightBarRoot.accentColor.r,
+                                          rightBarRoot.accentColor.g,
+                                          rightBarRoot.accentColor.b,
+                                          0.62
+                                      )
+                                    : Qt.rgba(
+                                          rightBarRoot.accentColor.r,
+                                          rightBarRoot.accentColor.g,
+                                          rightBarRoot.accentColor.b,
+                                          usbRow.deviceRow ? 0.20 : 0.13
+                                      )
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: 120
+                                    }
+                                }
+
+                                Behavior on border.color {
+                                    ColorAnimation {
+                                        duration: 120
+                                    }
+                                }
+                            }
+
+                            HoverHandler {
+                                id: usbRowHover
+                            }
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                spacing: 10
+
+                                Rectangle {
+                                    width: 34
+                                    height: 34
+                                    radius: 2
+
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    color:
+                                        Qt.rgba(
+                                            rightBarRoot.accentColor.r,
+                                            rightBarRoot.accentColor.g,
+                                            rightBarRoot.accentColor.b,
+                                            usbRow.deviceRow ? 0.10 : 0.06
+                                        )
+
+                                    Text {
+                                        anchors.centerIn: parent
+
+                                        text:
+                                            usbRow.deviceRow
+                                            ? "󰕓"
+                                            : (mounted ? "󰉉" : "󰋊")
+
+                                        color:
+                                            usbRow.deviceRow
+                                            ? rightBarRoot.accentColor
+                                            : Qt.rgba(1, 1, 1, 0.66)
+
+                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.pixelSize: 16
+                                    }
+                                }
+
+                                Column {
+                                    id: usbRowText
+
+                                    width:
+                                        Math.max(
+                                            90,
+                                            parent.width
+                                            - 34
+                                            - 10
+                                            - (
+                                                  usbRow.deviceRow
+                                                  ? deviceActions.width
+                                                  : partitionAction.width
+                                              )
+                                            - 18
+                                        )
+
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: 2
+
+                                    Text {
+                                        width: parent.width
+                                        text: title
+                                        elide: Text.ElideRight
+
+                                        color:
+                                            usbRow.deviceRow
+                                            ? Qt.rgba(
+                                                  rightBarRoot.accentColor.r,
+                                                  rightBarRoot.accentColor.g,
+                                                  rightBarRoot.accentColor.b,
+                                                  0.85
+                                              )
+                                            : "white"
+
+                                        font.family: "Inter"
+                                        font.pixelSize: 9
+                                        font.bold: usbRow.deviceRow
+                                        font.italic: true
+                                    }
+
+                                    Text {
+                                        width: parent.width
+                                        text: subtitle
+                                        elide: Text.ElideRight
+
+                                        color: Qt.rgba(1, 1, 1, 0.52)
+
+                                        font.family: "Inter"
+                                        font.pixelSize: 8
+                                        font.italic: true
+                                    }
+
+                                    Text {
+                                        width: parent.width
+                                        visible: !usbRow.deviceRow
+
+                                        text:
+                                            mounted
+                                            ? mountPoint
+                                            : "Not mounted"
+
+                                        elide: Text.ElideMiddle
+
+                                        color:
+                                            mounted
+                                            ? Qt.rgba(
+                                                  rightBarRoot.accentColor.r,
+                                                  rightBarRoot.accentColor.g,
+                                                  rightBarRoot.accentColor.b,
+                                                  0.72
+                                              )
+                                            : Qt.rgba(1, 1, 1, 0.34)
+
+                                        font.family: "Inter"
+                                        font.pixelSize: 8
+                                        font.italic: true
+                                    }
+                                }
+
+                                Row {
+                                    id: deviceActions
+                                    visible: usbRow.deviceRow
+
+                                    width:
+                                        visible
+                                        ? mountAllButton.width
+                                          + ejectButton.width
+                                          + spacing
+                                        : 0
+
+                                    height: 30
+                                    spacing: 6
+
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    Item {
+                                        id: mountAllButton
+                                        width: 74
+                                        height: 28
+
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: 2
+
+                                            color:
+                                                mountAllMouse.containsMouse
+                                                ? Qt.rgba(
+                                                      rightBarRoot.accentColor.r,
+                                                      rightBarRoot.accentColor.g,
+                                                      rightBarRoot.accentColor.b,
+                                                      0.14
+                                                  )
+                                                : Qt.rgba(1, 1, 1, 0.035)
+
+                                            border.width: 1
+                                            border.color:
+                                                Qt.rgba(
+                                                    rightBarRoot.accentColor.r,
+                                                    rightBarRoot.accentColor.g,
+                                                    rightBarRoot.accentColor.b,
+                                                    mountAllMouse.containsMouse
+                                                    ? 0.68
+                                                    : 0.28
+                                                )
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+
+                                            text:
+                                                mounted
+                                                ? "UNMOUNT"
+                                                : "MOUNT ALL"
+
+                                            color: rightBarRoot.accentColor
+
+                                            font.family: "Inter"
+                                            font.pixelSize: 8
+                                            font.bold: true
+                                            font.italic: true
+                                        }
+
+                                        MouseArea {
+                                            id: mountAllMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+
+                                            onClicked: {
+                                                if (!rightBarRoot.usbManager)
+                                                    return
+
+                                                if (mounted)
+                                                    rightBarRoot.usbManager.unmountDevice(path)
+                                                else
+                                                    rightBarRoot.usbManager.mountDevice(path)
+                                            }
+                                        }
+                                    }
+
+                                    Item {
+                                        id: ejectButton
+                                        width: 54
+                                        height: 28
+
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: 2
+
+                                            color:
+                                                ejectMouse.containsMouse
+                                                ? Qt.rgba(
+                                                      rightBarRoot.accentColor.r,
+                                                      rightBarRoot.accentColor.g,
+                                                      rightBarRoot.accentColor.b,
+                                                      0.14
+                                                  )
+                                                : Qt.rgba(1, 1, 1, 0.035)
+
+                                            border.width: 1
+                                            border.color:
+                                                Qt.rgba(
+                                                    rightBarRoot.accentColor.r,
+                                                    rightBarRoot.accentColor.g,
+                                                    rightBarRoot.accentColor.b,
+                                                    ejectMouse.containsMouse
+                                                    ? 0.68
+                                                    : 0.28
+                                                )
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "EJECT"
+                                            color: rightBarRoot.accentColor
+
+                                            font.family: "Inter"
+                                            font.pixelSize: 8
+                                            font.bold: true
+                                            font.italic: true
+                                        }
+
+                                        MouseArea {
+                                            id: ejectMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+
+                                            onClicked: {
+                                                if (!rightBarRoot.usbManager)
+                                                    return
+
+                                                rightBarRoot.usbPanelOpen = false
+                                                rightBarRoot.usbManager.safelyRemove(path)
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Item {
+                                    id: partitionAction
+
+                                    visible: !usbRow.deviceRow
+
+                                    width:
+                                        visible ? 74 : 0
+
+                                    height: 28
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: 2
+
+                                        color:
+                                            partitionActionMouse.containsMouse
+                                            ? Qt.rgba(
+                                                  rightBarRoot.accentColor.r,
+                                                  rightBarRoot.accentColor.g,
+                                                  rightBarRoot.accentColor.b,
+                                                  0.14
+                                              )
+                                            : Qt.rgba(1, 1, 1, 0.035)
+
+                                        border.width: 1
+
+                                        border.color:
+                                            Qt.rgba(
+                                                rightBarRoot.accentColor.r,
+                                                rightBarRoot.accentColor.g,
+                                                rightBarRoot.accentColor.b,
+                                                partitionActionMouse.containsMouse
+                                                ? 0.68
+                                                : 0.28
+                                            )
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+
+                                        text:
+                                            mounted
+                                            ? "UNMOUNT"
+                                            : "MOUNT"
+
+                                        color: rightBarRoot.accentColor
+
+                                        font.family: "Inter"
+                                        font.pixelSize: 8
+                                        font.bold: true
+                                        font.italic: true
+                                    }
+
+                                    MouseArea {
+                                        id: partitionActionMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+
+                                        onClicked: {
+                                            if (!rightBarRoot.usbManager)
+                                                return
+
+                                            if (mounted)
+                                                rightBarRoot.usbManager.unmount(path)
+                                            else
+                                                rightBarRoot.usbManager.mount(path)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // CONTROL CENTER — lives inside the SAME RightBar material as volume/notifications.
         // The surface itself stretches from the bar; content rows follow the slanted corridor.
         Item {
@@ -890,7 +1513,7 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                 onClicked: {
-                                    if (modelData.action === "settings") rightBarRoot.openControlSettings()
+                                    if (modelData.action === "settings") rightBarRoot.openHyprLabSettings()
                                     else if (modelData.action === "dnd" && rightBarRoot.notificationHost) rightBarRoot.notificationHost.toggleDnd()
                                 }
                             }
@@ -1273,4 +1896,6 @@ Item {
         }
 
     }
+
+
 }
