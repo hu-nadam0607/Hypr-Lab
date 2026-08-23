@@ -15,6 +15,14 @@ Item {
     property var notificationHost: null
     property var usbManager: null
 
+    property bool showUsbButton: true
+    property bool showAudioButton: true
+    property bool showNotificationButton: true
+    property bool showControlCenterButton: true
+    property bool showLockIndicators: true
+    property bool showTray: true
+    property bool showPowerButton: true
+
     property bool capsLockActive: false
     property bool numLockActive: false
     property bool usbAvailable: false
@@ -203,6 +211,15 @@ Item {
         controlCenterPage = "settings"
     }
 
+    function openMonitorSettings() {
+        usbPanelOpen = false
+        volumePanelOpen = false
+        audioPanelFull = false
+        notificationPanelOpen = false
+        controlCenterPanelOpen = true
+        controlCenterPage = "monitor"
+    }
+
     function openHyprLabSettings() {
         closePanels()
         Quickshell.execDetached([
@@ -250,6 +267,7 @@ Item {
         function close(): void { rightBarRoot.closePanels() }
         function main(): void { rightBarRoot.toggleControlCenterPanel() }
         function settings(): void { rightBarRoot.openControlSettings() }
+        function monitor(): void { rightBarRoot.openMonitorSettings() }
         function audio(): void { rightBarRoot.openFullAudioPanel() }
     }
 
@@ -357,7 +375,7 @@ Item {
 
         BarActionButton {
             id: usbButton
-            visible: rightBarRoot.usbAvailable
+            visible: rightBarRoot.showUsbButton && rightBarRoot.usbAvailable
             icon: "󰕓"
             iconSize: 15
             accentColor: rightBarRoot.accentColor
@@ -366,6 +384,7 @@ Item {
 
         BarActionButton {
             id: audioButton
+            visible: rightBarRoot.showAudioButton
             icon: rightBarRoot.muted ? "󰖁" : "󰕾"
             iconSize: 15
             accentColor: rightBarRoot.accentColor
@@ -374,6 +393,7 @@ Item {
 
         BarActionButton {
             id: notificationButton
+            visible: rightBarRoot.showNotificationButton
             icon: rightBarRoot.notificationHost && rightBarRoot.notificationHost.hasNotifications ? "󰂞" : "󰂚"
             iconSize: 15
             accentColor: rightBarRoot.accentColor
@@ -383,6 +403,7 @@ Item {
 
         BarActionButton {
             id: controlCenterButton
+            visible: rightBarRoot.showControlCenterButton
             icon: "󰒓"
             iconSize: 15
             accentColor: rightBarRoot.accentColor
@@ -390,6 +411,7 @@ Item {
         }
 
         Text {
+            visible: rightBarRoot.showLockIndicators || rightBarRoot.showTray || rightBarRoot.showPowerButton
             text: "/"
             color: Qt.rgba(rightBarRoot.accentColor.r, rightBarRoot.accentColor.g, rightBarRoot.accentColor.b, 0.46)
             font.family: "Inter"
@@ -399,6 +421,7 @@ Item {
         }
 
         Row {
+            visible: rightBarRoot.showLockIndicators
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
             scale: 0.82
@@ -408,6 +431,7 @@ Item {
         }
 
         Text {
+            visible: rightBarRoot.showTray || rightBarRoot.showPowerButton
             text: "/"
             color: Qt.rgba(rightBarRoot.accentColor.r, rightBarRoot.accentColor.g, rightBarRoot.accentColor.b, 0.46)
             font.family: "Inter"
@@ -418,6 +442,7 @@ Item {
 
         SysTray {
             id: sysTray
+            visible: rightBarRoot.showTray
             anchors.verticalCenter: parent.verticalCenter
             scale: 0.78
             transformOrigin: Item.Right
@@ -426,6 +451,7 @@ Item {
 
         PowerButton {
             id: powerButton
+            visible: rightBarRoot.showPowerButton
             width: 24
             height: 24
             scale: 0.82

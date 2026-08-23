@@ -1,242 +1,132 @@
 # Hypr-Lab 1.5
 
-**Hypr-Lab** is a Quickshell-based desktop environment-style shell for Arch Linux and modern Hyprland Lua configurations.
+Hypr-Lab is my Arch Linux + Hyprland desktop setup, built around Quickshell. It started as a personal configuration and gradually turned into a complete shell with its own top bar, launcher, settings, lock screen, control panels and wallpaper tools.
 
-**Hypr-Lab** egy Quickshell-alapú, desktop environment jellegű felhasználói környezet Arch Linuxhoz és a modern Hyprland Lua konfigurációs rendszeréhez.
+A Hypr-Lab az Arch Linux + Hyprland rendszeremhez készült saját desktop setupom, Quickshell alapokon. Személyes konfigurációként indult, majd idővel komplett shell lett belőle saját felső sávval, launcherrel, beállításokkal, lock screennel, vezérlőpanelekkel és háttérképkezeléssel.
 
-![Hypr-Lab Desktop](docs/screenshots/HL_main.png)
-
----
-
-## 🚧 Hypr-Lab 1.5 — Active Development / Aktív fejlesztés
-
-> **Hypr-Lab 1.0 is the current stable release.**
->
-> Development of **Hypr-Lab 1.5** is actively underway on the `develop-v1.5` branch.
->
-> **Current development milestone: v1.5 RC2**
-
-### v1.5 RC2 Preview
-
-![Hypr-Lab v1.5 RC2](docs/screenshots/HL_Beta4.png)
-
-### RC2 App Launcher
-
-![Hypr-Lab v1.5 RC2 App Launcher](docs/screenshots/HL_APPL.png)
-
-### RC2 Power Menu
-
-![Hypr-Lab v1.5 RC2 Power Menu](docs/screenshots/HL_PM.png)
-
-### What's coming in 1.5
-
-* redesigned Hypr-Lab shell with a sharp, angled Frosted Glass 3D visual language;
-* unified Top Bar that merges workspaces, Center Island and system controls into one continuous frosted surface, with angled ends and a wallpaper-adaptive 2 px bottom accent border;
-* adaptive window and shell accents that automatically derive their color from the current wallpaper;
-* redesigned 4×4 App Launcher with angled geometry, fast transitions, search and full keyboard navigation;
-* redesigned Power Menu with four animated Lock, Logout, Reboot and Shutdown controls;
-* redesigned Control Center with integrated Theme, Tools, Media and system controls;
-* redesigned Audio Control and Notification panels with animated expandable geometry;
-* Center Island with clock, date, synchronized notification feedback, volume feedback, media information and compact audio visualization;
-* improved monitor and display controls integrated into the new Control Center design;
-* redesigned horizontal Wallpaper Picker with angled thumbnail cards, wallpaper-adaptive accents, hover filename feedback, keyboard navigation and smooth edge-hover scrolling;
-* redesigned Lock Screen with wallpaper-adaptive angled login geometry, fixed system controls, animated clock and an always-visible MPRIS/CAVA media dock;
-* configurable idle handling with automatic lock, display standby and system suspend;
-* new Hypr-Lab Settings application, starting with working Lock & Power controls for lock, display standby and suspend timing;
-* rebuilt USB Manager with removable-device and partition listing, individual mount/unmount controls and safe device eject;
-* reduced wallpaper memory usage;
-* cleaner and more maintainable Quickshell source structure;
-* cleaned-up Hyprland Lua configuration and helper scripts;
-* continued visual, animation and performance refinements.
-
-### Mi érkezik az 1.5-ben
-
-* teljesen átdolgozott Hypr-Lab shell éles, ferde Frosted Glass 3D formavilággal;
-* egységes Top Bar, amely a workspace-eket, a Center Islandet és a rendszervezérlőket egyetlen összefüggő frosted felületté egyesíti, ferde végekkel és a háttérkép színét követő 2 px-es alsó accent borderrel;
-* a háttérkép színvilágához automatikusan alkalmazkodó ablak- és shell-accentek;
-* újratervezett 4×4-es App Launcher ferde geometriával, gyors animációkkal, kereséssel és teljes billentyűzetes navigációval;
-* újratervezett Power Menu négy animált Lock, Logout, Reboot és Shutdown vezérlővel;
-* újratervezett Control Center integrált Theme, Tools, Media és rendszervezérlő funkciókkal;
-* új Audio Control és Notification panelek animált, kinyúló geometriával;
-* Center Island órával, dátummal, szinkronizált értesítés-visszajelzéssel, hangerő-visszajelzéssel, médiainformációval és kompakt audio-vizualizációval;
-* továbbfejlesztett monitor- és kijelzőbeállítások az új Control Center felületbe integrálva;
-* újratervezett vízszintes Wallpaper Picker ferde előnézeti kártyákkal, háttérkép-adaptív accentekkel, hover fájlnév-kijelzéssel, billentyűzetes navigációval és finom szélső hover-görgetéssel;
-* újratervezett Lock Screen háttérkép-adaptív ferde login geometriával, fix rendszervezérlőkkel, animált órával és mindig látható MPRIS/CAVA media dockkal;
-* konfigurálható idle működés automatikus képernyőzárral, kijelző-készenléttel és rendszer-altatással;
-* új Hypr-Lab Settings alkalmazás, első működő Lock & Power modullal a képernyőzár, kijelző-készenlét és altatás időzítéséhez;
-* új USB Manager cserélhető eszköz- és partíciólistával, külön mount/unmount vezérléssel és biztonságos eszközleválasztással;
-* csökkentett memóriahasználat a háttérképkezelésben;
-* tisztább és könnyebben karbantartható Quickshell forrásstruktúra;
-* megtisztított Hyprland Lua konfiguráció és helper scriptek;
-* további vizuális, animációs és teljesítménybeli finomítások.
-
-> The `develop-v1.5` branch is a development branch and may contain unfinished or experimental changes.
->
-> A `develop-v1.5` fejlesztői ág, ezért befejezetlen vagy kísérleti módosításokat is tartalmazhat.
+![Hypr-Lab Desktop](docs/screenshots/HL15_FS_.png)
 
 ---
 
-## Features / Funkciók
+## Hypr-Lab 1.5 — development branch / fejlesztői ág
+
+**Hypr-Lab 1.0 is still the current stable release.** Version 1.5 is being developed on the `develop-v1.5` branch.
+
+**A Hypr-Lab 1.0 továbbra is a jelenlegi stabil kiadás.** Az 1.5-ös verzió fejlesztése a `develop-v1.5` ágon történik.
+
+**Current milestone / Jelenlegi mérföldkő: v1.5 RC3**
+
+RC3 is the current working state of the 1.5 branch. Most of the shell has already been rebuilt for 1.5, but this is still a development branch, so changes can land before the final release.
+
+Az RC3 az 1.5-ös ág jelenlegi működő állapota. A shell nagy része már az új 1.5-ös rendszerre épül, de ez továbbra is fejlesztői ág, ezért a végleges kiadásig még változhat.
+
+---
+
+## What is in 1.5? / Mi van az 1.5-ben?
 
 ### English
 
-Hypr-Lab brings the pieces I use around Hyprland and Quickshell together into one desktop setup.
+The 1.5 branch is a major rebuild rather than a small update. The current version includes:
 
-Main features include:
-
-* unified Hypr-Lab Top Bar with workspaces, Center Island and system controls;
-
-* App Launcher with search and keyboard navigation;
-
-* Control Center;
-
-* advanced audio control and output-device selection;
-
-* media controls and visualization;
-
-* Notification Center;
-
-* Do Not Disturb mode;
-
-* USB Manager with removable-device and partition controls, mount/unmount actions and safe eject;
-
-* Wallpaper Manager with animated transitions;
-
-* horizontal angled Wallpaper Picker with animated transitions and hover/keyboard navigation;
-
-* custom Lock Screen with wallpaper-adaptive login panel, animated clock and an always-visible media/CAVA dock;
-
-* configurable automatic lock, display standby and system suspend;
-
-* Welcome Screen;
-
-* Power Menu;
-
-* Hypr-Lab Settings with working Lock & Power controls;
-
-* monitor configuration tools;
-
-* custom Hypr-Lab cursor;
-
-* Fluent teal icon theme;
-
-* integrated screenshot shortcuts;
-
-* automatic backup and safe uninstall support.
+- one unified Hypr-Lab Top Bar with workspaces, Center Island and system controls;
+- configurable workspace count from 1 to 10, with navigation limited to the enabled workspaces;
+- configurable Top Bar modules and Center Island feedback;
+- wallpaper-adaptive accent colors;
+- 4×4 App Launcher with search, mouse control and keyboard navigation;
+- Control Center with theme, tools, media and system actions;
+- separate Audio Control with output-device selection and volume controls;
+- Notification Center and Do Not Disturb mode;
+- USB Manager with mount, unmount and safe eject actions;
+- animated Wallpaper Manager and horizontal Wallpaper Picker;
+- custom Lock Screen with media/CAVA dock;
+- automatic lock, display standby and suspend handling;
+- Hypr-Lab Settings for appearance, desktop, Top Bar, lock/power and other shell options;
+- monitor configuration tools;
+- screenshot shortcuts;
+- custom Hypr-Lab cursor and Fluent teal icon theme;
+- installer backups and a matching uninstaller.
 
 ### Magyar
 
-A Hypr-Lab nálam abból nőtt ki, hogy a Hyprland és a Quickshell köré használt dolgokat egyetlen összefüggő desktopba akartam összerakni.
+Az 1.5 nem egy kisebb frissítés, hanem a Hypr-Lab jelentős átdolgozása. A jelenlegi verzióban már működik:
 
-Főbb funkciói:
-
-* egységes Hypr-Lab felső sáv munkaterületekkel, Center Islanddel és rendszervezérlőkkel;
-
-* keresést és billentyűzetes navigációt támogató App Launcher;
-
-* Control Center;
-
-* fejlett hangerőszabályzás és hangkimenet-választás;
-
-* médiavezérlés és vizualizáció;
-
-* Notification Center;
-
-* Ne zavarjanak mód;
-
-* USB Manager cserélhető eszköz- és partíciókezeléssel, mount/unmount műveletekkel és biztonságos leválasztással;
-
-* animált átmeneteket használó Wallpaper Manager;
-
-* vízszintes, ferde Wallpaper Picker animált átmenetekkel, hover- és billentyűzetes navigációval;
-
-* egyedi Lock Screen háttérkép-adaptív login panellel, animált órával és mindig látható media/CAVA dockkal;
-
-* konfigurálható automatikus képernyőzár, kijelző-készenlét és rendszer-altatás;
-
-* Welcome Screen;
-
-* Power Menu;
-
-* Hypr-Lab Settings működő Lock & Power vezérléssel;
-
-* monitorkonfigurációs eszközök;
-
-* egyedi Hypr-Lab kurzor;
-
-* Fluent teal ikontéma;
-
-* integrált képernyőkép-gyorsbillentyűk;
-
-* automatikus biztonsági mentés és biztonságos eltávolítás.
+- az egységes Hypr-Lab Top Bar workspace-ekkel, Center Islanddel és rendszervezérlőkkel;
+- 1 és 10 között állítható workspace-mennyiség, ahol a navigáció is a ténylegesen engedélyezett workspace-ekre korlátozódik;
+- külön kapcsolható Top Bar modulok és Center Island visszajelzések;
+- a háttérképhez automatikusan igazodó accent szín;
+- 4×4-es App Launcher kereséssel, egér- és billentyűzetes vezérléssel;
+- Control Center téma-, eszköz-, média- és rendszerműveletekkel;
+- külön Audio Control hangkimenet-választással és hangerőszabályzással;
+- Notification Center és Ne zavarjanak mód;
+- USB Manager mount, unmount és biztonságos leválasztási funkciókkal;
+- animált Wallpaper Manager és vízszintes Wallpaper Picker;
+- saját Lock Screen media/CAVA dockkal;
+- automatikus képernyőzár, kijelző-készenlét és rendszer-altatás;
+- Hypr-Lab Settings az appearance, desktop, Top Bar, lock/power és további shell beállításokhoz;
+- monitorkonfigurációs eszközök;
+- screenshot gyorsbillentyűk;
+- saját Hypr-Lab kurzor és Fluent teal ikontéma;
+- telepítés előtti backup és hozzá tartozó uninstaller.
 
 ---
 
-## Hypr-Lab in action / Hypr-Lab működés közben
+## Screenshots / Képernyőképek
 
-### App Launcher
+### Desktop
 
-![Hypr-Lab App Launcher](docs/screenshots/HL_APPL.png)
+![Hypr-Lab Desktop](docs/screenshots/HL15_FS_.png)
 
-### Power Menu
+### Hypr-Lab Settings
 
-![Hypr-Lab Power Menu](docs/screenshots/HL_PM.png)
+![Hypr-Lab Settings](docs/screenshots/HL15_SET.png)
 
 ### Control Center
 
-![Hypr-Lab Control Center](docs/screenshots/HL_CC.png)
+![Hypr-Lab Control Center](docs/screenshots/HL15_CC.png)
+
+### Audio Control
+
+![Hypr-Lab Audio Control](docs/screenshots/HL15_AC.png)
+
+### App Launcher
+
+![Hypr-Lab App Launcher](docs/screenshots/HL15_LNCH.png)
 
 ### Notification Center
 
-![Hypr-Lab Notification Center](docs/screenshots/HL_NotifC.png)
+![Hypr-Lab Notification Center](docs/screenshots/HL15_NC.png)
 
 ### Wallpaper Picker
 
-![Hypr-Lab Wallpaper Picker](docs/screenshots/HL_wppPick.png)
+![Hypr-Lab Wallpaper Picker](docs/screenshots/HL15_WPP.png)
 
-### Lock Screen
+### Power Menu
 
-![Hypr-Lab Lock Screen](docs/screenshots/HL_LCKSCRN.jpeg)
-
-### Settings
-
-![Hypr-Lab Settings](docs/screenshots/HL_Settings.png)
+![Hypr-Lab Power Menu](docs/screenshots/HL15_PM.png)
 
 ---
 
 ## Requirements / Követelmények
 
-### English
+Hypr-Lab currently targets:
 
-Hypr-Lab targets:
+- Arch Linux;
+- Hyprland 0.55+ with the Lua configuration model;
+- Wayland;
+- Quickshell;
+- PipeWire + WirePlumber.
 
-* Arch Linux;
+A Hypr-Lab jelenlegi célrendszere:
 
-* Hyprland 0.55+ using the Lua configuration model;
+- Arch Linux;
+- Hyprland 0.55+ Lua konfigurációs modellel;
+- Wayland;
+- Quickshell;
+- PipeWire + WirePlumber.
 
-* Wayland;
+The installer checks the required Arch packages and can install the missing ones.
 
-* PipeWire + WirePlumber;
-
-* Quickshell.
-
-The installer can install the required Arch Linux packages that are missing from the system.
-
-### Magyar
-
-A Hypr-Lab célrendszere:
-
-* Arch Linux;
-
-* Hyprland 0.55+ Lua konfigurációs modellel;
-
-* Wayland;
-
-* PipeWire + WirePlumber;
-
-* Quickshell.
-
-A telepítő képes telepíteni a rendszerből hiányzó szükséges Arch Linux csomagokat.
+A telepítő ellenőrzi a szükséges Arch csomagokat, és igény esetén telepíti a hiányzókat.
 
 ---
 
@@ -244,74 +134,50 @@ A telepítő képes telepíteni a rendszerből hiányzó szükséges Arch Linux 
 
 ## English
 
-Clone the official Hypr-Lab repository:
+Clone the repository and run the installer as your **normal user**:
 
 ```bash
-
 git clone https://github.com/hu-nadam0607/Hypr-Lab.git
-
 cd Hypr-Lab
-
 ./install.sh
-
 ```
 
-Run the installer as your **normal user**.
+Do **not** run `install.sh` as root. It asks for `sudo` only when a system-level change is needed.
 
-Do **not** run `install.sh` as root. The installer requests `sudo` only when system-level changes are required.
-
-Follow the interactive installer and reboot the computer when installation is complete.
-
-On a clean Arch Linux installation, the normal login path is:
+After the installer finishes, reboot the machine. On a clean Arch installation the normal login path is:
 
 ```text
-
 greetd -> tuigreet -> start-hyprland -> Hyprland -> Hypr-Lab
-
 ```
 
-If login-manager configuration was intentionally skipped, Hyprland can be started from a TTY with:
+If login-manager setup was skipped, Hyprland can also be started from a TTY:
 
 ```bash
-
 start-hyprland
-
 ```
 
 ## Magyar
 
-Klónozd a hivatalos Hypr-Lab repositoryt:
+Klónozd a repositoryt, majd **normál felhasználóként** indítsd el a telepítőt:
 
 ```bash
-
 git clone https://github.com/hu-nadam0607/Hypr-Lab.git
-
 cd Hypr-Lab
-
 ./install.sh
-
 ```
 
-A telepítőt **normál felhasználóként** indítsd el.
+Az `install.sh` fájlt **ne rootként** futtasd. A telepítő csak akkor kér `sudo` jogosultságot, amikor valóban rendszerszintű módosításra van szükség.
 
-Az `install.sh` fájlt **ne futtasd root felhasználóként**. A telepítő csak azoknál a műveleteknél kér `sudo` jogosultságot, amelyek rendszerszintű módosítást igényelnek.
-
-Kövesd az interaktív telepítő utasításait, majd a telepítés befejezése után indítsd újra a számítógépet.
-
-Tiszta Arch Linux telepítésen az alapértelmezett bejelentkezési folyamat:
+A telepítés végén indítsd újra a gépet. Tiszta Arch telepítésnél az alapértelmezett bejelentkezési folyamat:
 
 ```text
-
 greetd -> tuigreet -> start-hyprland -> Hyprland -> Hypr-Lab
-
 ```
 
-Ha a login manager konfigurálását szándékosan kihagytad, a Hyprland TTY-ből is elindítható:
+Ha a login manager beállítását kihagytad, Hyprland TTY-ből is indítható:
 
 ```bash
-
 start-hyprland
-
 ```
 
 ---
@@ -320,536 +186,236 @@ start-hyprland
 
 ## English
 
-Enter the cloned Hypr-Lab directory and run:
+From the cloned Hypr-Lab directory run:
 
 ```bash
-
 ./uninstall.sh
-
 ```
 
-The default uninstall process:
+By default the uninstaller removes the Hypr-Lab user configuration, restores the pre-install backup when one exists, removes Hypr-Lab-owned themes and restores the login integration managed by Hypr-Lab. Arch packages are kept unless their removal is explicitly approved. The cloned repository itself is not deleted.
 
-* removes Hypr-Lab user configuration;
-
-* restores the pre-Hypr-Lab configuration backup when available;
-
-* removes themes owned by Hypr-Lab;
-
-* restores Hypr-Lab-managed login integration;
-
-* keeps Arch Linux packages unless you explicitly approve their removal;
-
-* leaves the cloned Hypr-Lab repository itself untouched.
-
-For a full uninstall using the package ownership information recorded by the installer:
+Full purge:
 
 ```bash
-
 ./uninstall.sh --purge
-
 ```
 
-For a non-interactive full purge:
+Non-interactive full purge:
 
 ```bash
-
 ./uninstall.sh --purge --yes
-
 ```
 
 ## Magyar
 
-Lépj be a klónozott Hypr-Lab könyvtárba, majd futtasd:
+A klónozott Hypr-Lab könyvtárban futtasd:
 
 ```bash
-
 ./uninstall.sh
-
 ```
 
-Az alapértelmezett eltávolítás:
+Alapértelmezetten az uninstaller eltávolítja a Hypr-Lab felhasználói konfigurációját, visszaállítja a telepítés előtti backupot, ha van ilyen, eltávolítja a Hypr-Labhoz tartozó témákat, és visszaállítja a Hypr-Lab által kezelt login integrációt. Az Arch csomagok megmaradnak, hacsak külön nem hagyod jóvá az eltávolításukat. Magát a klónozott repositoryt az uninstaller nem törli.
 
-* eltávolítja a Hypr-Lab felhasználói konfigurációját;
-
-* visszaállítja a Hypr-Lab előtti konfiguráció biztonsági mentését, ha rendelkezésre áll;
-
-* eltávolítja a Hypr-Lab tulajdonában lévő témákat;
-
-* visszaállítja a Hypr-Lab által kezelt bejelentkezési integrációt;
-
-* megtartja az Arch Linux csomagokat, hacsak azok eltávolítását külön nem hagyod jóvá;
-
-* magát a klónozott Hypr-Lab repositoryt érintetlenül hagyja.
-
-A telepítő által rögzített csomagtulajdonosi információkat használó teljes eltávolításhoz:
+Teljes eltávolítás:
 
 ```bash
-
 ./uninstall.sh --purge
-
 ```
 
-Nem interaktív teljes eltávolításhoz:
+Nem interaktív teljes eltávolítás:
 
 ```bash
-
 ./uninstall.sh --purge --yes
-
 ```
 
 ---
 
-## Safe package handling / Biztonságos csomagkezelés
+## Package handling / Csomagkezelés
 
-### English
+The installer records packages that were missing before Hypr-Lab and were installed by the installer. The uninstaller can offer only those recorded packages for removal. Packages that were already present on the system are not treated as Hypr-Lab-owned. Package removal itself is handled by `pacman -Rns` with its normal dependency checks.
 
-Hypr-Lab does **not guess which packages it owns**.
-
-During installation, packages that were missing before Hypr-Lab and were installed by the installer are recorded.
-
-During uninstall, only these recorded packages can be offered for removal.
-
-Packages that were already installed before Hypr-Lab are not recorded as Hypr-Lab-owned and are therefore not removed by the uninstaller.
-
-When package removal is requested, `pacman -Rns` performs its normal dependency resolution and safety checks.
-
-### Magyar
-
-A Hypr-Lab **nem próbálja kitalálni, hogy mely csomagok tartoznak hozzá**.
-
-Telepítés közben a telepítő rögzíti azokat a csomagokat, amelyek a Hypr-Lab telepítése előtt hiányoztak, és amelyeket maga a telepítő telepített.
-
-Eltávolításkor kizárólag ezek a rögzített csomagok ajánlhatók fel eltávolításra.
-
-A Hypr-Lab telepítése előtt már meglévő csomagokat a telepítő nem jelöli Hypr-Lab-tulajdonként, ezért az uninstaller sem távolítja el őket.
-
-Csomageltávolítás esetén a `pacman -Rns` végzi a szokásos függőségfeloldást és biztonsági ellenőrzéseket.
+A telepítő feljegyzi azokat a csomagokat, amelyek a Hypr-Lab előtt nem voltak a rendszeren, és amelyeket maga a telepítő rakott fel. Az uninstaller csak ezeket tudja eltávolításra felajánlani. A korábban is telepített csomagokat nem kezeli Hypr-Lab-tulajdonként. A tényleges csomageltávolítást a `pacman -Rns` végzi a szokásos függőségellenőrzéssel.
 
 ---
 
 ## Installer options / Telepítő opciók
 
 ```text
-
 -y, --yes            Accept normal prompts automatically
-
                      Normál kérdések automatikus elfogadása
 
 --skip-deps          Skip Arch package installation/checks
-
                      Arch csomagok ellenőrzésének/telepítésének kihagyása
 
 --no-gtk             Do not install Hypr-Lab GTK CSS
-
                      Hypr-Lab GTK CSS telepítésének kihagyása
 
 --no-themes          Do not install the Hypr-Lab cursor and Fluent icons
-
                      Hypr-Lab kurzor és Fluent ikonok telepítésének kihagyása
 
 --no-login-manager   Do not configure greetd/tuigreet
-
                      A greetd/tuigreet konfigurálásának kihagyása
 
--h, --help           Show help
-
-                     Súgó megjelenítése
-
+-h, --help           Show help / Súgó
 ```
-
----
 
 ## Uninstaller options / Eltávolító opciók
 
 ```text
-
 -y, --yes       Accept safe default prompts automatically
-
                 Biztonságos alapértelmezett válaszok automatikus elfogadása
 
 --purge         Remove tracked packages and Hypr-Lab state/backups too
-
                 Rögzített csomagok és a Hypr-Lab state/backup eltávolítása
 
 --purge-deps    Remove packages recorded as installed by Hypr-Lab
-
                 A Hypr-Lab által telepítettként rögzített csomagok eltávolítása
 
 --purge-state   Remove ~/.local/state/hypr-lab after uninstall
-
                 A ~/.local/state/hypr-lab eltávolítása az uninstall után
 
 --no-restore    Do not restore the pre-Hypr-Lab configuration backup
-
                 Ne állítsa vissza a Hypr-Lab előtti konfigurációt
 
 --keep-login    Leave greetd/display-manager integration untouched
-
                 A greetd/display-manager integráció érintetlenül hagyása
 
--h, --help      Show help
-
-                Súgó megjelenítése
-
+-h, --help      Show help / Súgó
 ```
 
 ---
 
-## Default visual themes / Alapértelmezett vizuális témák
+## Default themes / Alapértelmezett témák
 
 ### Cursor / Kurzor
 
-### English
+Hypr-Lab builds its Bibata-based cursor locally during installation:
 
-Hypr-Lab builds its custom Bibata cursor locally during installation:
-
-```text
-
-Bibata-Modern-Hypr-Lab
-
-size: 24
-
-inside: black
-
-outline: #37F5EB
-
-```
-
-The build uses the upstream Bibata Modern SVG sources.
-
-The upstream project is not authored by Hypr-Lab. See `THIRD_PARTY_NOTICES.md`.
-
-### Magyar
-
-A Hypr-Lab a telepítés során helyben építi fel az egyedi Bibata kurzort:
+A Hypr-Lab telepítés közben helyben építi fel a Bibata-alapú kurzort:
 
 ```text
-
 Bibata-Modern-Hypr-Lab
-
-méret: 24
-
-belső szín: fekete
-
-körvonal: #37F5EB
-
+size / méret: 24
+inside / belső szín: black / fekete
+outline / körvonal: #37F5EB
 ```
 
-A build az upstream Bibata Modern SVG forrásait használja.
+The cursor is built from the upstream Bibata Modern SVG sources. Licensing details are in `THIRD_PARTY_NOTICES.md`.
 
-Az upstream projekt nem a Hypr-Lab saját fejlesztése. Részletek a `THIRD_PARTY_NOTICES.md` fájlban.
+A kurzor az upstream Bibata Modern SVG forrásaira épül. A licencinformációk a `THIRD_PARTY_NOTICES.md` fájlban találhatók.
 
 ### Icons / Ikonok
 
-### English
+The installer uses the upstream Fluent icon theme and selects:
 
-Hypr-Lab installs the upstream Fluent icon theme and selects:
-
-```text
-
-Fluent-teal-dark
-
-```
-
-The theme remains a separate upstream GPL project. See `THIRD_PARTY_NOTICES.md`.
-
-Theme sources are fetched from their upstream repositories during installation. This keeps the Hypr-Lab repository smaller while allowing the customized cursor to be built from source.
-
-### Magyar
-
-A Hypr-Lab telepíti az upstream Fluent ikontémát, és alapértelmezetten ezt választja:
+A telepítő az upstream Fluent ikontémát használja, alapértelmezetten ezzel a változattal:
 
 ```text
-
 Fluent-teal-dark
-
 ```
 
-A téma továbbra is egy különálló upstream GPL projekt. Részletek a `THIRD_PARTY_NOTICES.md` fájlban.
+The theme remains a separate upstream project. See `THIRD_PARTY_NOTICES.md` for details.
 
-A témák forrásai telepítés közben az upstream repositorykból kerülnek letöltésre. Így a Hypr-Lab repository kisebb maradhat, miközben az egyedi kurzor forrásból építhető fel.
+Az ikontéma továbbra is külön upstream projekt. Részletek a `THIRD_PARTY_NOTICES.md` fájlban.
 
 ---
 
-## Core dependencies / Fő függőségek
+## Main dependencies / Fő függőségek
 
-### English
+The desktop stack uses official Arch packages where possible. The main pieces are Hyprland, Quickshell, Ghostty, PipeWire, WirePlumber, Hypridle, Hyprpolkitagent, XDG portals, screenshot/media tools, fonts, `greetd` and `greetd-tuigreet`.
 
-The installer uses official Arch Linux packages for the Hypr-Lab desktop stack, including:
+A desktop stack lehetőség szerint hivatalos Arch csomagokra épül. A fő elemek: Hyprland, Quickshell, Ghostty, PipeWire, WirePlumber, Hypridle, Hyprpolkitagent, XDG portalok, screenshot- és médiaeszközök, betűtípusok, `greetd` és `greetd-tuigreet`.
 
-* Hyprland;
+Hypr-Lab does not force a specific browser or file manager. Browser launching follows the XDG default. Supported installed file managers are detected automatically.
 
-* Quickshell;
+A Hypr-Lab nem kényszerít rád konkrét böngészőt vagy fájlkezelőt. A böngésző az XDG alapértelmezést követi, a támogatott telepített fájlkezelőket pedig a rendszer automatikusan felismeri.
 
-* Ghostty;
+Theme installation also uses Git, Yarn/npm and pipx to build the Hypr-Lab Bibata variant from upstream source.
 
-* PipeWire and WirePlumber;
-
-* Hypridle;
-
-* Hyprpolkitagent;
-
-* XDG portals;
-
-* screenshot tools;
-
-* media support;
-
-* fonts;
-
-* `greetd`;
-
-* `greetd-tuigreet`.
-
-A browser and file manager are deliberately not forced.
-
-Browser launching follows the user's XDG default. Supported installed file managers are detected by the installer. If no supported file manager exists during installation, the runtime wrapper can detect one later.
-
-Theme installation additionally uses Git, Yarn/npm and pipx to build the Hypr-Lab Bibata variant from upstream source.
-
-### Magyar
-
-A telepítő hivatalos Arch Linux csomagokat használ a Hypr-Lab asztali környezetéhez, többek között:
-
-* Hyprland;
-
-* Quickshell;
-
-* Ghostty;
-
-* PipeWire és WirePlumber;
-
-* Hypridle;
-
-* Hyprpolkitagent;
-
-* XDG portalok;
-
-* képernyőkép-készítő eszközök;
-
-* médiatámogatás;
-
-* betűtípusok;
-
-* `greetd`;
-
-* `greetd-tuigreet`.
-
-A Hypr-Lab szándékosan nem kényszerít rá a felhasználóra böngészőt vagy fájlkezelőt.
-
-A böngésző indítása a felhasználó XDG alapértelmezését követi. A támogatott, már telepített fájlkezelőket a telepítő felismeri. Ha telepítéskor nincs támogatott fájlkezelő, a runtime wrapper később is képes felismerni egyet.
-
-A témák telepítése ezen felül Git, Yarn/npm és pipx használatával építi fel az upstream forrásból származó Hypr-Lab Bibata változatot.
+A témák telepítéséhez Git, Yarn/npm és pipx is szükséges, mert a Hypr-Lab Bibata változata upstream forrásból épül.
 
 ---
 
 ## Main shortcuts / Fő gyorsbillentyűk
 
-| Shortcut / Gyorsbillentyű | Action / Művelet                                                        |
-
-| ------------------------- | ----------------------------------------------------------------------- |
-
-| `SUPER + SPACE`           | App Launcher / Alkalmazásindító                                         |
-
-| `SUPER + SHIFT + C`       | Control Center / Vezérlőközpont                                         |
-
-| `SUPER + SHIFT + V`       | Audio Control / Hangvezérlés                                            |
-
-| `SUPER + SHIFT + N`       | Notification Center / Értesítési központ                                |
-
-| `SUPER + SHIFT + D`       | Do Not Disturb / Ne zavarjanak                                          |
-
-| `SUPER + SHIFT + W`       | Wallpaper Picker / Háttérképválasztó                                    |
-
-| `SUPER + W`               | Random wallpaper / Véletlenszerű háttérkép                              |
-
-| `SUPER + I`               | Hypr-Lab Settings / Beállítások                                        |
-
-| `SUPER + L`               | Lock Screen / Képernyőzár                                               |
-
-| `SUPER + ALT + W`         | Welcome Screen / Üdvözlőképernyő                                        |
-
-| `SUPER + SHIFT + P`       | Power Menu / Kikapcsolási menü                                          |
-
-| `SUPER + C`               | Ghostty                                                                 |
-
-| `SUPER + E`               | Selected/detected file manager / Kiválasztott vagy felismert fájlkezelő |
-
-| `SUPER + B`               | XDG default browser / XDG alapértelmezett böngésző                      |
-
-| `SUPER + M`               | Exit Hyprland session / Kilépés a Hyprland munkamenetből                |
+| Shortcut / Gyorsbillentyű | Action / Művelet |
+| --- | --- |
+| `SUPER + SPACE` | App Launcher / Alkalmazásindító |
+| `SUPER + SHIFT + C` | Control Center / Vezérlőközpont |
+| `SUPER + SHIFT + V` | Audio Control / Hangvezérlés |
+| `SUPER + SHIFT + N` | Notification Center / Értesítési központ |
+| `SUPER + SHIFT + D` | Do Not Disturb / Ne zavarjanak |
+| `SUPER + SHIFT + W` | Wallpaper Picker / Háttérképválasztó |
+| `SUPER + W` | Random wallpaper / Véletlenszerű háttérkép |
+| `SUPER + I` | Hypr-Lab Settings / Beállítások |
+| `SUPER + L` | Lock Screen / Képernyőzár |
+| `SUPER + ALT + W` | Welcome Screen / Üdvözlőképernyő |
+| `SUPER + SHIFT + P` | Power Menu / Kikapcsolási menü |
+| `SUPER + C` | Ghostty |
+| `SUPER + E` | Selected/detected file manager / Kiválasztott vagy felismert fájlkezelő |
+| `SUPER + B` | XDG default browser / XDG alapértelmezett böngésző |
+| `SUPER + M` | Exit Hyprland session / Kilépés a Hyprland munkamenetből |
+| `SUPER + 1…0` | Workspace 1…10, limited by Settings / Workspace 1…10, a Settingsben megadott limit szerint |
 
 ---
 
 ## Backups / Biztonsági mentések
 
-### English
+Before replacing an existing Hypr-Lab-related user configuration, the installer creates a backup when needed:
 
-Before replacing the user's Hypr-Lab-related configuration, the installer creates a backup when applicable.
-
-Backups are stored under:
+A meglévő, Hypr-Lab által érintett felhasználói konfiguráció cseréje előtt a telepítő szükség esetén backupot készít:
 
 ```text
-
 ~/.local/state/hypr-lab/backups/<timestamp>/
-
 ```
 
-The latest backup path is recorded in:
+The latest backup path is stored in:
+
+A legutóbbi backup helyét ez a fájl tárolja:
 
 ```text
-
 ~/.local/state/hypr-lab/last-backup
-
 ```
 
-This state is also used by the uninstaller to safely restore the pre-Hypr-Lab configuration.
+The uninstaller uses this information when restoring the configuration that existed before Hypr-Lab.
 
-### Magyar
-
-A felhasználó Hypr-Lab által érintett konfigurációjának lecserélése előtt a telepítő szükség esetén biztonsági mentést készít.
-
-A mentések helye:
-
-```text
-
-~/.local/state/hypr-lab/backups/<időbélyeg>/
-
-```
-
-A legutóbbi mentés elérési útját ez a fájl tárolja:
-
-```text
-
-~/.local/state/hypr-lab/last-backup
-
-```
-
-Ezt az állapotinformációt az uninstaller is használja a Hypr-Lab előtti konfiguráció biztonságos visszaállításához.
+Az uninstaller ezt az információt használja a Hypr-Lab előtti konfiguráció visszaállításához.
 
 ---
 
 ## Repository layout / Repository felépítése
 
 ```text
-
 Hypr-Lab/
-
 ├── config/
-
 │   ├── hypr/
-
 │   ├── quickshell/
-
 │   ├── gtk-3.0/
-
 │   ├── gtk-4.0/
-
 │   └── wireplumber/
-
 ├── docs/
-
 │   └── screenshots/
-
 ├── system/
-
 │   └── greetd/
-
 │       └── config.toml
-
 ├── install.sh
-
 ├── uninstall.sh
-
 ├── verify-release.sh
-
 ├── manifest.json
-
 ├── README.md
-
 ├── RELEASE_NOTES.md
-
 ├── THIRD_PARTY_NOTICES.md
-
 └── LICENSE
-
 ```
 
-### English
+`config/` contains the user configuration installed by Hypr-Lab. `system/` contains the system-level templates used when required. Project screenshots live in `docs/screenshots/`. The installer and uninstaller are kept in the repository root together with release metadata and licensing files.
 
-* `config/` contains the Hypr-Lab user configuration payload.
-
-* `system/` contains system-level templates installed when required.
-
-* `docs/screenshots/` contains screenshots used by the project documentation.
-
-* `install.sh` installs Hypr-Lab.
-
-* `uninstall.sh` safely removes Hypr-Lab and can restore previous configuration.
-
-* `verify-release.sh` performs release-integrity checks.
-
-* `manifest.json` contains release metadata.
-
-### Magyar
-
-* A `config/` tartalmazza a Hypr-Lab felhasználói konfigurációs payloadját.
-
-* A `system/` tartalmazza a szükség esetén telepített rendszerszintű sablonokat.
-
-* A `docs/screenshots/` tartalmazza a projekt dokumentációjában használt képernyőképeket.
-
-* Az `install.sh` telepíti a Hypr-Labot.
-
-* Az `uninstall.sh` biztonságosan eltávolítja a Hypr-Labot, és képes visszaállítani a korábbi konfigurációt.
-
-* A `verify-release.sh` release-integritási ellenőrzéseket végez.
-
-* A `manifest.json` tartalmazza a release metaadatait.
+A `config/` tartalmazza a Hypr-Lab által telepített felhasználói konfigurációt. A `system/` alatt vannak a szükség esetén használt rendszerszintű sablonok. A projekt képernyőképei a `docs/screenshots/` könyvtárban találhatók. A telepítő, az uninstaller, a release metaadatok és a licencfájlok a repository gyökerében vannak.
 
 ---
 
 ## License and credits / Licenc és közreműködők
 
-### English
+Hypr-Lab is released under the **GNU General Public License v3.0** and is maintained by **nadam0607**. Third-party components keep their own copyright and licensing terms; see `THIRD_PARTY_NOTICES.md` for the details.
 
-Hypr-Lab is released under the **GNU General Public License v3.0**.
-
-Hypr-Lab began as a personal Arch Linux / Hyprland project by **nadam0607**.
-
-Development was assisted by **OpenAI ChatGPT**, including code drafting, debugging, refactoring and installer/test workflow support.
-
-Project direction, design decisions, testing and release decisions remain with the project maintainer.
-
-Third-party components retain their own copyright and licensing.
-
-See:
-
-* `LICENSE`
-
-* `THIRD_PARTY_NOTICES.md`
-
-### Magyar
-
-A Hypr-Lab a **GNU General Public License v3.0** feltételei szerint kerül kiadásra.
-
-A Hypr-Lab **nadam0607** személyes Arch Linux / Hyprland projektjeként indult.
-
-A fejlesztést **OpenAI ChatGPT** is segítette, többek között kódírással, hibakereséssel, refaktorálással, valamint a telepítési és tesztelési folyamatok kialakításával.
-
-A projekt irányítása, a dizájnnal kapcsolatos döntések, a tesztelés és a kiadással kapcsolatos döntések a projekt karbantartójának kezében maradnak.
-
-A harmadik féltől származó komponensek megtartják saját szerzői jogaikat és licencfeltételeiket.
-
-Lásd:
-
-* `LICENSE`
-
-* `THIRD_PARTY_NOTICES.md`
-
----
-
-**Hypr-Lab 1.5 — Arch. Hyprland. Quickshell. Built into one desktop experience.**
-
-**Hypr-Lab 1.5 — Arch. Hyprland. Quickshell. Egyetlen asztali élménnyé építve.**
+A Hypr-Lab a **GNU General Public License v3.0** alatt jelenik meg, karbantartója **nadam0607**. A harmadik féltől származó komponensek saját szerzői jogi és licencfeltételeiket tartják meg; a részleteket a `THIRD_PARTY_NOTICES.md` tartalmazza.

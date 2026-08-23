@@ -20,7 +20,9 @@ Item {
     // compact CAVA/media views all share the same fixed island surface.
     property bool enableVolumeTransient: true
     property bool enableCavaFace: true
+    property bool enableMediaTransient: true
     property bool enableNotificationSummary: true
+    property bool enableNotificationSound: true
 
     readonly property var notificationModel: notificationServer.trackedNotifications
     readonly property int notificationCount: notificationServer.trackedNotifications.values.length
@@ -103,12 +105,27 @@ Item {
         ])
     }
 
-    function setDnd(enabled) {
+    function setDnd(enabled, announce, persist) {
+        if (announce === undefined) announce = true
+        if (persist === undefined) persist = true
+
         if (doNotDisturb === enabled)
             return
 
         doNotDisturb = enabled
-        announceDndState()
+
+        if (persist) {
+            Quickshell.execDetached([
+                "bash",
+                Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-ui-settings.sh",
+                "set",
+                "DND",
+                enabled ? "1" : "0"
+            ])
+        }
+
+        if (announce)
+            announceDndState()
     }
 
     function toggleDnd() {
@@ -148,7 +165,7 @@ Item {
 
     function showMediaTransient() {
         selectPlayingPlayer()
-        if (mediaPlayer)
+        if (enableMediaTransient && mediaPlayer)
             showTransient("media", 5000)
     }
 
@@ -177,7 +194,7 @@ Item {
             if (!dndStatus)
                 root.unreadNotificationCount += 1
 
-            if (!root.doNotDisturb && !dndStatus) {
+            if (root.enableNotificationSound && !root.doNotDisturb && !dndStatus) {
                 notificationPopSound.stop()
                 notificationPopSound.play()
             }
@@ -194,6 +211,7 @@ Item {
         function dnd(): void { root.toggleDnd() }
         function dndOn(): void { root.setDnd(true) }
         function dndOff(): void { root.setDnd(false) }
+        function clear(): void { root.clearAllNotifications() }
     }
 
     SystemClock {

@@ -25,6 +25,40 @@ hl.config({
 local terminal = "ghostty"
 local mainMod = "SUPER"
 
+-- Hypr-Lab Settings controls how many numbered workspaces are available.
+-- Keep the workspace bindings native: only their generated count changes.
+local workspaceCount = 10
+
+do
+    local home = os.getenv("HOME")
+
+    if home then
+        local stateFile = io.open(
+            home .. "/.config/hypr/hyprlab-settings/ui.conf",
+            "r"
+        )
+
+        if stateFile then
+            for line in stateFile:lines() do
+                local value = line:match("^WORKSPACE_COUNT=(%d+)$")
+
+                if value then
+                    workspaceCount = tonumber(value) or 10
+                    break
+                end
+            end
+
+            stateFile:close()
+        end
+    end
+
+    if workspaceCount < 1 then
+        workspaceCount = 1
+    elseif workspaceCount > 10 then
+        workspaceCount = 10
+    end
+end
+
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(terminal), {
         description = "open_terminal"
     }
@@ -157,7 +191,7 @@ hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("~/.config/hypr/hyprlab-scrip
     }
 )
 
-for i = 1, 10 do
+for i = 1, workspaceCount do
     local key = i % 10
 
     hl.bind(
@@ -168,7 +202,7 @@ for i = 1, 10 do
     )
 end
 
-for i = 1, 10 do
+for i = 1, workspaceCount do
     local key = i % 10
 
     hl.bind(

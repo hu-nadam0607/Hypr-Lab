@@ -39,6 +39,10 @@ PanelWindow {
         id: adaptiveAccent
     }
 
+    RuntimeSettings {
+        id: runtimeSettings
+    }
+
     WallpaperManager {
         id: globalWallpaperManager
         accentColor: adaptiveAccent.accentColor
@@ -83,6 +87,8 @@ PanelWindow {
             0
 
         accentColor: adaptiveAccent.accentColor
+        showWorkspaces: runtimeSettings.showWorkspaces
+        workspaceCount: runtimeSettings.workspaceCount
 
         onOpenAppLauncher:
             globalAppLauncher.toggle()
@@ -104,6 +110,18 @@ PanelWindow {
             0
 
         accentColor: adaptiveAccent.accentColor
+        enableVolumeTransient: runtimeSettings.volumeFeedback
+        enableCavaFace: runtimeSettings.cavaFace
+        enableMediaTransient: runtimeSettings.mediaFeedback
+        enableNotificationSummary: runtimeSettings.notificationSummary
+        enableNotificationSound: runtimeSettings.notificationSound
+    }
+
+    Connections {
+        target: runtimeSettings
+        function onDndEnabledChanged() {
+            centerIsland.setDnd(runtimeSettings.dndEnabled, false, false)
+        }
     }
 
     PanelWindow {
@@ -195,6 +213,14 @@ PanelWindow {
 
         usbAvailable: globalUsbManager.hasDevices
         usbManager: globalUsbManager
+
+        showUsbButton: runtimeSettings.showUsb
+        showAudioButton: runtimeSettings.showAudio
+        showNotificationButton: runtimeSettings.showNotifications
+        showControlCenterButton: runtimeSettings.showControlCenter
+        showLockIndicators: runtimeSettings.showLockIndicators
+        showTray: runtimeSettings.showTray
+        showPowerButton: runtimeSettings.showPower
 
         onWallpaperRequested:
             globalWallpaperManager.togglePicker()

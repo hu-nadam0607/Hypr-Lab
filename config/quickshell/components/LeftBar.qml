@@ -7,6 +7,8 @@ Item {
     property int barWidth: 1080
     property int barHeight: 36
     property color accentColor: "#68787D"
+    property bool showWorkspaces: true
+    property int workspaceCount: 10
 
     readonly property int activeWorkspaceId:
         Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
@@ -26,7 +28,10 @@ Item {
     // LeftBar keeps only its original controls and interaction logic.
 
     function updateIndicator(animate) {
-        const index = Math.max(0, Math.min(9, leftBarRoot.activeWorkspaceId - 1))
+        if (!leftBarRoot.showWorkspaces || leftBarRoot.workspaceCount < 1)
+            return
+
+        const index = Math.max(0, Math.min(leftBarRoot.workspaceCount - 1, leftBarRoot.activeWorkspaceId - 1))
         const item = workspaceRepeater.itemAt(index)
 
         if (!item)
@@ -133,6 +138,7 @@ Item {
         }
 
         Text {
+            visible: leftBarRoot.showWorkspaces
             text: "/"
             color: Qt.rgba(1, 1, 1, 0.48)
             font.family: "Inter"
@@ -143,7 +149,8 @@ Item {
 
         Item {
             id: workspaceContainer
-            width: workspaceRow.implicitWidth
+            visible: leftBarRoot.showWorkspaces
+            width: leftBarRoot.showWorkspaces ? workspaceRow.implicitWidth : 0
             height: 26
             anchors.verticalCenter: parent.verticalCenter
 
@@ -155,6 +162,7 @@ Item {
                 height: 24
                 antialiasing: true
                 z: 0
+                visible: leftBarRoot.showWorkspaces && leftBarRoot.activeWorkspaceId <= leftBarRoot.workspaceCount
 
                 onWidthChanged: requestPaint()
 
@@ -184,7 +192,7 @@ Item {
 
                 Repeater {
                     id: workspaceRepeater
-                    model: 10
+                    model: Math.max(1, Math.min(10, leftBarRoot.workspaceCount))
 
                     WorkspaceButton {
                         workspaceId: index + 1
