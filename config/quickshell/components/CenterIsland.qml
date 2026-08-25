@@ -109,22 +109,22 @@ Item {
         if (announce === undefined) announce = true
         if (persist === undefined) persist = true
 
-        if (doNotDisturb === enabled)
-            return
-
+        const changed = doNotDisturb !== enabled
         doNotDisturb = enabled
 
         if (persist) {
+            // Manual controls (Control Center / IPC) only change the manual
+            // override. The schedule itself is configured exclusively in Settings.
             Quickshell.execDetached([
                 "bash",
                 Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-ui-settings.sh",
                 "set",
-                "DND",
+                "DND_MANUAL",
                 enabled ? "1" : "0"
             ])
         }
 
-        if (announce)
+        if (announce && changed)
             announceDndState()
     }
 
@@ -325,6 +325,17 @@ Item {
                 color: "white"
                 font.family: "Inter"
                 font.pixelSize: 12
+                font.bold: true
+                font.italic: true
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Text {
+                text: "Zz"
+                visible: root.doNotDisturb
+                color: root.accentColor
+                font.family: "Inter"
+                font.pixelSize: 9
                 font.bold: true
                 font.italic: true
                 anchors.verticalCenter: parent.verticalCenter

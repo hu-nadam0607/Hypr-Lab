@@ -89,8 +89,8 @@ hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("qs ipc call notifications to
     }
 )
 
-hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("qs ipc call notifications dnd"), {
-        description = "Toggle Hypr-Lab Do Not Disturb"
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("qs ipc call hyprscope toggle"), {
+        description = "Open/Close Hypr-Scope workspace overview"
     }
 )
 

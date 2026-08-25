@@ -60,6 +60,13 @@ PanelWindow {
         id: globalWelcome
     }
 
+    HyprScope {
+        id: globalHyprScope
+        workspaceCount: runtimeSettings.workspaceCount
+        accentColor: adaptiveAccent.accentColor
+        wallpaperSource: globalWallpaperManager.currentWallpaper
+    }
+
 
     UnifiedTopBar {
         id: unifiedTopBar
@@ -115,12 +122,13 @@ PanelWindow {
         enableMediaTransient: runtimeSettings.mediaFeedback
         enableNotificationSummary: runtimeSettings.notificationSummary
         enableNotificationSound: runtimeSettings.notificationSound
+        doNotDisturb: runtimeSettings.effectiveDnd
     }
 
     Connections {
         target: runtimeSettings
-        function onDndEnabledChanged() {
-            centerIsland.setDnd(runtimeSettings.dndEnabled, false, false)
+        function onEffectiveDndChanged() {
+            centerIsland.setDnd(runtimeSettings.effectiveDnd, false, false)
         }
     }
 

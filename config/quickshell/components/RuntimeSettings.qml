@@ -20,6 +20,19 @@ Scope {
     property bool notificationSound: true
     property bool notificationSummary: true
     property bool dndEnabled: false
+    property bool dndAuto: false
+    property bool dndManual: false
+    property int dndFromMinutes: 1320
+    property int dndUntilMinutes: 360
+
+    readonly property int currentMinutes: parseInt(Qt.formatDateTime(clock.date, "HH")) * 60 + parseInt(Qt.formatDateTime(clock.date, "mm"))
+    readonly property bool dndScheduledNow: {
+        if (!dndAuto || dndFromMinutes === dndUntilMinutes) return false
+        if (dndFromMinutes < dndUntilMinutes)
+            return currentMinutes >= dndFromMinutes && currentMinutes < dndUntilMinutes
+        return currentMinutes >= dndFromMinutes || currentMinutes < dndUntilMinutes
+    }
+    readonly property bool effectiveDnd: dndManual || dndScheduledNow
 
     readonly property string helper:
         Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-ui-settings.sh"
@@ -78,7 +91,20 @@ Scope {
                 notificationSummary = boolValue(value)
             else if (key === "DND")
                 dndEnabled = boolValue(value)
+            else if (key === "DND_AUTO")
+                dndAuto = boolValue(value)
+            else if (key === "DND_MANUAL")
+                dndManual = boolValue(value)
+            else if (key === "DND_FROM")
+                dndFromMinutes = Math.max(0, Math.min(1439, parseInt(value)))
+            else if (key === "DND_UNTIL")
+                dndUntilMinutes = Math.max(0, Math.min(1439, parseInt(value)))
         }
+    }
+
+    SystemClock {
+        id: clock
+        precision: SystemClock.Seconds
     }
 
     Process {

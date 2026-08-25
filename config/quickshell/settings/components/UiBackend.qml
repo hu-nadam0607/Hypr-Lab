@@ -23,6 +23,10 @@ Scope {
     property bool notificationSound: true
     property bool notificationSummary: true
     property bool dnd: false
+    property bool dndAuto: false
+    property bool dndManual: false
+    property int dndFromMinutes: 1320
+    property int dndUntilMinutes: 360
 
     property real audioVolume: 0.0
     property bool audioMuted: false
@@ -57,17 +61,24 @@ Scope {
 
     function setDnd(value): void {
         root.dnd = value
+        root.setBool("DND", value)
+    }
 
-        const v = value ? "1" : "0"
+    function setDndAuto(value): void {
+        root.dndAuto = value
+        root.setBool("DND_AUTO", value)
+    }
 
-        Quickshell.execDetached([
-            "bash",
-            root.helper,
-            "set",
-            "DND",
-            v
-        ])
+    function setDndManual(value): void {
+        root.dndManual = value
+        root.setBool("DND_MANUAL", value)
+    }
 
+    function applyDndSchedule(fromMinutes, untilMinutes): void {
+        root.dndFromMinutes = Math.max(0, Math.min(1439, fromMinutes))
+        root.dndUntilMinutes = Math.max(0, Math.min(1439, untilMinutes))
+        root.setValue("DND_FROM", root.dndFromMinutes)
+        root.setValue("DND_UNTIL", root.dndUntilMinutes)
         root.statusText = "Applied"
         statusTimer.restart()
     }
@@ -227,6 +238,14 @@ Scope {
                         root.notificationSummary = root.boolValue(value)
                     else if (key === "DND")
                         root.dnd = root.boolValue(value)
+                    else if (key === "DND_AUTO")
+                        root.dndAuto = root.boolValue(value)
+                    else if (key === "DND_MANUAL")
+                        root.dndManual = root.boolValue(value)
+                    else if (key === "DND_FROM")
+                        root.dndFromMinutes = Math.max(0, Math.min(1439, parseInt(value)))
+                    else if (key === "DND_UNTIL")
+                        root.dndUntilMinutes = Math.max(0, Math.min(1439, parseInt(value)))
                 }
             }
         }
