@@ -7,8 +7,10 @@ Item {
 
     property SystemTrayItem item: null
 
-    signal popupOpened()
-    signal popupClosed()
+    property color accentColor: "#68787D"
+
+    signal popupOpened
+    signal popupClosed
 
     property bool popupReportedOpen: false
 
@@ -23,20 +25,11 @@ Item {
         width: 18
         height: 18
 
-        source:
-            trayItemRoot.item
-            ? trayItemRoot.item.icon
-            : ""
+        source: trayItemRoot.item ? trayItemRoot.item.icon : ""
 
-        opacity:
-            mouseArea.containsMouse
-            ? 1.0
-            : 0.78
+        opacity: mouseArea.containsMouse ? 1.0 : 0.78
 
-        scale:
-            mouseArea.containsMouse
-            ? 1.08
-            : 1.0
+        scale: mouseArea.containsMouse ? 1.08 : 1.0
 
         Behavior on opacity {
             NumberAnimation {
@@ -56,23 +49,22 @@ Item {
     TrayMenu {
         id: trayMenu
 
-        menu:
-            trayItemRoot.item
-            ? trayItemRoot.item.menu
-            : null
+        accentColor: trayItemRoot.accentColor
+
+        menu: trayItemRoot.item ? trayItemRoot.item.menu : null
 
         anchorItem: trayItemRoot
 
         onVisibleChanged: {
             if (visible) {
                 if (!trayItemRoot.popupReportedOpen) {
-                    trayItemRoot.popupReportedOpen = true
-                    trayItemRoot.popupOpened()
+                    trayItemRoot.popupReportedOpen = true;
+                    trayItemRoot.popupOpened();
                 }
             } else {
                 if (trayItemRoot.popupReportedOpen) {
-                    trayItemRoot.popupReportedOpen = false
-                    trayItemRoot.popupClosed()
+                    trayItemRoot.popupReportedOpen = false;
+                    trayItemRoot.popupClosed();
                 }
             }
         }
@@ -86,24 +78,20 @@ Item {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
 
-        acceptedButtons:
-            Qt.LeftButton |
-            Qt.RightButton
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-        onClicked: function(mouse) {
+        onClicked: function (mouse) {
             if (!trayItemRoot.item)
-                return
-
+                return;
             if (mouse.button === Qt.LeftButton) {
-                trayItemRoot.item.activate()
-                return
+                trayItemRoot.item.activate();
+                return;
             }
 
             if (mouse.button === Qt.RightButton) {
                 if (!trayItemRoot.item.hasMenu)
-                    return
-
-                trayMenu.showMenu()
+                    return;
+                trayMenu.showMenu();
             }
         }
     }

@@ -10,8 +10,7 @@ Item {
 
     property int activePopupCount: 0
 
-    readonly property bool popupActive:
-        activePopupCount > 0
+    readonly property bool popupActive: activePopupCount > 0
 
     property int buttonSize: 28
     property int drawerSpacing: 8
@@ -19,10 +18,7 @@ Item {
     property int openDuration: 280
     property int closeDuration: 220
 
-    implicitWidth:
-        buttonSize
-        + drawerViewport.width
-        + (drawerViewport.width > 0 ? drawerSpacing : 0)
+    implicitWidth: buttonSize + drawerViewport.width + (drawerViewport.width > 0 ? drawerSpacing : 0)
 
     implicitHeight: 32
 
@@ -31,32 +27,28 @@ Item {
 
     function requestClose() {
         if (popupActive) {
-            closeTimer.stop()
-            return
+            closeTimer.stop();
+            return;
         }
 
         if (trayHover.hovered) {
-            closeTimer.stop()
-            return
+            closeTimer.stop();
+            return;
         }
 
-        closeTimer.restart()
+        closeTimer.restart();
     }
 
     function popupOpened() {
-        activePopupCount += 1
-        closeTimer.stop()
+        activePopupCount += 1;
+        closeTimer.stop();
     }
 
     function popupClosed() {
-        activePopupCount =
-            Math.max(
-                0,
-                activePopupCount - 1
-            )
+        activePopupCount = Math.max(0, activePopupCount - 1);
 
         if (!popupActive && !trayHover.hovered)
-            requestClose()
+            requestClose();
     }
 
     Timer {
@@ -66,9 +58,8 @@ Item {
         repeat: false
 
         onTriggered: {
-            if (!sysTrayRoot.popupActive
-                    && !trayHover.hovered) {
-                sysTrayRoot.expanded = false
+            if (!sysTrayRoot.popupActive && !trayHover.hovered) {
+                sysTrayRoot.expanded = false;
             }
         }
     }
@@ -78,9 +69,9 @@ Item {
 
         onHoveredChanged: {
             if (hovered) {
-                closeTimer.stop()
+                closeTimer.stop();
             } else {
-                sysTrayRoot.requestClose()
+                sysTrayRoot.requestClose();
             }
         }
     }
@@ -91,20 +82,14 @@ Item {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
 
-        spacing:
-            drawerViewport.width > 0
-            ? sysTrayRoot.drawerSpacing
-            : 0
+        spacing: drawerViewport.width > 0 ? sysTrayRoot.drawerSpacing : 0
 
         Item {
             id: drawerViewport
 
             anchors.verticalCenter: parent.verticalCenter
 
-            width:
-                sysTrayRoot.expanded
-                ? trayRow.implicitWidth
-                : 0
+            width: sysTrayRoot.expanded ? trayRow.implicitWidth : 0
 
             height: 32
 
@@ -112,15 +97,9 @@ Item {
 
             Behavior on width {
                 NumberAnimation {
-                    duration:
-                        sysTrayRoot.expanded
-                        ? sysTrayRoot.openDuration
-                        : sysTrayRoot.closeDuration
+                    duration: sysTrayRoot.expanded ? sysTrayRoot.openDuration : sysTrayRoot.closeDuration
 
-                    easing.type:
-                        sysTrayRoot.expanded
-                        ? Easing.OutCubic
-                        : Easing.InCubic
+                    easing.type: sysTrayRoot.expanded ? Easing.OutCubic : Easing.InCubic
                 }
             }
 
@@ -132,24 +111,15 @@ Item {
 
                 spacing: 8
 
-                opacity:
-                    sysTrayRoot.expanded
-                    ? 1
-                    : 0
+                opacity: sysTrayRoot.expanded ? 1 : 0
 
-                scale:
-                    sysTrayRoot.expanded
-                    ? 1.0
-                    : 0.92
+                scale: sysTrayRoot.expanded ? 1.0 : 0.92
 
                 transformOrigin: Item.Right
 
                 Behavior on opacity {
                     NumberAnimation {
-                        duration:
-                            sysTrayRoot.expanded
-                            ? 220
-                            : 140
+                        duration: sysTrayRoot.expanded ? 220 : 140
 
                         easing.type: Easing.OutCubic
                     }
@@ -157,15 +127,9 @@ Item {
 
                 Behavior on scale {
                     NumberAnimation {
-                        duration:
-                            sysTrayRoot.expanded
-                            ? 280
-                            : 180
+                        duration: sysTrayRoot.expanded ? 280 : 180
 
-                        easing.type:
-                            sysTrayRoot.expanded
-                            ? Easing.OutBack
-                            : Easing.InCubic
+                        easing.type: sysTrayRoot.expanded ? Easing.OutBack : Easing.InCubic
                     }
                 }
 
@@ -176,13 +140,14 @@ Item {
 
                     TrayItem {
                         item: modelData
+                        accentColor: sysTrayRoot.accentColor
 
                         onPopupOpened: {
-                            sysTrayRoot.popupOpened()
+                            sysTrayRoot.popupOpened();
                         }
 
                         onPopupClosed: {
-                            sysTrayRoot.popupClosed()
+                            sysTrayRoot.popupClosed();
                         }
                     }
                 }
@@ -198,72 +163,39 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             Rectangle {
-    id: buttonBackground
+                id: buttonBackground
 
-    anchors.centerIn: parent
+                anchors.centerIn: parent
 
-    width: 24
-    height: 24
+                width: 24
+                height: 24
 
-    radius: 8
+                radius: 8
 
-    color:
-        sysTrayRoot.expanded
-        ? Qt.rgba(
-              sysTrayRoot.accentColor.r,
-              sysTrayRoot.accentColor.g,
-              sysTrayRoot.accentColor.b,
-              0.12
-          )
-        : drawerMouse.containsMouse
-          ? Qt.rgba(
-                sysTrayRoot.accentColor.r,
-                sysTrayRoot.accentColor.g,
-                sysTrayRoot.accentColor.b,
-                0.08
-            )
-          : "transparent"
+                color: sysTrayRoot.expanded ? Qt.rgba(sysTrayRoot.accentColor.r, sysTrayRoot.accentColor.g, sysTrayRoot.accentColor.b, 0.12) : drawerMouse.containsMouse ? Qt.rgba(sysTrayRoot.accentColor.r, sysTrayRoot.accentColor.g, sysTrayRoot.accentColor.b, 0.08) : "transparent"
 
-    border.width:
-        sysTrayRoot.expanded
-        ? 1
-        : drawerMouse.containsMouse
-          ? 1
-          : 0
+                border.width: sysTrayRoot.expanded ? 1 : drawerMouse.containsMouse ? 1 : 0
 
-    border.color:
-        sysTrayRoot.expanded
-        ? Qt.rgba(
-              sysTrayRoot.accentColor.r,
-              sysTrayRoot.accentColor.g,
-              sysTrayRoot.accentColor.b,
-              0.45
-          )
-        : Qt.rgba(
-              sysTrayRoot.accentColor.r,
-              sysTrayRoot.accentColor.g,
-              sysTrayRoot.accentColor.b,
-              0.20
-          )
+                border.color: sysTrayRoot.expanded ? Qt.rgba(sysTrayRoot.accentColor.r, sysTrayRoot.accentColor.g, sysTrayRoot.accentColor.b, 0.45) : Qt.rgba(sysTrayRoot.accentColor.r, sysTrayRoot.accentColor.g, sysTrayRoot.accentColor.b, 0.20)
 
-    Behavior on color {
-        ColorAnimation {
-            duration: 140
-        }
-    }
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 140
+                    }
+                }
 
-    Behavior on border.width {
-        NumberAnimation {
-            duration: 140
-        }
-    }
+                Behavior on border.width {
+                    NumberAnimation {
+                        duration: 140
+                    }
+                }
 
-    Behavior on border.color {
-        ColorAnimation {
-            duration: 140
-        }
-    }
-}
+                Behavior on border.color {
+                    ColorAnimation {
+                        duration: 140
+                    }
+                }
+            }
 
             Text {
                 id: drawerIcon
@@ -272,35 +204,12 @@ Item {
 
                 text: "󰀻"
 
-                color:
-                    sysTrayRoot.expanded
-                    ? Qt.rgba(
-                          sysTrayRoot.accentColor.r,
-                          sysTrayRoot.accentColor.g,
-                          sysTrayRoot.accentColor.b,
-                          0.95
-                      )
-                    : drawerMouse.containsMouse
-                      ? Qt.rgba(
-                            sysTrayRoot.accentColor.r,
-                            sysTrayRoot.accentColor.g,
-                            sysTrayRoot.accentColor.b,
-                            0.85
-                        )
-                      : Qt.rgba(
-                            1,
-                            1,
-                            1,
-                            0.72
-                        )
+                color: sysTrayRoot.expanded ? Qt.rgba(sysTrayRoot.accentColor.r, sysTrayRoot.accentColor.g, sysTrayRoot.accentColor.b, 0.95) : drawerMouse.containsMouse ? Qt.rgba(sysTrayRoot.accentColor.r, sysTrayRoot.accentColor.g, sysTrayRoot.accentColor.b, 0.85) : Qt.rgba(1, 1, 1, 0.72)
 
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: 16
 
-                scale:
-                    sysTrayRoot.expanded
-                    ? 1.08
-                    : 1.0
+                scale: sysTrayRoot.expanded ? 1.08 : 1.0
 
                 Behavior on color {
                     ColorAnimation {
@@ -327,13 +236,11 @@ Item {
                 acceptedButtons: Qt.LeftButton
 
                 onClicked: {
-                    closeTimer.stop()
+                    closeTimer.stop();
 
                     if (sysTrayRoot.popupActive)
-                        return
-
-                    sysTrayRoot.expanded =
-                        !sysTrayRoot.expanded
+                        return;
+                    sysTrayRoot.expanded = !sysTrayRoot.expanded;
                 }
             }
         }

@@ -63,6 +63,9 @@ hl.bind(mainMod .. " + C", hl.dsp.exec_cmd(terminal), {
         description = "open_terminal"
     }
 )
+-- Restart  Quickshell for DEV
+hl.bind(mainMod .. " + R ", hl.dsp.exec_cmd("~/.config/hypr/hyprlab-scripts/hyprlab-restart.sh")
+)
 
 hl.bind(mainMod .. " + M", hl.dsp.exit(), {
         description = "quit_hyprland"
