@@ -107,15 +107,12 @@ Item {
             paintCursor: false
             visible: hasContent
 
-            Component.onCompleted: {
-                if (!live && captureSource)
-                    captureFrame()
-            }
-
-            onCaptureSourceChanged: {
-                if (!live && captureSource)
-                    captureFrame()
-            }
+            // ScreencopyView creates its recording context asynchronously.
+            // Setting captureSource is sufficient: Quickshell starts the first
+            // capture automatically as soon as that context is ready. Calling
+            // captureFrame() from Component.onCompleted or immediately after a
+            // source change can race context creation and produce:
+            //   "Cannot capture frame, as no recording context is ready."
         }
 
         Rectangle {

@@ -58,6 +58,7 @@ PanelWindow {
 
     Welcome {
         id: globalWelcome
+        accentColor: adaptiveAccent.accentColor
     }
 
     HyprScope {
@@ -66,7 +67,6 @@ PanelWindow {
         accentColor: adaptiveAccent.accentColor
         wallpaperSource: globalWallpaperManager.currentWallpaper
     }
-
 
     UnifiedTopBar {
         id: unifiedTopBar
@@ -81,40 +81,31 @@ PanelWindow {
     LeftBar {
         id: leftBar
 
-        anchors.left:
-            parent.left
+        anchors.left: parent.left
 
-        anchors.leftMargin:
-            8
+        anchors.leftMargin: 8
 
-        anchors.top:
-            parent.top
+        anchors.top: parent.top
 
-        anchors.topMargin:
-            0
+        anchors.topMargin: 0
 
         accentColor: adaptiveAccent.accentColor
         showWorkspaces: runtimeSettings.showWorkspaces
         workspaceCount: runtimeSettings.workspaceCount
 
-        onOpenAppLauncher:
-            globalAppLauncher.toggle()
+        onOpenAppLauncher: globalAppLauncher.toggle()
     }
 
     CenterIsland {
         id: centerIsland
 
-        anchors.horizontalCenter:
-            parent.horizontalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
 
-        anchors.horizontalCenterOffset:
-            centerIsland.visualCenterCompensation
+        anchors.horizontalCenterOffset: centerIsland.visualCenterCompensation
 
-        anchors.top:
-            parent.top
+        anchors.top: parent.top
 
-        anchors.topMargin:
-            0
+        anchors.topMargin: 0
 
         accentColor: adaptiveAccent.accentColor
         enableVolumeTransient: runtimeSettings.volumeFeedback
@@ -128,7 +119,15 @@ PanelWindow {
     Connections {
         target: runtimeSettings
         function onEffectiveDndChanged() {
-            centerIsland.setDnd(runtimeSettings.effectiveDnd, false, false)
+            centerIsland.setDnd(runtimeSettings.effectiveDnd, false, false);
+        }
+    }
+
+    Connections {
+        target: centerIsland
+
+        function onNotificationPanelToggleRequested() {
+            rightBar.toggleNotificationPanel();
         }
     }
 
@@ -158,12 +157,7 @@ PanelWindow {
             height: notificationDismissOverlay.height
 
             Region {
-                x: Math.max(
-                    0,
-                    notificationDismissOverlay.width / 2
-                        - centerIsland.width / 2
-                        - 6
-                )
+                x: Math.max(0, notificationDismissOverlay.width / 2 - centerIsland.width / 2 - 6)
                 y: 2
                 width: centerIsland.width + 12
                 height: centerIsland.height + 12
@@ -176,13 +170,10 @@ PanelWindow {
             anchors.fill: parent
             focus: centerIsland.notificationCenterOpen
 
-            Keys.onPressed: function(event) {
-                if (
-                    event.key === Qt.Key_Escape
-                    && centerIsland.notificationCenterOpen
-                ) {
-                    centerIsland.closeNotificationCenter()
-                    event.accepted = true
+            Keys.onPressed: function (event) {
+                if (event.key === Qt.Key_Escape && centerIsland.notificationCenterOpen) {
+                    centerIsland.closeNotificationCenter();
+                    event.accepted = true;
                 }
             }
         }
@@ -192,7 +183,7 @@ PanelWindow {
             acceptedButtons: Qt.LeftButton
 
             onClicked: {
-                centerIsland.closeNotificationCenter()
+                centerIsland.closeNotificationCenter();
             }
         }
     }
@@ -204,17 +195,13 @@ PanelWindow {
     RightBar {
         id: rightBar
 
-        anchors.right:
-            parent.right
+        anchors.right: parent.right
 
-        anchors.rightMargin:
-            8
+        anchors.rightMargin: 8
 
-        anchors.top:
-            parent.top
+        anchors.top: parent.top
 
-        anchors.topMargin:
-            0
+        anchors.topMargin: 0
 
         accentColor: adaptiveAccent.accentColor
         notificationHost: centerIsland
@@ -230,10 +217,8 @@ PanelWindow {
         showTray: runtimeSettings.showTray
         showPowerButton: runtimeSettings.showPower
 
-        onWallpaperRequested:
-            globalWallpaperManager.togglePicker()
+        onWallpaperRequested: globalWallpaperManager.togglePicker()
 
-        onOpenPowerMenu:
-            globalPowerMenu.toggle()
+        onOpenPowerMenu: globalPowerMenu.toggle()
     }
 }

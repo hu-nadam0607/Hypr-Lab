@@ -16,6 +16,8 @@ Item {
     property real visualCenterCompensation: 0
     property int unreadNotificationCount: 0
 
+    signal notificationPanelToggleRequested
+
     // CenterIsland transient layers. Volume, notification summary and the
     // compact CAVA/media views all share the same fixed island surface.
     property bool enableVolumeTransient: true
@@ -45,15 +47,15 @@ Item {
     readonly property bool musicPlaying: mediaPlayer !== null && mediaPlayer.isPlaying
 
     function selectPlayingPlayer() {
-        const list = Mpris.players.values
-        let selected = null
+        const list = Mpris.players.values;
+        let selected = null;
         for (let i = 0; i < list.length; ++i) {
             if (list[i] && list[i].isPlaying) {
-                selected = list[i]
-                break
+                selected = list[i];
+                break;
             }
         }
-        mediaPlayer = selected
+        mediaPlayer = selected;
     }
 
     onMediaPlayersChanged: selectPlayingPlayer()
@@ -89,84 +91,74 @@ Item {
     }
 
     function isDndStatusNotification(notification) {
-        return notification
-            && notification.appName === "Hypr-Lab"
-            && (notification.summary === "Ne zavarjanak bekapcsolva."
-                || notification.summary === "Ne zavarjanak kikapcsolva.")
+        return notification && notification.appName === "Hypr-Lab" && (notification.summary === "Ne zavarjanak bekapcsolva." || notification.summary === "Ne zavarjanak kikapcsolva.");
     }
 
     function announceDndState() {
-        Quickshell.execDetached([
-            "notify-send",
-            "-a", "Hypr-Lab",
-            doNotDisturb
-                ? "Ne zavarjanak bekapcsolva."
-                : "Ne zavarjanak kikapcsolva."
-        ])
+        Quickshell.execDetached(["notify-send", "-a", "Hypr-Lab", doNotDisturb ? "Ne zavarjanak bekapcsolva." : "Ne zavarjanak kikapcsolva."]);
     }
 
     function setDnd(enabled, announce, persist) {
-        if (announce === undefined) announce = true
-        if (persist === undefined) persist = true
+        if (announce === undefined)
+            announce = true;
+        if (persist === undefined)
+            persist = true;
 
-        const changed = doNotDisturb !== enabled
-        doNotDisturb = enabled
+        const changed = doNotDisturb !== enabled;
+        doNotDisturb = enabled;
 
         if (persist) {
             // Manual controls (Control Center / IPC) only change the manual
             // override. The schedule itself is configured exclusively in Settings.
-            Quickshell.execDetached([
-                "bash",
-                Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-ui-settings.sh",
-                "set",
-                "DND_MANUAL",
-                enabled ? "1" : "0"
-            ])
+            Quickshell.execDetached(["bash", Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-ui-settings.sh", "set", "DND_MANUAL", enabled ? "1" : "0"]);
         }
 
         if (announce && changed)
-            announceDndState()
+            announceDndState();
     }
 
     function toggleDnd() {
-        setDnd(!doNotDisturb)
+        setDnd(!doNotDisturb);
     }
 
-    function openNotificationCenter() {}
-    function closeNotificationCenter() { notificationCenterOpen = false }
+    function openNotificationCenter() {
+    }
+    function closeNotificationCenter() {
+        notificationCenterOpen = false;
+    }
 
     function clearAllNotifications() {
-        const values = [...notificationServer.trackedNotifications.values]
+        const values = [...notificationServer.trackedNotifications.values];
 
         for (let i = values.length - 1; i >= 0; --i) {
             if (values[i])
-                values[i].dismiss()
+                values[i].dismiss();
         }
 
-        unreadNotificationCount = 0
+        unreadNotificationCount = 0;
     }
 
     function showTransient(kind, durationMs) {
-        transientKind = kind
-        transientHideTimer.interval = durationMs
-        transientShown = true
-        transientHideTimer.restart()
+        transientKind = kind;
+        transientHideTimer.interval = durationMs;
+        transientShown = true;
+        transientHideTimer.restart();
     }
 
     function showVolumeTransient() {
         if (enableVolumeTransient)
-            showTransient("volume", 2000)
+            showTransient("volume", 2000);
     }
 
     function showNotificationTransient(durationMs) {
         if (enableNotificationSummary)
-            showTransient("notification", durationMs || 2000)
+            showTransient("notification", durationMs || 2000);
     }
 
     function showMediaTransient() {
-        selectPlayingPlayer()
+        selectPlayingPlayer();
         if (enableMediaTransient && mediaPlayer)
-            showTransient("media", 5000)
+            showTransient("media", 5000);
     }
 
     NotificationServer {
@@ -180,38 +172,45 @@ Item {
         inlineReplySupported: true
         persistenceSupported: true
         keepOnReload: false
-        extraHints: [
-            "synchronous",
-            "private-synchronous",
-            "x-canonical-private-synchronous"
-        ]
+        extraHints: ["synchronous", "private-synchronous", "x-canonical-private-synchronous"]
 
         onNotification: notification => {
-            notification.tracked = true
+            notification.tracked = true;
 
-            const dndStatus = root.isDndStatusNotification(notification)
+            const dndStatus = root.isDndStatusNotification(notification);
 
             if (!dndStatus)
-                root.unreadNotificationCount += 1
+                root.unreadNotificationCount += 1;
 
             if (root.enableNotificationSound && !root.doNotDisturb && !dndStatus) {
-                notificationPopSound.stop()
-                notificationPopSound.play()
+                notificationPopSound.stop();
+                notificationPopSound.play();
             }
 
             if (!dndStatus)
-                root.showNotificationTransient(2000)
+                root.showNotificationTransient(2000);
         }
     }
 
     IpcHandler {
         target: "notifications"
 
-        function toggle(): void {}
-        function dnd(): void { root.toggleDnd() }
-        function dndOn(): void { root.setDnd(true) }
-        function dndOff(): void { root.setDnd(false) }
-        function clear(): void { root.clearAllNotifications() }
+        function toggle(): void {
+            root.notificationPanelToggleRequested();
+        }
+
+        function dnd(): void {
+            root.toggleDnd();
+        }
+        function dndOn(): void {
+            root.setDnd(true);
+        }
+        function dndOff(): void {
+            root.setDnd(false);
+        }
+        function clear(): void {
+            root.clearAllNotifications();
+        }
     }
 
     SystemClock {
@@ -221,18 +220,18 @@ Item {
 
     onVolumeLevelChanged: {
         if (!audioInitialized) {
-            audioInitialized = true
-            return
+            audioInitialized = true;
+            return;
         }
-        showVolumeTransient()
+        showVolumeTransient();
     }
 
     onMutedChanged: {
         if (!audioInitialized) {
-            audioInitialized = true
-            return
+            audioInitialized = true;
+            return;
         }
-        showVolumeTransient()
+        showVolumeTransient();
     }
 
     Timer {
@@ -267,7 +266,10 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             Behavior on width {
-                NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+                NumberAnimation {
+                    duration: 140
+                    easing.type: Easing.OutCubic
+                }
             }
         }
 
@@ -296,7 +298,10 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
 
                 Behavior on opacity {
-                    NumberAnimation { duration: 120; easing.type: Easing.InOutSine }
+                    NumberAnimation {
+                        duration: 120
+                        easing.type: Easing.InOutSine
+                    }
                 }
             }
 
@@ -312,7 +317,7 @@ Item {
 
             Text {
                 text: "/"
-                color: Qt.rgba(1,1,1,0.52)
+                color: Qt.rgba(1, 1, 1, 0.52)
                 font.family: "Inter"
                 font.pixelSize: 11
                 font.bold: true
@@ -343,7 +348,10 @@ Item {
         }
 
         Behavior on opacity {
-            NumberAnimation { duration: 170; easing.type: Easing.InOutCubic }
+            NumberAnimation {
+                duration: 170
+                easing.type: Easing.InOutCubic
+            }
         }
     }
 
@@ -363,9 +371,7 @@ Item {
             id: volumeFace
             width: transientViewport.width
             height: transientViewport.height
-            x: root.transientShown && root.transientKind === "volume"
-               ? 0
-               : transientViewport.width + 8
+            x: root.transientShown && root.transientKind === "volume" ? 0 : transientViewport.width + 8
 
             Behavior on x {
                 SpringAnimation {
@@ -397,18 +403,12 @@ Item {
                         width: parent.width
                         height: 4
                         radius: 2
-                        color: Qt.rgba(1,1,1,0.14)
+                        color: Qt.rgba(1, 1, 1, 0.14)
                     }
 
                     Rectangle {
                         anchors.verticalCenter: parent.verticalCenter
-                        width: Math.max(
-                            0,
-                            Math.min(
-                                parent.width,
-                                (root.muted ? 0 : root.volumeLevel) * parent.width
-                            )
-                        )
+                        width: Math.max(0, Math.min(parent.width, (root.muted ? 0 : root.volumeLevel) * parent.width))
                         height: 4
                         radius: 2
                         color: root.accentColor
@@ -442,7 +442,10 @@ Item {
             elide: Text.ElideRight
 
             Behavior on opacity {
-                NumberAnimation { duration: 180; easing.type: Easing.InOutCubic }
+                NumberAnimation {
+                    duration: 180
+                    easing.type: Easing.InOutCubic
+                }
             }
         }
 
@@ -452,11 +455,7 @@ Item {
             width: parent.width
             opacity: root.transientShown && root.transientKind === "media" ? 1.0 : 0.0
             visible: opacity > 0.001
-            text: root.mediaPlayer
-                  ? ((root.mediaPlayer.trackArtist || "Ismeretlen előadó")
-                     + "  /  "
-                     + (root.mediaPlayer.trackTitle || "Ismeretlen szám"))
-                  : ""
+            text: root.mediaPlayer ? ((root.mediaPlayer.trackArtist || "Ismeretlen előadó") + "  /  " + (root.mediaPlayer.trackTitle || "Ismeretlen szám")) : ""
             color: "white"
             font.family: "Inter"
             font.pixelSize: 11
@@ -467,7 +466,10 @@ Item {
             elide: Text.ElideRight
 
             Behavior on opacity {
-                NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.InOutCubic
+                }
             }
         }
     }
@@ -481,15 +483,14 @@ Item {
         hoverEnabled: false
         z: 50
 
-        onWheel: function(wheel) {
+        onWheel: function (wheel) {
             if (wheel.angleDelta.y < 0) {
-                root.showNotificationTransient(3000)
-                wheel.accepted = true
+                root.showNotificationTransient(3000);
+                wheel.accepted = true;
             } else if (wheel.angleDelta.y > 0) {
-                root.showMediaTransient()
-                wheel.accepted = true
+                root.showMediaTransient();
+                wheel.accepted = true;
             }
         }
     }
-
 }
