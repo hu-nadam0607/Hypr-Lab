@@ -14,11 +14,11 @@ A Hypr-Lab az a desktop setup, amit Arch Linuxon és Hyprlanden használok. A sh
 
 **A Hypr-Lab 1.0 továbbra is a stabil kiadás.** Az 1.5 fejlesztése a `develop-v1.5` ágon zajlik.
 
-**Current milestone / Jelenlegi mérföldkő: v1.5 RC4**
+**Current milestone / Jelenlegi mérföldkő: v1.5 RC5**
 
-RC4 adds the first complete version of **Hypr-Scope**, along with a more capable Do Not Disturb setup. The rest of the 1.5 shell is already in daily-use shape, but this branch is still under development and can change before the final release.
+RC5 adds a complete **Night Light** system with manual control, adjustable color temperature and automatic scheduling. It also includes the first complete version of **Hypr-Scope** and the expanded Do Not Disturb system. The rest of the 1.5 shell is already in daily-use shape, but this branch is still under development and can change before the final release.
 
-Az RC4-ben elkészült a **Hypr-Scope** első teljesen használható változata, és a Ne zavarjanak mód is jóval többet tud. Az 1.5 többi része már napi használatban is működik, de ez továbbra is fejlesztői ág, ezért a végleges kiadásig még változhat.
+Az RC5-ben elkészült a teljes **Night Light** rendszer manuális vezérléssel, állítható színhőmérséklettel és automatikus időzítéssel. Emellett már része a **Hypr-Scope** első teljesen használható változata és a kibővített Ne zavarjanak rendszer is. Az 1.5 többi része már napi használatban is működik, de ez továbbra is fejlesztői ág, ezért a végleges kiadásig még változhat.
 
 ---
 
@@ -39,6 +39,7 @@ The 1.5 branch is a fairly big rebuild. At the moment it includes:
 - separate Audio Control with output-device selection and volume controls;
 - Notification Center with manual Do Not Disturb control;
 - scheduled Do Not Disturb configuration in Hypr-Lab Settings, including editable start/end times and manual override;
+- integrated **Night Light** with manual activation, adjustable color temperature and automatic start/end scheduling;
 - a `Zz` indicator next to the clock/date whenever DND is active;
 - USB Manager with mount, unmount and safe eject actions;
 - animated Wallpaper Manager and horizontal Wallpaper Picker;
@@ -65,6 +66,7 @@ Az 1.5 jóval több egy kisebb frissítésnél. Jelenleg ezek a főbb részek m�
 - külön Audio Control hangkimenet-választással és hangerőszabályzással;
 - Notification Center manuális Ne zavarjanak kapcsolóval;
 - időzíthető Ne zavarjanak mód a Hypr-Lab Settingsben, szabadon beállítható kezdő- és záróidővel, valamint manuális felülbírálással;
+- integrált **Night Light** manuális bekapcsolással, állítható színhőmérséklettel és automatikus kezdő-/záróidőzítéssel;
 - `Zz` visszajelzés az óra/dátum mellett, amikor a DND aktív;
 - USB Manager mount, unmount és biztonságos leválasztási funkciókkal;
 - animált Wallpaper Manager és vízszintes Wallpaper Picker;
@@ -91,6 +93,10 @@ Az 1.5 jóval több egy kisebb frissítésnél. Jelenleg ezek a főbb részek m�
 ### Hypr-Lab Settings — DND schedule
 
 ![Hypr-Lab DND Settings](docs/screenshots/HL_DND.png)
+
+### Hypr-Lab Settings — Night Light
+
+![Hypr-Lab Night Light Settings](docs/screenshots/HL15_NL.png)
 
 ### Hypr-Lab Settings
 

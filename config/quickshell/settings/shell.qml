@@ -18,78 +18,158 @@ FloatingWindow {
     property bool entered: false
 
     readonly property var pages: [
-        { id: "appearance", icon: "󰏘", title: "Appearance", available: true, description: "Window borders, opacity, blur, shadows, animation and spacing." },
-        { id: "desktop", icon: "󰍹", title: "Desktop", available: true, description: "Workspace count and quick workspace switching." },
-        { id: "topbar", icon: "󰕮", title: "Top Bar", available: true, description: "Choose which modules are visible on the Hypr-Lab Top Bar." },
-        { id: "lockpower", icon: "󰌾", title: "Lock & Power", available: true, description: "Lock, display standby and suspend behavior." },
-        { id: "audio", icon: "󰕾", title: "Audio & Media", available: true, description: "Master audio and Center Island media feedback." },
-        { id: "notifications", icon: "󰂚", title: "Notifications", available: true, description: "Do Not Disturb, notification sound and Center Island feedback." },
-        { id: "input", icon: "󰌌", title: "Input & Keybinds", available: true, description: "Hypr-Lab shortcut reference and configuration tools." },
-        { id: "system", icon: "󰒋", title: "System", available: true, description: "Monitor controls, default applications and Hyprland integration." },
-        { id: "about", icon: "󰋼", title: "About", available: true, description: "Project information and development links." }
+        {
+            id: "appearance",
+            icon: "󰏘",
+            title: "Appearance",
+            available: true,
+            description: "Window borders, opacity, blur, shadows, animation and spacing."
+        },
+        {
+            id: "desktop",
+            icon: "󰍹",
+            title: "Desktop",
+            available: true,
+            description: "Workspace count and quick workspace switching."
+        },
+        {
+            id: "topbar",
+            icon: "󰕮",
+            title: "Top Bar",
+            available: true,
+            description: "Choose which modules are visible on the Hypr-Lab Top Bar."
+        },
+        {
+            id: "lockpower",
+            icon: "󰌾",
+            title: "Lock & Power",
+            available: true,
+            description: "Lock, display standby and suspend behavior."
+        },
+        {
+            id: "audio",
+            icon: "󰕾",
+            title: "Audio & Media",
+            available: true,
+            description: "Master audio and Center Island media feedback."
+        },
+        {
+            id: "notifications",
+            icon: "󰂚",
+            title: "Notifications",
+            available: true,
+            description: "Do Not Disturb, notification sound and Center Island feedback."
+        },
+        {
+            id: "nightlight",
+            icon: "󰖔",
+            title: "Night Light",
+            available: true,
+            description: "Blue-light filtering, color temperature and automatic scheduling."
+        },
+        {
+            id: "input",
+            icon: "󰌌",
+            title: "Input & Keybinds",
+            available: true,
+            description: "Hypr-Lab shortcut reference and configuration tools."
+        },
+        {
+            id: "system",
+            icon: "󰒋",
+            title: "System",
+            available: true,
+            description: "Monitor controls, default applications and Hyprland integration."
+        },
+        {
+            id: "about",
+            icon: "󰋼",
+            title: "About",
+            available: true,
+            description: "Project information and development links."
+        }
     ]
 
     function pageData(id) {
         for (let p of pages)
             if (p.id === id)
-                return p
-        return pages[3]
+                return p;
+        return pages[3];
     }
 
     function pageSource(id) {
-        if (id === "appearance") return "components/AppearancePage.qml"
-        if (id === "desktop") return "components/DesktopPage.qml"
-        if (id === "topbar") return "components/TopBarPage.qml"
-        if (id === "lockpower") return "components/LockPowerPage.qml"
-        if (id === "audio") return "components/AudioMediaPage.qml"
-        if (id === "notifications") return "components/NotificationsPage.qml"
-        if (id === "input") return "components/InputKeybindsPage.qml"
-        if (id === "system") return "components/SystemPage.qml"
-        if (id === "about") return "components/AboutPage.qml"
-        return "components/LockPowerPage.qml"
+        if (id === "appearance")
+            return "components/AppearancePage.qml";
+        if (id === "desktop")
+            return "components/DesktopPage.qml";
+        if (id === "topbar")
+            return "components/TopBarPage.qml";
+        if (id === "lockpower")
+            return "components/LockPowerPage.qml";
+        if (id === "audio")
+            return "components/AudioMediaPage.qml";
+        if (id === "notifications")
+            return "components/NotificationsPage.qml";
+        if (id === "nightlight")
+            return "components/NightLightPage.qml";
+        if (id === "input")
+            return "components/InputKeybindsPage.qml";
+        if (id === "system")
+            return "components/SystemPage.qml";
+        if (id === "about")
+            return "components/AboutPage.qml";
+        return "components/LockPowerPage.qml";
     }
 
     function backendForPage(id) {
-        if (id === "lockpower") return powerBackend
-        if (id === "appearance") return appearanceBackend
-        if (id === "about") return systemInfoBackend
-        return uiBackend
+        if (id === "lockpower")
+            return powerBackend;
+        if (id === "appearance")
+            return appearanceBackend;
+        if (id === "about")
+            return systemInfoBackend;
+        return uiBackend;
     }
 
     function loadCurrentPage() {
         if (!pageLoader)
-            return
-
-        pageLoader.setSource(
-            settingsWindow.pageSource(settingsWindow.currentPage),
-            {
-                "backend": settingsWindow.backendForPage(settingsWindow.currentPage),
-                "accentColor": accentReader.accentColor
-            }
-        )
+            return;
+        pageLoader.setSource(settingsWindow.pageSource(settingsWindow.currentPage), {
+            "backend": settingsWindow.backendForPage(settingsWindow.currentPage),
+            "accentColor": accentReader.accentColor
+        });
     }
 
     function selectPage(id) {
         if (currentPage === id)
-            return
-
-        currentPage = id
-        pageBody.opacity = 0
-        settingsWindow.loadCurrentPage()
-        pageReset.restart()
+            return;
+        currentPage = id;
+        pageBody.opacity = 0;
+        settingsWindow.loadCurrentPage();
+        pageReset.restart();
     }
 
     function closeSettings() {
-        rootSurface.opacity = 0
-        rootSurface.scale = 0.985
-        closeTimer.restart()
+        rootSurface.opacity = 0;
+        rootSurface.scale = 0.985;
+        closeTimer.restart();
     }
 
-    AccentReader { id: accentReader }
-    PowerBackend { id: powerBackend }
-    AppearanceBackend { id: appearanceBackend }
-    UiBackend { id: uiBackend }
-    SystemInfoBackend { id: systemInfoBackend }
+    AccentReader {
+        id: accentReader
+    }
+    PowerBackend {
+        id: powerBackend
+    }
+    AppearanceBackend {
+        id: appearanceBackend
+    }
+    UiBackend {
+        id: uiBackend
+    }
+    SystemInfoBackend {
+        id: systemInfoBackend
+    }
 
     Item {
         id: rootSurface
@@ -97,8 +177,18 @@ FloatingWindow {
         opacity: settingsWindow.entered ? 1 : 0
         scale: settingsWindow.entered ? 1 : 0.975
 
-        Behavior on opacity { NumberAnimation { duration: 190; easing.type: Easing.OutCubic } }
-        Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 190
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on scale {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
+        }
 
         // Plain application surface. Hyprland owns the outer window border.
         Rectangle {
@@ -135,8 +225,22 @@ FloatingWindow {
 
                 Column {
                     spacing: 1
-                    Text { text: "HYPR-LAB SETTINGS"; color:"white"; font.family:"Inter"; font.pixelSize:13; font.bold:true; font.italic:true; font.letterSpacing:1.1 }
-                    Text { text: "v1.5 · system configuration"; color:Qt.rgba(1,1,1,0.35); font.family:"Inter"; font.pixelSize:8; font.italic:true }
+                    Text {
+                        text: "HYPR-LAB SETTINGS"
+                        color: "white"
+                        font.family: "Inter"
+                        font.pixelSize: 13
+                        font.bold: true
+                        font.italic: true
+                        font.letterSpacing: 1.1
+                    }
+                    Text {
+                        text: "v1.5 · system configuration"
+                        color: Qt.rgba(1, 1, 1, 0.35)
+                        font.family: "Inter"
+                        font.pixelSize: 8
+                        font.italic: true
+                    }
                 }
             }
 
@@ -144,14 +248,8 @@ FloatingWindow {
                 anchors.right: closeButton.left
                 anchors.rightMargin: 22
                 anchors.verticalCenter: parent.verticalCenter
-                text: settingsWindow.currentPage === "lockpower"
-                    ? powerBackend.statusText
-                    : (settingsWindow.currentPage === "appearance"
-                        ? appearanceBackend.statusText
-                        : (settingsWindow.currentPage === "about"
-                            ? systemInfoBackend.statusText
-                            : uiBackend.statusText))
-                color: text === "Applied" ? accentReader.accentColor : Qt.rgba(1,1,1,0.30)
+                text: settingsWindow.currentPage === "lockpower" ? powerBackend.statusText : (settingsWindow.currentPage === "appearance" ? appearanceBackend.statusText : (settingsWindow.currentPage === "about" ? systemInfoBackend.statusText : uiBackend.statusText))
+                color: text === "Applied" ? accentReader.accentColor : Qt.rgba(1, 1, 1, 0.30)
                 font.family: "Inter"
                 font.pixelSize: 8
                 font.bold: true
@@ -168,7 +266,7 @@ FloatingWindow {
                 Text {
                     anchors.centerIn: parent
                     text: "×"
-                    color: closeMouse.containsMouse ? accentReader.accentColor : Qt.rgba(1,1,1,0.62)
+                    color: closeMouse.containsMouse ? accentReader.accentColor : Qt.rgba(1, 1, 1, 0.62)
                     font.family: "Inter"
                     font.pixelSize: 20
                     font.bold: true
@@ -263,7 +361,7 @@ FloatingWindow {
                 Text {
                     width: parent.width
                     text: settingsWindow.pageData(settingsWindow.currentPage).description
-                    color: Qt.rgba(1,1,1,0.38)
+                    color: Qt.rgba(1, 1, 1, 0.38)
                     font.family: "Inter"
                     font.pixelSize: 9
                     font.italic: true
@@ -288,7 +386,11 @@ FloatingWindow {
                 anchors.bottom: parent.bottom
                 opacity: 1
 
-                Behavior on opacity { NumberAnimation { duration: 120 } }
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 120
+                    }
+                }
 
                 Loader {
                     id: pageLoader
@@ -297,7 +399,7 @@ FloatingWindow {
 
                     onStatusChanged: {
                         if (status === Loader.Error)
-                            console.error("Hypr-Lab Settings: failed to load page:", source)
+                            console.error("Hypr-Lab Settings: failed to load page:", source);
                     }
                 }
 
@@ -306,7 +408,7 @@ FloatingWindow {
 
                     function onAccentColorChanged() {
                         if (pageLoader.item)
-                            pageLoader.item.accentColor = accentReader.accentColor
+                            pageLoader.item.accentColor = accentReader.accentColor;
                     }
                 }
             }
@@ -335,8 +437,8 @@ FloatingWindow {
     }
 
     Component.onCompleted: {
-        settingsWindow.loadCurrentPage()
-        entered = true
+        settingsWindow.loadCurrentPage();
+        entered = true;
     }
     onClosed: Qt.quit()
 }

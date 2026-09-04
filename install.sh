@@ -190,6 +190,7 @@ REQUIRED_PACKAGES=(
     quickshell
     ghostty
     hypridle
+    hyprsunset
     hyprpolkitagent
     pipewire
     pipewire-pulse

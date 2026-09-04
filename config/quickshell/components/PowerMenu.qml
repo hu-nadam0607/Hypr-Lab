@@ -10,40 +10,53 @@ Scope {
     property bool windowVisible: false
     property bool cardsShown: false
 
-    AdaptiveAccent { id: adaptiveAccent }
+    AdaptiveAccent {
+        id: adaptiveAccent
+    }
     readonly property color accent: adaptiveAccent.accentColor
 
     function open(): void {
-        closeTimer.stop()
-        if (windowVisible && isOpen) return
-        windowVisible = true
-        isOpen = true
-        cardsShown = false
-        revealTimer.restart()
+        closeTimer.stop();
+        if (windowVisible && isOpen)
+            return;
+        windowVisible = true;
+        isOpen = true;
+        cardsShown = false;
+        revealTimer.restart();
     }
 
     function close(): void {
-        if (!windowVisible || !isOpen) return
-        revealTimer.stop()
-        isOpen = false
-        cardsShown = false
-        closeTimer.restart()
+        if (!windowVisible || !isOpen)
+            return;
+        revealTimer.stop();
+        isOpen = false;
+        cardsShown = false;
+        closeTimer.restart();
     }
 
-    function toggle(): void { isOpen ? close() : open() }
+    function toggle(): void {
+        isOpen ? close() : open();
+    }
 
     IpcHandler {
         target: "powermenu"
-        function toggle() { root.toggle() }
-        function open() { root.open() }
-        function close() { root.close() }
+        function toggle() {
+            root.toggle();
+        }
+        function open() {
+            root.open();
+        }
+        function close() {
+            root.close();
+        }
     }
 
     Timer {
         id: revealTimer
         interval: 12
         repeat: false
-        onTriggered: if (root.isOpen) root.cardsShown = true
+        onTriggered: if (root.isOpen)
+            root.cardsShown = true
     }
 
     Timer {
@@ -51,13 +64,19 @@ Scope {
         // Last card starts after 105 ms and needs 205 ms to leave.
         interval: 330
         repeat: false
-        onTriggered: if (!root.isOpen) root.windowVisible = false
+        onTriggered: if (!root.isOpen)
+            root.windowVisible = false
     }
 
     PanelWindow {
         id: window
         visible: root.windowVisible
-        anchors { top: true; bottom: true; left: true; right: true }
+        anchors {
+            top: true
+            bottom: true
+            left: true
+            right: true
+        }
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         focusable: true
@@ -109,10 +128,7 @@ Scope {
                         shown: root.cardsShown
                         revealDelay: 42
                         closeDelay: 70
-                        // Same Hyprland session-exit action as the SUPER + M bind.
-                        // Hyprland 0.56.x Lua config: use the same session-exit path
-                        // recommended by Hyprland's own example config.
-                        actionCommand: ["sh", "-lc", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"]
+                        actionCommand: [Quickshell.env("HOME") + "/.config/hypr/hyprlab-scripts/hyprlab-exit.sh"]
                         onTriggered: root.close()
                     }
 
