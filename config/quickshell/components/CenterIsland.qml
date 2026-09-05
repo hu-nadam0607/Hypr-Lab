@@ -12,6 +12,7 @@ Item {
 
     property color accentColor: "#68787D"
     property bool doNotDisturb: false
+    property bool nightLightActive: false
     property bool notificationCenterOpen: false
     property real visualCenterCompensation: 0
     property int unreadNotificationCount: 0
@@ -343,6 +344,15 @@ Item {
                 font.pixelSize: 9
                 font.bold: true
                 font.italic: true
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Text {
+                text: "󰖔"
+                visible: root.nightLightActive
+                color: root.accentColor
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: 11
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

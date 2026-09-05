@@ -114,6 +114,7 @@ PanelWindow {
         enableNotificationSummary: runtimeSettings.notificationSummary
         enableNotificationSound: runtimeSettings.notificationSound
         doNotDisturb: runtimeSettings.effectiveDnd
+        nightLightActive: runtimeSettings.effectiveNightLight
     }
 
     Connections {
