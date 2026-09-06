@@ -16,9 +16,9 @@ A Hypr-Lab az a desktop setup, amit Arch Linuxon és Hyprlanden használok. A sh
 
 **Current milestone / Jelenlegi mérföldkő: v1.5 RC5**
 
-RC5 adds a complete **Night Light** system with manual control, adjustable color temperature and automatic scheduling. It also includes the first complete version of **Hypr-Scope** and the expanded Do Not Disturb system. The rest of the 1.5 shell is already in daily-use shape, but this branch is still under development and can change before the final release.
+RC5 adds a complete **Night Light** system with manual control, adjustable color temperature and automatic scheduling. It also includes the first complete version of **Hypr-Scope**, the expanded Do Not Disturb system and **Hypr-Viewer v0.1.0**, Hypr-Lab's own lightweight image viewer. The rest of the 1.5 shell is already in daily-use shape, but this branch is still under development and can change before the final release.
 
-Az RC5-ben elkészült a teljes **Night Light** rendszer manuális vezérléssel, állítható színhőmérséklettel és automatikus időzítéssel. Emellett már része a **Hypr-Scope** első teljesen használható változata és a kibővített Ne zavarjanak rendszer is. Az 1.5 többi része már napi használatban is működik, de ez továbbra is fejlesztői ág, ezért a végleges kiadásig még változhat.
+Az RC5-ben elkészült a teljes **Night Light** rendszer manuális vezérléssel, állítható színhőmérséklettel és automatikus időzítéssel. Emellett már része a **Hypr-Scope** első teljesen használható változata, a kibővített Ne zavarjanak rendszer és a **Hypr-Viewer v0.1.0**, a Hypr-Lab saját könnyű képnézegetője is. Az 1.5 többi része már napi használatban is működik, de ez továbbra is fejlesztői ág, ezért a végleges kiadásig még változhat.
 
 ---
 
@@ -40,6 +40,7 @@ The 1.5 branch is a fairly big rebuild. At the moment it includes:
 - Notification Center with manual Do Not Disturb control;
 - scheduled Do Not Disturb configuration in Hypr-Lab Settings, including editable start/end times and manual override;
 - integrated **Night Light** with manual activation, adjustable color temperature and automatic start/end scheduling;
+- **Hypr-Viewer v0.1.0**, a lightweight Hypr-Lab image viewer with file/folder opening, gallery thumbnails, image navigation, zoom/pan, rotation and image information;
 - a `Zz` indicator next to the clock/date whenever DND is active;
 - USB Manager with mount, unmount and safe eject actions;
 - animated Wallpaper Manager and horizontal Wallpaper Picker;
@@ -67,6 +68,7 @@ Az 1.5 jóval több egy kisebb frissítésnél. Jelenleg ezek a főbb részek m�
 - Notification Center manuális Ne zavarjanak kapcsolóval;
 - időzíthető Ne zavarjanak mód a Hypr-Lab Settingsben, szabadon beállítható kezdő- és záróidővel, valamint manuális felülbírálással;
 - integrált **Night Light** manuális bekapcsolással, állítható színhőmérséklettel és automatikus kezdő-/záróidőzítéssel;
+- **Hypr-Viewer v0.1.0**, saját könnyű Hypr-Lab képnézegető fájl- és mappamegnyitással, galéria-thumbnail nézettel, képlapozással, zoom/pan funkcióval, forgatással és képinformációkkal;
 - `Zz` visszajelzés az óra/dátum mellett, amikor a DND aktív;
 - USB Manager mount, unmount és biztonságos leválasztási funkciókkal;
 - animált Wallpaper Manager és vízszintes Wallpaper Picker;
