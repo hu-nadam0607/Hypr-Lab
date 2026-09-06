@@ -32,6 +32,21 @@ Rectangle {
     // the exact parent slant during scrolling.
     readonly property real rowSlantShift: -root.panelSlant * (root.visibleCenterY - root.gridCenterInPanel) / Math.max(1, root.panelHeight)
 
+    readonly property string resolvedIconSource: {
+        const icon = String(root.app.icon || "");
+
+        if (icon.startsWith("file://"))
+            return icon;
+
+        if (icon.startsWith("/"))
+            return "file://" + icon;
+
+        return Quickshell.iconPath(
+            icon,
+            "application-x-executable"
+        );
+    }
+
     signal activated()
 
     width: Math.max(120, root.gridCellWidth - 12)
@@ -73,7 +88,7 @@ Rectangle {
         IconImage {
             anchors.horizontalCenter: parent.horizontalCenter
             implicitSize: 35
-            source: Quickshell.iconPath(root.app.icon, "application-x-executable")
+            source: root.resolvedIconSource
             asynchronous: true
         }
 
