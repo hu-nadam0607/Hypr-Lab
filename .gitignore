@@ -1,0 +1,8 @@
+# Hypr-Lab local/runtime state
+config/hypr/hyprlab-settings/monitors.json
+config/quickshell/.welcome-disabled
+config/quickshell/files/favorites.json
+
+# Python cache
+__pycache__/
+*.pyc

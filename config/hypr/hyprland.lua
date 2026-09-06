@@ -20,6 +20,7 @@ end)
 hl.config({
 	input = {
 		kb_layout = "hu",
+		numlock_by_default = true,
 	},
 })
 
@@ -71,8 +72,8 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("~/.config/hypr/settings/browser.sh")
 	description = "Open the browser declared in the sh file.",
 })
 
-hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("~/.config/hypr/settings/filemanager.sh"), {
-	description = "Open the file manager declared in the sh file.",
+hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("~/.config/quickshell/files/scripts/hypr-files.sh"), {
+	description = "Open Hypr-Files",
 })
 
 hl.bind(mainMod .. " + Q", hl.dsp.window.close(), {
@@ -348,6 +349,14 @@ hl.layer_rule({
 hl.window_rule({
 	match = {
 		class = "hypr-lab-settings",
+	},
+
+	float = true,
+})
+
+hl.window_rule({
+	match = {
+		class = "hypr-lab-viewer",
 	},
 
 	float = true,

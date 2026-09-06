@@ -14,11 +14,11 @@ A Hypr-Lab az a desktop setup, amit Arch Linuxon és Hyprlanden használok. A sh
 
 **A Hypr-Lab 1.0 továbbra is a stabil kiadás.** Az 1.5 fejlesztése a `develop-v1.5` ágon zajlik.
 
-**Current milestone / Jelenlegi mérföldkő: v1.5 RC5**
+**Current milestone / Jelenlegi mérföldkő: v1.5 RC6**
 
-RC5 adds a complete **Night Light** system with manual control, adjustable color temperature and automatic scheduling. It also includes the first complete version of **Hypr-Scope**, the expanded Do Not Disturb system and **Hypr-Viewer v0.1.0**, Hypr-Lab's own lightweight image viewer. The rest of the 1.5 shell is already in daily-use shape, but this branch is still under development and can change before the final release.
+RC6 adds two native Hypr-Lab desktop applications: **Hypr-Viewer v0.1.0**, the lightweight image viewer, and **Hypr-Files v0.1.0**, the new Quickshell-based file manager. Hypr-Files includes tabs, Favorites with drag & drop, keyboard navigation, file operations with progress/cancel and conflict handling, archive support, Trash, internal and external device handling, and USB mount/unmount/safe eject. The rest of the 1.5 shell is already in daily-use shape, but this branch is still under development and can change before the final release.
 
-Az RC5-ben elkészült a teljes **Night Light** rendszer manuális vezérléssel, állítható színhőmérséklettel és automatikus időzítéssel. Emellett már része a **Hypr-Scope** első teljesen használható változata, a kibővített Ne zavarjanak rendszer és a **Hypr-Viewer v0.1.0**, a Hypr-Lab saját könnyű képnézegetője is. Az 1.5 többi része már napi használatban is működik, de ez továbbra is fejlesztői ág, ezért a végleges kiadásig még változhat.
+Az RC6 két saját Hypr-Lab desktop alkalmazással bővül: a **Hypr-Viewer v0.1.0** könnyű képnézegetővel és az új, Quickshell-alapú **Hypr-Files v0.1.0** fájlkezelővel. A Hypr-Files tabokat, drag & drop Favorites részt, billentyűzetes navigációt, folyamatjelzős és megszakítható fájlműveleteket, névütközés-kezelést, archívumkezelést, Kukát, belső és külső meghajtókezelést, valamint USB mount/unmount/biztonságos leválasztást tartalmaz. Az 1.5 többi része már napi használatban is működik, de ez továbbra is fejlesztői ág, ezért a végleges kiadásig még változhat.
 
 ---
 
@@ -41,6 +41,7 @@ The 1.5 branch is a fairly big rebuild. At the moment it includes:
 - scheduled Do Not Disturb configuration in Hypr-Lab Settings, including editable start/end times and manual override;
 - integrated **Night Light** with manual activation, adjustable color temperature and automatic start/end scheduling;
 - **Hypr-Viewer v0.1.0**, a lightweight Hypr-Lab image viewer with file/folder opening, gallery thumbnails, image navigation, zoom/pan, rotation and image information;
+- **Hypr-Files v0.1.0**, a native Quickshell file manager with tabs, grid/list views, Favorites drag & drop, keyboard and rubber-band selection, file copy/move/delete progress with cancellation, conflict handling (overwrite/keep both/cancel), archive creation/extraction, Trash, internal drives and hot-plug USB mount/unmount/safe eject;
 - a `Zz` indicator next to the clock/date whenever DND is active;
 - USB Manager with mount, unmount and safe eject actions;
 - animated Wallpaper Manager and horizontal Wallpaper Picker;
@@ -69,6 +70,7 @@ Az 1.5 jóval több egy kisebb frissítésnél. Jelenleg ezek a főbb részek m�
 - időzíthető Ne zavarjanak mód a Hypr-Lab Settingsben, szabadon beállítható kezdő- és záróidővel, valamint manuális felülbírálással;
 - integrált **Night Light** manuális bekapcsolással, állítható színhőmérséklettel és automatikus kezdő-/záróidőzítéssel;
 - **Hypr-Viewer v0.1.0**, saját könnyű Hypr-Lab képnézegető fájl- és mappamegnyitással, galéria-thumbnail nézettel, képlapozással, zoom/pan funkcióval, forgatással és képinformációkkal;
+- **Hypr-Files v0.1.0**, saját Quickshell fájlkezelő tabokkal, grid/list nézettel, drag & drop Favorites résszel, billentyűzetes és kijelölőkeretes kijelöléssel, megszakítható másolás/mozgatás/törlés folyamatjelzéssel, névütközés-kezeléssel (felülírás/mindkettő megtartása/mégse), tömörítéssel/kibontással, Kukával, belső meghajtókkal és hot-plug USB mount/unmount/biztonságos leválasztással;
 - `Zz` visszajelzés az óra/dátum mellett, amikor a DND aktív;
 - USB Manager mount, unmount és biztonságos leválasztási funkciókkal;
 - animált Wallpaper Manager és vízszintes Wallpaper Picker;
@@ -127,6 +129,14 @@ Az 1.5 jóval több egy kisebb frissítésnél. Jelenleg ezek a főbb részek m�
 ### Power Menu
 
 ![Hypr-Lab Power Menu](docs/screenshots/HL15_PM.png)
+
+### Hypr-Files
+
+![Hypr-Files](docs/screenshots/HL_Files.png)
+
+### Hypr-Viewer
+
+![Hypr-Viewer](docs/screenshots/HL_VW.png)
 
 ---
 
@@ -350,9 +360,9 @@ The desktop stack uses official Arch packages where possible. The main pieces ar
 
 A desktop stack lehetőség szerint hivatalos Arch csomagokra épül. A fő elemek: Hyprland, Quickshell, Ghostty, PipeWire, WirePlumber, Hypridle, Hyprpolkitagent, XDG portalok, screenshot- és médiaeszközök, betűtípusok, `greetd` és `greetd-tuigreet`.
 
-Hypr-Lab does not force a specific browser or file manager. Browser launching follows the XDG default, and supported installed file managers are detected automatically.
+Hypr-Lab does not force a specific browser. Browser launching follows the XDG default. Hypr-Files is now the native Hypr-Lab file manager and is bound to `SUPER + E` in the 1.5 development branch.
 
-A Hypr-Lab nem erőltet rád konkrét böngészőt vagy fájlkezelőt. A böngésző az XDG alapértelmezést követi, a támogatott telepített fájlkezelőket pedig automatikusan felismeri.
+A Hypr-Lab nem erőltet rád konkrét böngészőt; a böngésző az XDG alapértelmezést követi. Az 1.5 fejlesztői ág saját fájlkezelője a Hypr-Files, amely a `SUPER + E` gyorsbillentyűre van kötve.
 
 Theme installation also uses Git, Yarn/npm and pipx to build the Hypr-Lab Bibata variant from upstream source.
 
@@ -376,7 +386,7 @@ A témák telepítéséhez Git, Yarn/npm és pipx is szükséges, mert a Hypr-La
 | `SUPER + ALT + W` | Welcome Screen / Üdvözlőképernyő |
 | `SUPER + SHIFT + P` | Power Menu / Kikapcsolási menü |
 | `SUPER + C` | Ghostty |
-| `SUPER + E` | Selected/detected file manager / Kiválasztott vagy felismert fájlkezelő |
+| `SUPER + E` | Hypr-Files |
 | `SUPER + B` | XDG default browser / XDG alapértelmezett böngésző |
 | `SUPER + M` | Exit Hyprland session / Kilépés a Hyprland munkamenetből |
 | `SUPER + 1…0` | Workspace 1…10, limited by Settings / Workspace 1…10, a Settingsben megadott limit szerint |
